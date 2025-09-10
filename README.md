@@ -39,6 +39,7 @@ The key advantage of Re4ctoR is its **post-quantum resilience** and the ability 
 | **TestU01 SmallCrush** | PASSED (15/15)        | Confirmed uniformity and randomness. |
 | **TestU01 Crush**      | PASSED (96/96)        | All advanced statistical tests passed. |
 | **TestU01 BigCrush**   | PASSED (160/160)      | Successfully passed the most demanding suite. |
+
 🌍 Applications
 
 Blockchain & Web3 → randomness for smart contracts, DeFi, decentralized games, lotteries.
