@@ -59,3 +59,4 @@ We are open to collaborations and licensing discussions with interested partners
 For more information, please contact:
 
 ✉️ shtomko@gmail.com
+Pavlo Tvardovskyi
