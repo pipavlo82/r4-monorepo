@@ -4,14 +4,15 @@ about: Propose an enhancement
 labels: enhancement
 ---
 
-**Problem / motivation**  
+**Problem / motivation**
 What problem does this solve?
 
-**Proposed solution**  
+**Proposed solution**
 High-level description and any alternatives considered.
 
-**Impact**  
+**Impact**
 APIs, performance, security, compatibility.
 
-**Additional context**  
+**Additional context**
 References or prior art.
+
