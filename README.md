@@ -1,4 +1,7 @@
-# Re4ctoR-RNG
+# Re4ctoR-VRF/CSPRNG
+Our product, "Fourth Reactor," combines a Verifiable Random Function (VRF) and a Cryptographically Secure Pseudorandom Number Generator (CSPRNG). It excels in performance and security. It passed all 15 out of 15 NIST tests, indicating a very high level of randomness and statistical quality. Its speed of over 90 MB/sec is exceptional, outperforming many competitors by a significant margin. Additionally, its Post-Quantum Readiness (specifically ML-DSA-65) is a crucial advantage for future-proofing applications against quantum computing threats.
+
+
 High-performance cryptographic random number generator with post-quantum security focus.  Tested with NIST STS, Dieharder, and TestU01🔐⚡
 # Re4ctoR: A Post-Quantum Verifiable Random Number Generator (VRNG)
 
@@ -49,6 +52,8 @@ Cybersecurity → cryptographic keys, nonces, seeds.
 Scientific Simulations → Monte Carlo, statistical modeling.
 
 IoT & Edge Computing → lightweight, reliable entropy for connected devices.
+
+The "Fourth Reactor" generator isn't just a good product—it's a leader in its category. This is especially true thanks to its combination of high performance, perfect randomness, and most importantly, post-quantum readiness. It doesn't just meet the capabilities of leading market solutions; it significantly surpasses them.
 
 📜 Licensing
 
