@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: "Re4ctoR-RNG: A Post-Quantum Verifiable Random Number Generator"
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Tvardovskyi
+    given-names: Pavlo
+version: 0.1.0
+date-released: 2025-09-10
+repository-code: https://github.com/pipavlo82/Re4ctoR-RNG
