@@ -8,6 +8,28 @@
 
 ## Details
 
+### Dieharder
+
+- **Version:** 3.31.1  
+- **Mode:** stdin (`-g 201`), with additional reruns using higher `psamples`  
+- **Logs:** `rng_reports/20250908_223744_consolidated/*.txt`  
+- **Seeds observed in logs:** 984015027, 2878240219, 1575189660
+
+**Final status:** **PASS** — **0 FAILED**, **0 WEAK** (after reruns).
+
+**Initially weak results (all cleared after increasing `psamples`):**
+
+| Test                          | Condition    | Initial p-value @100 psamples | Rerun p-value / psamples        | Final  |
+|-------------------------------|--------------|-------------------------------:|----------------------------------|--------|
+| `diehard_dna`                 | default      | 0.99553273 (WEAK)             | 0.49593590 @200; 0.10987154 @400 | PASSED |
+| `sts_serial` (m=11)           | default      | 0.99781550 (WEAK)             | passed at 200 psamples           | PASSED |
+| `rgb_bitdist` (m=10)          | default      | 0.99962963 (WEAK)             | 0.89567568 @200                  | PASSED |
+| `rgb_lagged_sum` (k=3)        | default      | 0.99691170 (WEAK)             | 0.79153456 @200                  | PASSED |
+| `rgb_lagged_sum` (k=6)        | default      | 0.99606002 (WEAK)             | 0.57318073 @200                  | PASSED |
+
+_Notes:_ “WEAK” on default settings can occur due to sampling variance; increasing `psamples` improved statistical power and all tests passed on rerun.
+
+
 ### PractRand
 - Date: 2025-09-08  
 - Volume: **up to 8 GB**  
