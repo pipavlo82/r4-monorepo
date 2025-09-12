@@ -42,8 +42,30 @@ _Notes:_ “WEAK” on default settings can occur due to sampling variance; incr
 - Logs/configs: see [`rng_reports/`](rng_reports/).
 
 ### NIST STS
-- Proportions met required minima.  
-- Few isolated low p-values (**0.018–0.006**); **overall status: PASS**.
+.### NIST Statistical Test Suite (STS)
+
+- **Suite:** NIST STS v2.1.2  
+- **Input:** `quantum_safe_rng_v1577_v13_1024mb.bin` (200 sequences)  
+- **Result:** **PASS** — all tests meet the NIST minimum pass-rate criterion (≥ 193 / 200 for non-excursion tests).
+
+**Pass-rate (highlights):**
+- Frequency: **197/200**
+- BlockFrequency: **199/200**
+- CumulativeSums (forward/backward): **197/200**, **197/200**
+- Runs: **198/200**
+- LongestRun: **199/200** *(lowest p ≈ 0.0185)*
+- Rank: **199/200**
+- FFT: **198/200**
+- NonOverlapping Template (multiple templates): **min 194/200**, typical **196–200/200**
+- OverlappingTemplate: **200/200**
+- Universal: **199/200**
+- ApproximateEntropy: **198/200**
+- Serial (two parameters): **198/200** *(p ≈ 0.0064)*, **199/200**
+- LinearComplexity: **198/200**
+- RandomExcursions / RandomExcursionsVariant: p-values span **~0.04–0.97**; proportions **119–123 / 123**
+
+**Notes:** A few low p-values (e.g., Serial **p≈0.0064**, LongestRun **p≈0.0185**, some NonOverlapping Template cases **p≈0.009–0.03**) are expected due to the large number of subtests. Since overall pass-rates are within NIST thresholds, the suite outcome is considered a **pass** with no evidence of systematic bias.
+
 
 ## Artifacts
 - Logs folder: [`rng_reports/`](rng_reports/) (subfolders per date, e.g., `2025-09-08/`).
