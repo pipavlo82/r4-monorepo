@@ -1,3 +1,5 @@
+[![CI](https://github.com/pipavlo82/Re4ctoR-RNG/actions/workflows/ci.yml/badge.svg)](https://github.com/pipavlo82/Re4ctoR-RNG/actions/workflows/ci.yml)
+
 # Re4ctoR-VRF/CSPRNG
 Our product, "Fourth Reactor," combines a Verifiable Random Function (VRF) and a Cryptographically Secure Pseudorandom Number Generator (CSPRNG). It excels in performance and security. It passed all 15 out of 15 NIST tests, indicating a very high level of randomness and statistical quality. Its speed of over 90 MB/sec is exceptional, outperforming many competitors by a significant margin. Additionally, its Post-Quantum Readiness (specifically ML-DSA-65) is a crucial advantage for future-proofing applications against quantum computing threats.
 
