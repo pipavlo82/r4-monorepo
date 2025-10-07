@@ -17,7 +17,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config libssl-dev
 
-      # Якщо у тебе інші імена файлів, підправ тут r4cs.c / r4cs_cat.c / r4cs.h
       - name: Build CLI
         run: |
           mkdir -p bin
