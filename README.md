@@ -73,3 +73,6 @@ gcc -O2 -std=c11 demo.c $(pkg-config --cflags --libs r4cs) -o demo
   Logs: `rng_reports/testu01/crush.txt`, `rng_reports/testu01/bigcrush.txt`, summary excerpt: `rng_reports/testu01/bigcrush_summary.txt`.
 
 > ⚠️ Statistical suites ≠ crypto proof. Independent audit required before production.
+
+### Dieharder targeted re-tests
+See `rng_reports/r4cs_dieharder_retest_summary.txt` (IDs 11/102/203). No WEAK/FAILED observed.
