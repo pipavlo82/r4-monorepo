@@ -1,3 +1,5 @@
+![CI](https://github.com/pipavlo82/r4-cs/actions/workflows/ci.yml/badge.svg)
+
 # R4-CS (MVP): HKDF-SHA256 → ChaCha20 DRBG (optional external entropy: `re4_stream`)
 
 **Status:** MVP for demonstrations. Ships a C library (`-lr4cs` via `pkg-config`), a CLI tool (`r4cs_cat`), and real test logs (PractRand / Dieharder / NIST STS / TestU01 Crush) in `rng_reports/`.
