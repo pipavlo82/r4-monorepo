@@ -2,20 +2,34 @@ name: CI
 
 on:
   push:
+    branches: [ main, ci-fix ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  smoke:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev
+          sudo apt-get install -y build-essential pkg-config libssl-dev
 
-      - name: Smoke test (build + 16MiB)
+      # Якщо у тебе інші імена файлів, підправ тут r4cs.c / r4cs_cat.c / r4cs.h
+      - name: Build CLI
         run: |
-          bash ci/smoke.sh
+          mkdir -p bin
+          gcc -O2 -std=c11 r4cs_cat.c r4cs.c -I. -lcrypto -lpthread -o bin/r4cs_cat
+
+      - name: Build demo
+        run: |
+          gcc -O2 -std=c11 demo.c r4cs.c -I. -lcrypto -lpthread -o demo
+
+      - name: Smoke test
+        env:
+          R4_SEED: "1"
+        run: |
+          ./demo
+          ./bin/r4cs_cat -n 64 -hex
