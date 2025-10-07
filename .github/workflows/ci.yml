@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [ main, ci-fix ]
   pull_request:
-    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-linux:
@@ -15,20 +17,27 @@ jobs:
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libssl-dev
+          sudo apt-get install -y build-essential libssl-dev
 
       - name: Build CLI
         run: |
-          mkdir -p bin
-          gcc -O2 -std=c11 r4cs_cat.c r4cs.c -I. -lcrypto -lpthread -o bin/r4cs_cat
+          gcc -O2 -std=c11 -Wall -Wextra -pthread \
+              -o r4cs_cat r4cs_cat.c r4cs.c -lcrypto
 
       - name: Build demo
         run: |
-          gcc -O2 -std=c11 demo.c r4cs.c -I. -lcrypto -lpthread -o demo
+          gcc -O2 -std=c11 -Wall -Wextra -pthread \
+              -o demo demo.c r4cs.c -lcrypto
 
       - name: Smoke test
         env:
           R4_SEED: "1"
         run: |
-          ./demo
-          ./bin/r4cs_cat -n 64 -hex
+          set -e
+          ./r4cs_cat -n 64 -hex > out.hex
+          # очікуємо 64 байти = 128 hex-символів + \n = 129 байт
+          BYTES=$(wc -c < out.hex)
+          echo "got $BYTES bytes"
+          test "$BYTES" -eq 129
+          # додатково перевіримо формат (лише hex, без пробілів)
+          grep -Eq '^[0-9a-f]{128}$' out.hex || (echo "bad hex"; exit 1)
