@@ -14,3 +14,6 @@ rng_reports/*_tl??_??*.txt
 rng_reports/testu01/bigcrush.txt
 rng_reports/testu01/bigcrush.nohup.log
 rng_reports/testu01/bigcrush.pid
+rng_reports/testu01/bigcrush.txt
+rng_reports/testu01/bigcrush.nohup.log
+rng_reports/testu01/bigcrush.pid
