@@ -11,3 +11,6 @@ rng_reports/*_tl??_??*.txt
 !rng_reports/*summary*.txt
 !rng_reports/*dieharder*.txt
 !rng_reports/*nist*.txt
+rng_reports/testu01/bigcrush.txt
+rng_reports/testu01/bigcrush.nohup.log
+rng_reports/testu01/bigcrush.pid
