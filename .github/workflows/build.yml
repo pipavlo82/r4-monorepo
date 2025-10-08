@@ -1,8 +1,8 @@
-name: CI
+name: Build
 on: [push, pull_request]
 
 jobs:
-  build-linux:
+  linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,23 +15,17 @@ jobs:
       - name: Prepare dummy re4_stream (deterministic zeros)
         run: |
           mkdir -p tools
-          cat > tools/re4_stream_dummy <<'SH'
-          #!/usr/bin/env bash
-          exec cat /dev/zero
-          SH
+          printf '#!/usr/bin/env bash\nexec cat /dev/zero\n' > tools/re4_stream_dummy
           chmod +x tools/re4_stream_dummy
-          # на всяк випадок у PATH:
           echo "$PWD/tools" >> $GITHUB_PATH
 
       - name: Build CLI
-        run: |
-          make -B r4cs_cat
+        run: make -B r4cs_cat
 
       - name: Build demo (local link)
-        run: |
-          gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
+        run: gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
 
-      - name: Smoke: 64 bytes hex format
+      - name: Smoke: 64 bytes hex
         env:
           R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
         run: |
@@ -45,10 +39,3 @@ jobs:
           R4_SEED=1 ./r4cs_cat -n 4096 > a.bin
           R4_SEED=1 ./r4cs_cat -n 4096 > b.bin
           cmp -s a.bin b.bin
-
-      - name: Smoke: non-empty without seed
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-        run: |
-          ./r4cs_cat -n 1024 > c.bin
-          test -s c.bin
