@@ -1,4 +1,4 @@
-name: CI
+name: CI (dispatch)
 on:
   push:
   pull_request:
