@@ -7,6 +7,9 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
+    env:
+      R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
+      R4_SEED: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -15,13 +18,32 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config libssl-dev
 
-      - name: Build CLI
+      - name: Prepare dummy re4_stream
         run: |
-          make -B r4cs_cat
+          mkdir -p tools
+          cat > tools/re4_stream_dummy <<'SH'
+          #!/usr/bin/env bash
+          # Imitation of re4_stream: infinite stream of random bytes for CI
+          exec dd if=/dev/urandom bs=1M status=none
+          SH
+          chmod +x tools/re4_stream_dummy
+
+      - name: Build CLI
+        run: make -B r4cs_cat
 
       - name: Build demo (local link)
+        run: gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
+
+      - name: Smoke: 64 bytes hex format
         run: |
-          gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
+          ./r4cs_cat -n 64 -hex | tee out.hex
+          grep -Eq '^[0-9a-f]{128}$' out.hex
+
+      - name: Smoke: determinism with R4_SEED
+        run: |
+          ./r4cs_cat -n 4096 > a.bin
+          ./r4cs_cat -n 4096 > b.bin
+          cmp -s a.bin b.bin
 
       - name: Quick run demo
         run: ./demo
