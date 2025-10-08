@@ -1,10 +1,12 @@
 name: CI
 on:
-  workflow_dispatch:
   push:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [manual-ci]
 
 jobs:
   say-ok:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "OK :: manual dispatch works"
+      - run: echo "OK :: CI triggered (push/workflow_dispatch/repository_dispatch)"
