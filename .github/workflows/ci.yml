@@ -1,11 +1,11 @@
-name: Build
+name: CI
 on:
   push:
   pull_request:
   workflow_dispatch: {}
 
 jobs:
-  linux:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +15,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config libssl-dev
 
-      - name: Prepare dummy re4_stream (deterministic zeros)
+      - name: Prepare dummy re4_stream (zeros)
         run: |
           mkdir -p tools
           printf '#!/usr/bin/env bash\nexec cat /dev/zero\n' > tools/re4_stream_dummy
