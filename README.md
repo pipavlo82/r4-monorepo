@@ -79,3 +79,27 @@ gcc -O2 -std=c11 demo.c $(pkg-config --cflags --libs r4cs) -o demo
 
 ### Dieharder targeted re-tests
 See `rng_reports/r4cs_dieharder_retest_summary.txt` (IDs 11/102/203). No WEAK/FAILED observed.
+
+## Test results (reproducible)
+
+**Note:** Passing statistical batteries does *not* prove cryptographic security. This is a DRBG MVP; an independent audit is required before any production use.
+
+- PractRand v0.95:
+  - stdin32: 1 GiB (2^30) — no anomalies  
+  - stdin64: 1 GiB (2^30) — no anomalies  
+  - stdin32: 2 GiB (2^31) — no anomalies  
+  - Smoke: 64 MiB — no anomalies  
+  See: `rng_reports/r4cs_pr32_tl30_32.txt`, `rng_reports/r4cs_pr64_tl30_32.txt`, `rng_reports/r4cs_pr32_tl31_33.txt`.
+
+- Dieharder v3.31.1 (full `-a`): initial run showed **WEAK** in 3 tests (2dsphere, sts_serial(k=5), rgb_lagged_sum(t=30)); targeted re-tests with `-p 100`: **no WEAK/FAILED**.  
+  See: `rng_reports/r4cs_dieharder.txt`, `rng_reports/r4cs_dieharder_retest_*.txt`.
+
+- NIST STS 2.1.2: 80 streams × 1,000,000 bits; pass rates within the expected thresholds for N=80.  
+  See STS summary under `rng_reports/`.
+
+- TestU01 v1.2.3:
+  - **Crush**: *All tests were passed*.  
+    See: `rng_reports/testu01_crush_summary.txt`
+  - **BigCrush**: *All tests were passed*.  
+    See: `rng_reports/testu01/bigcrush_summary.txt`
+
