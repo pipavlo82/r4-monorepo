@@ -1,3 +1,6 @@
+[![CI](https://github.com/pipavlo82/r4-cs/actions/workflows/ci.yml/badge.svg)](https://github.com/pipavlo82/r4-cs/actions/workflows/ci.yml)
+# R4-CS (MVP): HKDF-SHA256 → ChaCha20 DRBG with optional external entropy (`re4_stream`)
+
 ![CI](https://github.com/pipavlo82/r4-cs/actions/workflows/ci.yml/badge.svg)
 
 # R4-CS (MVP): HKDF-SHA256 → ChaCha20 DRBG (optional external entropy: `re4_stream`)
