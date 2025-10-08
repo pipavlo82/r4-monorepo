@@ -3,7 +3,42 @@ on:
   push:
 
 jobs:
-  ok:
+  linux:
     runs-on: ubuntu-latest
+    env:
+      R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
+      R4_SEED: "1"
     steps:
-      - run: echo "OK"
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libssl-dev
+
+      - name: Prepare dummy re4_stream (deterministic zeros)
+        run: |
+          mkdir -p tools
+          printf '#!/usr/bin/env bash\nexec cat /dev/zero\n' > tools/re4_stream_dummy
+          chmod +x tools/re4_stream_dummy
+          ls -l tools/re4_stream_dummy
+
+      - name: Build CLI
+        run: make -B r4cs_cat
+
+      - name: Build demo (local link)
+        run: gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
+
+      - name: Smoke: 64 bytes hex format
+        run: |
+          ./r4cs_cat -n 64 -hex | tee out.hex
+          grep -Eq '^[0-9a-f]{128}$' out.hex
+
+      - name: Smoke: determinism with R4_SEED
+        run: |
+          ./r4cs_cat -n 4096 > a.bin
+          ./r4cs_cat -n 4096 > b.bin
+          cmp -s a.bin b.bin
+
+      - name: Smoke: demo runs
+        run: ./demo | grep -E '^[0-9a-f]{64}$'
