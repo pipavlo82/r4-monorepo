@@ -17,3 +17,7 @@ rng_reports/testu01/bigcrush.pid
 rng_reports/testu01/bigcrush.txt
 rng_reports/testu01/bigcrush.nohup.log
 rng_reports/testu01/bigcrush.pid
+dist/
+tools/
+out.hex
+*.tar.gz
