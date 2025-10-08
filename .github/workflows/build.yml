@@ -1,5 +1,8 @@
 name: Build
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   linux:
@@ -23,14 +26,6 @@ jobs:
 
       - name: Build demo (local link)
         run: gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
-
-      - name: Debug env + quick run
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-        run: |
-          echo "R4_PATH=$R4_PATH"
-          ls -l "$R4_PATH"
-          ./r4cs_cat -n 16 >/dev/null
 
       - name: Smoke: 64 bytes hex
         env:
