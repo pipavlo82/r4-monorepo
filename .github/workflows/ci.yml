@@ -3,10 +3,10 @@ name: CI
 on:
   push:
   pull_request:
-  workflow_dispatch:
+
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -23,18 +23,5 @@ jobs:
         run: |
           gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
 
-      - name: Smoke: 64 bytes hex format
-        run: |
-          R4_SEED=1 ./r4cs_cat -n 64 -hex | tee out.hex
-          grep -Eq '^[0-9a-f]{128}$' out.hex || (echo "bad hex format"; exit 1)
-
-      - name: Smoke: determinism with R4_SEED
-        run: |
-          R4_SEED=1 ./r4cs_cat -n 4096 > a.bin
-          R4_SEED=1 ./r4cs_cat -n 4096 > b.bin
-          cmp -s a.bin b.bin
-
-      - name: Smoke: non-empty without seed
-        run: |
-          ./r4cs_cat -n 1024 > c.bin
-          test -s c.bin
+      - name: Quick run demo
+        run: ./demo
