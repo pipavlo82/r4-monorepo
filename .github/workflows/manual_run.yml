@@ -1,5 +1,6 @@
 name: Manual Run
 on:
+  push:
   workflow_dispatch:
 
 jobs:
