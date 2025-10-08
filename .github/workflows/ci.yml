@@ -20,23 +20,20 @@ jobs:
           exec cat /dev/zero
           SH
           chmod +x tools/re4_stream_dummy
+          # на всяк випадок у PATH:
+          echo "$PWD/tools" >> $GITHUB_PATH
 
       - name: Build CLI
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: '1'
-        run: make -B r4cs_cat
+        run: |
+          make -B r4cs_cat
 
       - name: Build demo (local link)
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: '1'
-        run: gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
+        run: |
+          gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
 
       - name: Smoke: 64 bytes hex format
         env:
           R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: '1'
         run: |
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
@@ -44,14 +41,14 @@ jobs:
       - name: Smoke: determinism with R4_SEED
         env:
           R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: '1'
         run: |
-          ./r4cs_cat -n 4096 > a.bin
-          ./r4cs_cat -n 4096 > b.bin
+          R4_SEED=1 ./r4cs_cat -n 4096 > a.bin
+          R4_SEED=1 ./r4cs_cat -n 4096 > b.bin
           cmp -s a.bin b.bin
 
-      - name: Quick run demo
+      - name: Smoke: non-empty without seed
         env:
           R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: '1'
-        run: ./demo
+        run: |
+          ./r4cs_cat -n 1024 > c.bin
+          test -s c.bin
