@@ -46,7 +46,7 @@ jobs:
           R4_SEED=1 ./r4cs_cat -n 4096 > b.bin
           cmp -s a.bin b.bin
 
-      - name: Smoke: demo outputs hex(32B)
+      - name: Smoke: demo prints 32B hex
         env:
           R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
         run: ./demo | grep -Eq '^[0-9a-f]{64}$'
