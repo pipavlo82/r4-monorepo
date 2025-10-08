@@ -1,0 +1,10 @@
+name: CI
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  say-ok:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "OK :: manual dispatch works"
