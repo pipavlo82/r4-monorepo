@@ -1,9 +1,9 @@
-name: Manual Dispatch OK
+name: dispatch-ok
 on:
   workflow_dispatch:
 
 jobs:
-  hello:
+  say-ok:
     runs-on: ubuntu-latest
     steps:
       - run: echo "OK :: manual dispatch works"
