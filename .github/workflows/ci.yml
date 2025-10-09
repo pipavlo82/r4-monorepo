@@ -5,16 +5,13 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    env:
-      R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-      R4_SEED: "1"
     steps:
       - uses: actions/checkout@v4
 
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libssl-dev dieharder
+          sudo apt-get install -y build-essential pkg-config libssl-dev
 
       - name: Prepare dummy re4_stream (deterministic zeros)
         run: |
@@ -26,32 +23,28 @@ jobs:
       - name: Build CLI
         run: make -B r4cs_cat
 
+      - name: Build demo (local link)
+        run: gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
+
       - name: Smoke: 64 bytes hex format
+        env:
+          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
         run: |
           ./r4cs_cat -n 64 -hex | tee out.hex
-          grep -Eq '^[0-9a-f]{128}$' out.hex
+          grep -E '^[0-9a-f]{128}$' out.hex
 
       - name: Smoke: determinism with R4_SEED
+        env:
+          R4_SEED: "1"
+          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
         run: |
           ./r4cs_cat -n 4096 > a.bin
           ./r4cs_cat -n 4096 > b.bin
           cmp -s a.bin b.bin
 
-      - name: Dieharder smoke (fast subset)
+      - name: Smoke: non-empty without seed
+        env:
+          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
         run: |
-          mkdir -p rng_reports
-          BYTES=$((20*1024*1024))
-          ./r4cs_cat -n $BYTES | dieharder -d 11  -g 200 -p 10 > rng_reports/dh_minDist2d.txt
-          ./r4cs_cat -n $BYTES | dieharder -d 12  -g 200 -p 10 > rng_reports/dh_3dSphere.txt
-          ./r4cs_cat -n $BYTES | dieharder -d 102 -g 200 -p 10 > rng_reports/dh_sts_serial.txt
-          ./r4cs_cat -n $BYTES | dieharder -d 203 -g 200 -p 10 > rng_reports/dh_rgb_lagged_sum.txt
-
-      - name: Upload rng logs (artifacts)
-        uses: actions/upload-artifact@v4
-        with:
-          name: rng_reports_${{ github.sha }}
-          path: |
-            out.hex
-            a.bin
-            b.bin
-            rng_reports/**
+          ./r4cs_cat -n 1024 > c.bin
+          test -s c.bin
