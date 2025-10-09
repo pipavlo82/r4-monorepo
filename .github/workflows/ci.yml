@@ -27,7 +27,7 @@ jobs:
 
       - name: Smoke: 64 bytes hex format
         env:
-          R4_PATH: $GITHUB_WORKSPACE/tools/re4_stream_dummy
+          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
           R4_SEED: "1"
         run: |
           set -euo pipefail
@@ -36,7 +36,7 @@ jobs:
 
       - name: Smoke: determinism with R4_SEED
         env:
-          R4_PATH: $GITHUB_WORKSPACE/tools/re4_stream_dummy
+          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
           R4_SEED: "1"
         run: |
           set -euo pipefail
@@ -46,7 +46,7 @@ jobs:
 
       - name: Dieharder smoke (fast subset)
         env:
-          R4_PATH: $GITHUB_WORKSPACE/tools/re4_stream_dummy
+          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
           R4_SEED: "1"
         run: |
           set -euo pipefail
