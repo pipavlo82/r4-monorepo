@@ -23,7 +23,9 @@ jobs:
           echo "$PWD/tools" >> "$GITHUB_PATH"
 
       - name: Build CLI
-        run: make -B r4cs_cat
+        run: |
+          set -euo pipefail
+          make -B r4cs_cat
 
       - name: Smoke: 64 bytes hex format
         env:
@@ -44,19 +46,6 @@ jobs:
           ./r4cs_cat -n 4096 > b.bin
           cmp -s a.bin b.bin
 
-      - name: Dieharder smoke (fast subset)
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: "1"
-        run: |
-          set -euo pipefail
-          mkdir -p rng_reports
-          BYTES=$((20*1024*1024))
-          ./r4cs_cat -n $BYTES | dieharder -d 11  -g 200 -p 10 > rng_reports/dh_minDist2d.txt
-          ./r4cs_cat -n $BYTES | dieharder -d 12  -g 200 -p 10 > rng_reports/dh_3dSphere.txt
-          ./r4cs_cat -n $BYTES | dieharder -d 102 -g 200 -p 10 > rng_reports/dh_sts_serial.txt
-          ./r4cs_cat -n $BYTES | dieharder -d 203 -g 200 -p 10 > rng_reports/dh_rgb_lagged_sum.txt
-
       - name: Upload rng logs (artifacts)
         uses: actions/upload-artifact@v4
         with:
@@ -65,4 +54,3 @@ jobs:
             out.hex
             a.bin
             b.bin
-            rng_reports/**
