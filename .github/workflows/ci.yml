@@ -22,15 +22,10 @@ jobs:
           chmod +x tools/re4_stream_dummy
           echo "$PWD/tools" >> "$GITHUB_PATH"
 
-      - name: Build CLI
+      - name: Build CLI (via make)
         run: |
           set -euo pipefail
           make -B r4cs_cat
-
-      - name: Build demo (local link)
-        run: |
-          set -euo pipefail
-          gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o demo
 
       - name: Smoke: 64 bytes hex format
         env:
