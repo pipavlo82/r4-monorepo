@@ -24,6 +24,7 @@ jobs:
 
       - name: Export R4 env
         run: |
+          set -euo pipefail
           echo "R4_PATH=${GITHUB_WORKSPACE}/tools/re4_stream_dummy" >> "$GITHUB_ENV"
           echo "R4_SEED=1" >> "$GITHUB_ENV"
 
