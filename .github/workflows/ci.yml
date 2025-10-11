@@ -12,7 +12,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libssl-dev
+          sudo apt-get install -y build-essential pkg-config libssl-dev dieharder
 
       - name: Prepare dummy re4_stream (deterministic zeros)
         run: |
@@ -45,3 +45,24 @@ jobs:
           ./r4cs_cat -n 4096 > a.bin
           ./r4cs_cat -n 4096 > b.bin
           cmp -s a.bin b.bin
+
+      - name: Dieharder smoke (fast subset)
+        run: |
+          set -euo pipefail
+          mkdir -p rng_reports
+          BYTES=$((20*1024*1024))
+          ./r4cs_cat -n $BYTES | dieharder -d 11  -g 200 -p 10 > rng_reports/dh_minDist2d.txt
+          ./r4cs_cat -n $BYTES | dieharder -d 12  -g 200 -p 10 > rng_reports/dh_3dSphere.txt
+          ./r4cs_cat -n $BYTES | dieharder -d 102 -g 200 -p 10 > rng_reports/dh_sts_serial.txt
+          ./r4cs_cat -n $BYTES | dieharder -d 203 -g 200 -p 10 > rng_reports/dh_rgb_lagged_sum.txt
+
+      - name: Upload rng logs (artifacts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rng_reports_${{ github.sha }}
+          path: |
+            out.hex
+            a.bin
+            b.bin
+            rng_reports/**
