@@ -22,24 +22,24 @@ jobs:
           chmod +x tools/re4_stream_dummy
           echo "$PWD/tools" >> "$GITHUB_PATH"
 
+      - name: Export R4_PATH and R4_SEED
+        run: |
+          set -euo pipefail
+          echo "R4_PATH=${GITHUB_WORKSPACE}/tools/re4_stream_dummy" >> "$GITHUB_ENV"
+          echo "R4_SEED=1" >> "$GITHUB_ENV"
+
       - name: Build CLI (via Makefile)
         run: |
           set -euo pipefail
           make -B r4cs_cat
 
       - name: Smoke: 64 bytes hex format
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: "1"
         run: |
           set -euo pipefail
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
 
       - name: Smoke: determinism with R4_SEED
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: "1"
         run: |
           set -euo pipefail
           ./r4cs_cat -n 4096 > a.bin
@@ -47,9 +47,6 @@ jobs:
           cmp -s a.bin b.bin
 
       - name: Dieharder smoke (fast subset)
-        env:
-          R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
-          R4_SEED: "1"
         run: |
           set -euo pipefail
           mkdir -p rng_reports
