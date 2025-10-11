@@ -21,7 +21,7 @@ jobs:
       - name: Build CLI
         run: |
           set -euo pipefail
-          gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o r4cs_cat  # Якщо CLI з demo.c, видаліть r4cs.c
+          gcc -O2 -std=c11 demo.c r4cs.c -lcrypto -lpthread -o r4cs_cat  # Замініть, якщо CLI з demo.c тільки
       - name: Smoke: 64 bytes hex format
         env:
           R4_PATH: ${{ github.workspace }}/tools/re4_stream_dummy
