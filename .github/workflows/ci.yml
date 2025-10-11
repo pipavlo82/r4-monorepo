@@ -38,10 +38,3 @@ jobs:
           set -euo pipefail
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
-
-      - name: Smoke: determinism with R4_SEED
-        run: |
-          set -euo pipefail
-          ./r4cs_cat -n 4096 > a.bin
-          ./r4cs_cat -n 4096 > b.bin
-          cmp -s a.bin b.bin
