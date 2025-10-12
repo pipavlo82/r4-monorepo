@@ -1,251 +1,142 @@
-#define _POSIX_C_SOURCE 200809L
-#include "r4cs.h"
+// r4cs.c (фрагменти)
+
+#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
-#include <time.h>
-#include <unistd.h>
-#include <pthread.h>
 #include <openssl/evp.h>
-#include <openssl/hmac.h>
+#include <openssl/core_names.h>
+#include <openssl/kdf.h>
 
-#ifndef R4_RESEED_INTERVAL
-#define R4_RESEED_INTERVAL (1u<<20) /* кожні ~1 МіБ виводу */
-#endif
-
-// -------- util: secure memset --------
-static void secure_bzero(void *p, size_t n) {
+/* --- secure zero --- */
+static void r4_secure_zero(void *p, size_t n) {
 #if defined(__STDC_LIB_EXT1__)
     memset_s(p, n, 0, n);
+#elif defined(HAVE_EXPLICIT_BZERO)
+    explicit_bzero(p, n);
+#elif defined(_WIN32)
+    SecureZeroMemory(p, n);
 #else
-    volatile unsigned char *vp = (volatile unsigned char*)p;
+    volatile unsigned char *vp = (volatile unsigned char *)p;
     while (n--) *vp++ = 0;
 #endif
 }
 
-// -------- ChaCha20 core (мінімум) --------
+/* --- HKDF-SHA256 (OpenSSL 3 EVP_KDF) --- */
+static int hkdf_sha256(const unsigned char *ikm, size_t ikm_len,
+                       const unsigned char *salt, size_t salt_len,
+                       const unsigned char *info, size_t info_len,
+                       unsigned char *out, size_t out_len) {
+    int ok = 0;
+    EVP_KDF *kdf = NULL;
+    EVP_KDF_CTX *kctx = NULL;
+    OSSL_PARAM params[5], *p = params;
+
+    kdf = EVP_KDF_fetch(NULL, "HKDF", NULL);
+    if (!kdf) goto end;
+    kctx = EVP_KDF_CTX_new(kdf);
+    if (!kctx) goto end;
+
+    *p++ = OSSL_PARAM_construct_utf8_string(OSSL_KDF_PARAM_DIGEST, "SHA256", 0);
+    *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_KEY, (void*)ikm, ikm_len);
+    if (salt && salt_len) *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, (void*)salt, salt_len);
+    if (info && info_len) *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_INFO, (void*)info, info_len);
+    *p   = OSSL_PARAM_construct_end();
+
+    if (EVP_KDF_derive(kctx, out, out_len, params) == 1) ok = 1;
+
+end:
+    EVP_KDF_CTX_free(kctx);
+    EVP_KDF_free(kdf);
+    return ok ? 0 : -1;
+}
+
+/* --- стан DRBG (ChaCha20 key/nonce/ctr), прикладова структура --- */
 typedef struct {
-    uint8_t key[32];
-    uint8_t nonce[12];
-    uint32_t counter;
-} chacha20_ctx;
+    unsigned char key[32];
+    unsigned char nonce[12];
+    uint64_t      counter;
+    int           initialized;
+    int           deterministic; // 1 коли ініт з R4_SEED
+} r4_ctx;
 
-static inline uint32_t rotl32(uint32_t x, int r){ return (x<<r)|(x>>(32-r)); }
-#define QR(a,b,c,d) do{ \
-    a+=b; d^=a; d=rotl32(d,16); \
-    c+=d; b^=c; b=rotl32(b,12); \
-    a+=b; d^=a; d=rotl32(d, 8); \
-    c+=d; b^=c; b=rotl32(b, 7); \
-}while(0)
-
-static void chacha20_block(const chacha20_ctx *ctx, uint32_t out[16]) {
-    static const uint32_t C[4] = {0x61707865,0x3320646e,0x79622d32,0x6b206574};
-    uint32_t s[16];
-    s[0]=C[0]; s[1]=C[1]; s[2]=C[2]; s[3]=C[3];
-    // key
-    for (int i=0;i<8;i++){
-        s[4+i] = ((uint32_t)ctx->key[4*i]) |
-                 ((uint32_t)ctx->key[4*i+1] << 8) |
-                 ((uint32_t)ctx->key[4*i+2] << 16) |
-                 ((uint32_t)ctx->key[4*i+3] << 24);
-    }
-    // counter + nonce
-    s[12] = ctx->counter;
-    s[13] = ((uint32_t)ctx->nonce[0]) | ((uint32_t)ctx->nonce[1]<<8) |
-            ((uint32_t)ctx->nonce[2]<<16) | ((uint32_t)ctx->nonce[3]<<24);
-    s[14] = ((uint32_t)ctx->nonce[4]) | ((uint32_t)ctx->nonce[5]<<8) |
-            ((uint32_t)ctx->nonce[6]<<16) | ((uint32_t)ctx->nonce[7]<<24);
-    s[15] = ((uint32_t)ctx->nonce[8]) | ((uint32_t)ctx->nonce[9]<<8) |
-            ((uint32_t)ctx->nonce[10]<<16)| ((uint32_t)ctx->nonce[11]<<24);
-
-    for (int i=0;i<16;i++) out[i]=s[i];
-
-    for (int i=0;i<10;i++){
-        QR(out[0],out[4],out[8],out[12]);
-        QR(out[1],out[5],out[9],out[13]);
-        QR(out[2],out[6],out[10],out[14]);
-        QR(out[3],out[7],out[11],out[15]);
-        QR(out[0],out[5],out[10],out[15]);
-        QR(out[1],out[6],out[11],out[12]);
-        QR(out[2],out[7],out[8],out[13]);
-        QR(out[3],out[4],out[9],out[14]);
-    }
-    for (int i=0;i<16;i++) out[i]+=s[i];
-}
-
-static void chacha20_generate(chacha20_ctx *ctx, uint8_t *out, size_t n) {
-    while (n) {
-        uint32_t blk[16];
-        chacha20_block(ctx, blk);
-        ctx->counter++;
-        size_t take = n < 64 ? n : 64;
-        memcpy(out, blk, take);
-        secure_bzero(blk, sizeof(blk));
-        out += take; n -= take;
-    }
-}
-
-// -------- HKDF-SHA256 (через OpenSSL HMAC) --------
-static int hkdf_extract(const uint8_t *salt,size_t salt_len,
-                        const uint8_t *ikm,size_t ikm_len,
-                        uint8_t out_prk[32]) {
-    unsigned int len=0;
-    unsigned char *p = HMAC(EVP_sha256(), salt, (int)salt_len, ikm, ikm_len, out_prk, &len);
-    return (p && len==32) ? 0 : -1;
-}
-
-static int hkdf_expand(const uint8_t prk[32],
-                       const uint8_t *info,size_t info_len,
-                       uint8_t *okm,size_t okm_len) {
-    uint8_t T[32]; size_t Tlen=0; uint8_t c=1;
-    size_t done=0;
-    while (done<okm_len) {
-        HMAC_CTX *ctx = HMAC_CTX_new();
-        if(!ctx) return -1;
-        if (HMAC_Init_ex(ctx, prk, 32, EVP_sha256(), NULL) != 1) { HMAC_CTX_free(ctx); return -1; }
-        if (Tlen) HMAC_Update(ctx, T, Tlen);
-        if (info && info_len) HMAC_Update(ctx, info, info_len);
-        HMAC_Update(ctx, &c, 1);
-        unsigned int outl=0;
-        HMAC_Final(ctx, T, &outl);
-        HMAC_CTX_free(ctx);
-        size_t copy = (okm_len - done < 32) ? (okm_len - done) : 32;
-        memcpy(okm+done, T, copy);
-        done += copy; Tlen = outl; c++;
-    }
-    secure_bzero(T, sizeof(T));
-    return 0;
-}
-
-static int hkdf_sha256(const uint8_t *salt,size_t salt_len,
-                       const uint8_t *ikm,size_t ikm_len,
-                       const uint8_t *info,size_t info_len,
-                       uint8_t *okm,size_t okm_len) {
-    uint8_t prk[32];
-    if (hkdf_extract(salt, salt_len, ikm, ikm_len, prk) != 0) return -1;
-    int rc = hkdf_expand(prk, info, info_len, okm, okm_len);
-    secure_bzero(prk, sizeof(prk));
-    return rc;
-}
-
-// -------- глобальний DRBG --------
-static chacha20_ctx G;
-static size_t g_bytes_since_reseed = SIZE_MAX; // форс перший reseed
-static FILE *g_r4 = NULL;
-static pthread_mutex_t g_mx = PTHREAD_MUTEX_INITIALIZER;
-
-// читання з /dev/urandom
-static int read_urandom(void *buf, size_t n) {
-    FILE *f = fopen("/dev/urandom","rb"); if(!f) return -1;
-    size_t got = fread(buf,1,n,f); fclose(f);
-    return (got==n)?0:-1;
-}
-
-// запуск re4_stream
-static int r4_open(const char *path) {
-    if (g_r4) return 0;
-    const char *p = path;
-    if (!p || !*p) { p = getenv("R4_PATH"); if(!p||!*p) p = "re4_stream"; }
-    const char *seed = getenv("R4_SEED");
-    char cmd[512];
-    if (seed && *seed) snprintf(cmd,sizeof(cmd),"%s %s", p, seed);
-    else {
-        unsigned long long s=0; read_urandom(&s, sizeof(s)); if(!s) s=1ULL;
-        snprintf(cmd,sizeof(cmd),"%s %llu", p, (unsigned long long)s);
-    }
-    g_r4 = popen(cmd, "r");
-    return g_r4 ? 0 : -1;
-}
-
-static int r4_read(void *buf, size_t n) {
-    if (!g_r4) return -1;
-    uint8_t *p=(uint8_t*)buf; size_t total=0;
-    while (total<n) {
-        size_t got = fread(p+total,1,n-total,g_r4);
-        if (got==0) return -1;
-        total += got;
-    }
-    return 0;
-}
-
-static int reseed_locked(void) {
-    // збираємо мікс: 64B OS + 64B R4 + контекст
-    uint8_t salt[64], r4buf[64], ikm[64];
-    if (read_urandom(salt, sizeof(salt)) != 0) return -1;
-    if (r4_read(r4buf, sizeof(r4buf)) != 0) return -1;
-
-    // info: PID|time|“R4-CS v1”
-    uint8_t info[64]; memset(info,0,sizeof(info));
-    uint32_t pid = (uint32_t)getpid();
-    uint64_t t = (uint64_t)time(NULL);
-    memcpy(info, &pid, sizeof(pid));
-    memcpy(info+8, &t, sizeof(t));
-    memcpy(info+16, "R4-CS v1", 8);
-
-    // ikm = XOR(OS, R4) для простоти
-    for (size_t i=0;i<sizeof(ikm);i++) ikm[i] = salt[i] ^ r4buf[i];
-
-    // HKDF -> 32 key + 12 nonce + 4 counter (всього 48)
-    uint8_t okm[48];
-    if (hkdf_sha256(salt, sizeof(salt), ikm, sizeof(ikm), info, sizeof(info), okm, sizeof(okm)) != 0)
+/* --- ініціалізація з SEED (без системної ентропії) --- */
+int r4_init_from_seed(r4_ctx *ctx, const unsigned char *seed, size_t seed_len,
+                      const unsigned char *info, size_t info_len)
+{
+    unsigned char okm[32 + 12]; // key||nonce
+    if (hkdf_sha256(seed, seed_len, NULL, 0, info, info_len, okm, sizeof(okm)) != 0)
         return -1;
 
-    memcpy(G.key,   okm, 32);
-    memcpy(G.nonce, okm+32, 12);
-    memcpy(&G.counter, okm+44, 4);
-
-    secure_bzero(okm, sizeof(okm));
-    secure_bzero(salt, sizeof(salt));
-    secure_bzero(r4buf, sizeof(r4buf));
-    secure_bzero(ikm, sizeof(ikm));
-
-    g_bytes_since_reseed = 0;
+    memcpy(ctx->key,   okm, 32);
+    memcpy(ctx->nonce, okm + 32, 12);
+    r4_secure_zero(okm, sizeof(okm));
+    ctx->counter = 0;
+    ctx->initialized = 1;
+    ctx->deterministic = 1;
     return 0;
 }
 
-// -------- публічні API --------
-int r4cs_init(const char *r4_path) {
-    pthread_mutex_lock(&g_mx);
-    int rc = 0;
-    if (r4_open(r4_path) != 0) rc = -1;
-    else if (reseed_locked() != 0) rc = -2;
-    pthread_mutex_unlock(&g_mx);
-    return rc;
+/* --- ініціалізація з системної ентропії (коли SEED не задано) --- */
+/* ВАЖЛИВО: цей шлях НЕ ВИКЛИКАЄТЬСЯ, якщо є R4_SEED */
+static int r4_init_from_system(r4_ctx *ctx) {
+    // тут можна читати getrandom()/URANDOM один раз,
+    // але він не викликається в детермінованому режимі
+    // (залиш як є, або реалізуй за потреби)
+    return -1; // поки вимкнемо, щоб не було випадкових звернень
 }
 
-int r4cs_reseed(void) {
-    pthread_mutex_lock(&g_mx);
-    int rc = reseed_locked();
-    pthread_mutex_unlock(&g_mx);
-    return rc;
-}
-
-int r4cs_random(void *out, size_t n) {
-    uint8_t *p = (uint8_t*)out;
-    pthread_mutex_lock(&g_mx);
-    if (g_bytes_since_reseed > R4_RESEED_INTERVAL) {
-        if (reseed_locked() != 0) { pthread_mutex_unlock(&g_mx); return -1; }
+/* --- публічний init --- */
+int r4_init_auto(r4_ctx *ctx) {
+    const char *seed_env = getenv("R4_SEED");
+    if (seed_env && seed_env[0]) {
+        const unsigned char *seed = (const unsigned char*)seed_env;
+        size_t seed_len = strlen(seed_env);
+        const char *info_env = getenv("R4_INFO"); // optional
+        const unsigned char *info = (const unsigned char*)info_env;
+        size_t info_len = info_env ? strlen(info_env) : 0;
+        return r4_init_from_seed(ctx, seed, seed_len, info, info_len);
     }
-    while (n) {
-        size_t chunk = n;
-        if (g_bytes_since_reseed + chunk > R4_RESEED_INTERVAL)
-            chunk = R4_RESEED_INTERVAL - g_bytes_since_reseed;
-        if (chunk == 0) {
-            if (reseed_locked()!=0) { pthread_mutex_unlock(&g_mx); return -1; }
-            continue;
-        }
-        chacha20_generate(&G, p, chunk);
-        p += chunk; n -= chunk; g_bytes_since_reseed += chunk;
-    }
-    pthread_mutex_unlock(&g_mx);
-    return 0;
+    // без SEED — або ініт із системи, або фейл (щоб не було “тихого” доступу)
+    return r4_init_from_system(ctx);
 }
 
-void r4cs_close(void) {
-    pthread_mutex_lock(&g_mx);
-    if (g_r4) { pclose(g_r4); g_r4=NULL; }
-    secure_bzero(&G, sizeof(G));
-    pthread_mutex_unlock(&g_mx);
+/* --- генерація байтів через EVP_chacha20 --- */
+static int r4_generate(r4_ctx *ctx, unsigned char *out, size_t out_len) {
+    if (!ctx || !ctx->initialized) return -1;
+
+    EVP_CIPHER_CTX *cctx = EVP_CIPHER_CTX_new();
+    if (!cctx) return -1;
+    int ok = 0, outl;
+
+    if (EVP_EncryptInit_ex(cctx, EVP_chacha20(), NULL, NULL, NULL) != 1) goto end;
+
+    // ChaCha20 параметри: ключ, nonce (12B), лічильник (32-біт у TLS; тут підженемо через ctrl)
+    if (EVP_CIPHER_CTX_ctrl(cctx, EVP_CTRL_AEAD_SET_IVLEN, 12, NULL) != 1) goto end;
+    if (EVP_EncryptInit_ex(cctx, NULL, NULL, ctx->key, ctx->nonce) != 1) goto end;
+    if (EVP_CIPHER_CTX_ctrl(cctx, EVP_CTRL_CHACHA20_SET_COUNTER, (int)ctx->counter, NULL) != 1) goto end;
+
+    if (EVP_EncryptUpdate(cctx, out, &outl, out, (int)out_len) != 1) goto end;
+    // у потокових шифрах буфер in==out дає XOR; простіше згенерувати нулі такого ж розміру.
+    // Краще так:
+    unsigned char *zeros = calloc(1, out_len);
+    if (!zeros) goto end;
+    if (EVP_EncryptUpdate(cctx, out, &outl, zeros, (int)out_len) != 1) { free(zeros); goto end; }
+    free(zeros);
+
+    // оновити counter: крок у 64-байтних блоках
+    ctx->counter += (out_len + 63) / 64;
+    ok = 1;
+
+end:
+    EVP_CIPHER_CTX_free(cctx);
+    return ok ? 0 : -1;
+}
+
+/* --- очищення стану --- */
+void r4_free(r4_ctx *ctx) {
+    if (!ctx) return;
+    r4_secure_zero(ctx->key, sizeof(ctx->key));
+    r4_secure_zero(ctx->nonce, sizeof(ctx->nonce));
+    r4_secure_zero(ctx, sizeof(*ctx));
 }
