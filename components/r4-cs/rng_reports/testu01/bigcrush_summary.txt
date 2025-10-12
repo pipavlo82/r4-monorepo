@@ -1,0 +1,7 @@
+========= Summary results of BigCrush =========
+Version:          TestU01 1.2.3
+Generator:        R4-CS_DRBG
+Number of statistics:  160
+Total CPU time:   14:01:45.37
+
+All tests were passed

@@ -1,0 +1,116 @@
+Dieharder targeted re-tests (IDs: 11=2dsphere, 102=sts_serial, 203=rgb_lagged_sum)
+Tue Oct  7 19:54:54 EDT 2025
+
+== r4cs_dieharder_retest_2dsphere.txt ==
+#=============================================================================#
+#=============================================================================#
+   rng_name    |rands/second|   Seed   |
+#=============================================================================#
+        test_name   |ntup| tsamples |psamples|  p-value |Assessment
+#=============================================================================#
+    diehard_2dsphere|   2|      8000|     100|0.65718500|  PASSED  
+
+== r4cs_dieharder_retest_rgb_lagged_sum.txt ==
+#=============================================================================#
+#=============================================================================#
+   rng_name    |rands/second|   Seed   |
+#=============================================================================#
+        test_name   |ntup| tsamples |psamples|  p-value |Assessment
+#=============================================================================#
+      rgb_lagged_sum|   0|   1000000|     100|0.99217835|  PASSED  
+
+== r4cs_dieharder_retest_sts_serial.txt ==
+#=============================================================================#
+#=============================================================================#
+   rng_name    |rands/second|   Seed   |
+#=============================================================================#
+        test_name   |ntup| tsamples |psamples|  p-value |Assessment
+#=============================================================================#
+          sts_serial|   1|    100000|     100|0.44030403|  PASSED  
+          sts_serial|   2|    100000|     100|0.82549152|  PASSED  
+          sts_serial|   3|    100000|     100|0.63085000|  PASSED  
+          sts_serial|   3|    100000|     100|0.94161408|  PASSED  
+          sts_serial|   4|    100000|     100|0.12179446|  PASSED  
+          sts_serial|   4|    100000|     100|0.16904533|  PASSED  
+          sts_serial|   5|    100000|     100|0.49063892|  PASSED  
+          sts_serial|   5|    100000|     100|0.80683266|  PASSED  
+          sts_serial|   6|    100000|     100|0.72306914|  PASSED  
+          sts_serial|   6|    100000|     100|0.74548686|  PASSED  
+          sts_serial|   7|    100000|     100|0.77649763|  PASSED  
+          sts_serial|   7|    100000|     100|0.81772646|  PASSED  
+          sts_serial|   8|    100000|     100|0.89397297|  PASSED  
+          sts_serial|   8|    100000|     100|0.46461944|  PASSED  
+          sts_serial|   9|    100000|     100|0.46699316|  PASSED  
+          sts_serial|   9|    100000|     100|0.02791422|  PASSED  
+          sts_serial|  10|    100000|     100|0.95663306|  PASSED  
+          sts_serial|  10|    100000|     100|0.30488887|  PASSED  
+          sts_serial|  11|    100000|     100|0.57944385|  PASSED  
+          sts_serial|  11|    100000|     100|0.05619776|  PASSED  
+          sts_serial|  12|    100000|     100|0.38608931|  PASSED  
+          sts_serial|  12|    100000|     100|0.88805833|  PASSED  
+          sts_serial|  13|    100000|     100|0.53005331|  PASSED  
+          sts_serial|  13|    100000|     100|0.72931335|  PASSED  
+          sts_serial|  14|    100000|     100|0.45879372|  PASSED  
+          sts_serial|  14|    100000|     100|0.47689708|  PASSED  
+          sts_serial|  15|    100000|     100|0.87640483|  PASSED  
+          sts_serial|  15|    100000|     100|0.55209387|  PASSED  
+          sts_serial|  16|    100000|     100|0.97386149|  PASSED  
+          sts_serial|  16|    100000|     100|0.49291184|  PASSED  
+
+== r4cs_dieharder_retest_summary.txt ==
+Dieharder targeted re-tests (IDs: 11=2dsphere, 102=sts_serial, 203=rgb_lagged_sum)
+#=============================================================================#
+#=============================================================================#
+   rng_name    |rands/second|   Seed   |
+#=============================================================================#
+        test_name   |ntup| tsamples |psamples|  p-value |Assessment
+#=============================================================================#
+    diehard_2dsphere|   2|      8000|     100|0.65718500|  PASSED  
+== r4cs_dieharder_retest_rgb_lagged_sum.txt ==
+#=============================================================================#
+#=============================================================================#
+   rng_name    |rands/second|   Seed   |
+#=============================================================================#
+        test_name   |ntup| tsamples |psamples|  p-value |Assessment
+#=============================================================================#
+      rgb_lagged_sum|   0|   1000000|     100|0.99217835|  PASSED  
+== r4cs_dieharder_retest_sts_serial.txt ==
+#=============================================================================#
+#=============================================================================#
+   rng_name    |rands/second|   Seed   |
+#=============================================================================#
+        test_name   |ntup| tsamples |psamples|  p-value |Assessment
+#=============================================================================#
+          sts_serial|   1|    100000|     100|0.44030403|  PASSED  
+          sts_serial|   2|    100000|     100|0.82549152|  PASSED  
+          sts_serial|   3|    100000|     100|0.63085000|  PASSED  
+          sts_serial|   3|    100000|     100|0.94161408|  PASSED  
+          sts_serial|   4|    100000|     100|0.12179446|  PASSED  
+          sts_serial|   4|    100000|     100|0.16904533|  PASSED  
+          sts_serial|   5|    100000|     100|0.49063892|  PASSED  
+          sts_serial|   5|    100000|     100|0.80683266|  PASSED  
+          sts_serial|   6|    100000|     100|0.72306914|  PASSED  
+          sts_serial|   6|    100000|     100|0.74548686|  PASSED  
+          sts_serial|   7|    100000|     100|0.77649763|  PASSED  
+          sts_serial|   7|    100000|     100|0.81772646|  PASSED  
+          sts_serial|   8|    100000|     100|0.89397297|  PASSED  
+          sts_serial|   8|    100000|     100|0.46461944|  PASSED  
+          sts_serial|   9|    100000|     100|0.46699316|  PASSED  
+          sts_serial|   9|    100000|     100|0.02791422|  PASSED  
+          sts_serial|  10|    100000|     100|0.95663306|  PASSED  
+          sts_serial|  10|    100000|     100|0.30488887|  PASSED  
+          sts_serial|  11|    100000|     100|0.57944385|  PASSED  
+          sts_serial|  11|    100000|     100|0.05619776|  PASSED  
+          sts_serial|  12|    100000|     100|0.38608931|  PASSED  
+          sts_serial|  12|    100000|     100|0.88805833|  PASSED  
+          sts_serial|  13|    100000|     100|0.53005331|  PASSED  
+          sts_serial|  13|    100000|     100|0.72931335|  PASSED  
+          sts_serial|  14|    100000|     100|0.45879372|  PASSED  
+          sts_serial|  14|    100000|     100|0.47689708|  PASSED  
+          sts_serial|  15|    100000|     100|0.87640483|  PASSED  
+          sts_serial|  15|    100000|     100|0.55209387|  PASSED  
+          sts_serial|  16|    100000|     100|0.97386149|  PASSED  
+          sts_serial|  16|    100000|     100|0.49291184|  PASSED  
+
+Scan for WEAK/FAILED:
+none

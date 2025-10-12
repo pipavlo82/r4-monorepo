@@ -1,0 +1,20 @@
+PractRand summaries
+--------------------
+
+== r4cs_pr32_tl30_32.txt ==
+RNG_test using PractRand version 0.95
+rng=RNG_stdin32, seed=unknown
+length= 1 gigabyte (2^30 bytes), time= 8.9 seconds
+  no anomalies in 194 test result(s)
+
+== r4cs_pr32_tl31_33.txt ==
+RNG_test using PractRand version 0.95
+rng=RNG_stdin32, seed=unknown
+length= 2 gigabytes (2^31 bytes), time= 17.8 seconds
+  no anomalies in 205 test result(s)
+
+== r4cs_pr64_tl30_32.txt ==
+RNG_test using PractRand version 0.95
+rng=RNG_stdin64, seed=unknown
+length= 1 gigabyte (2^30 bytes), time= 8.4 seconds
+  no anomalies in 246 test result(s)
