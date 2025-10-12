@@ -29,6 +29,21 @@ static void r4_memzero(void *p, size_t n) {
     volatile unsigned char *v = (volatile unsigned char*)p;
     while (n--) *v++ = 0;
 }
+// ---------- CLI wrappers (global ctx) ----------
+static r4ctx g_ctx;
+
+int r4cs_init(void *unused) {
+    (void)unused;
+    return r4_init_from_system(&g_ctx);
+}
+
+int r4cs_random(unsigned char *buf, size_t n) {
+    return r4_generate(&g_ctx, buf, n);
+}
+
+void r4cs_close(void) {
+    r4_free(&g_ctx);
+}
 
 static int r4_get_system_entropy(void *buf, size_t n) {
     int fd = open("/dev/urandom", O_RDONLY);
