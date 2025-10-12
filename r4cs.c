@@ -113,9 +113,11 @@ static int r4_generate(r4_ctx *ctx, unsigned char *out, size_t out_len) {
 
     // ChaCha20 параметри: ключ, nonce (12B), лічильник (32-біт у TLS; тут підженемо через ctrl)
     if (EVP_CIPHER_CTX_ctrl(cctx, EVP_CTRL_AEAD_SET_IVLEN, 12, NULL) != 1) goto end;
-    if (EVP_EncryptInit_ex(cctx, NULL, NULL, ctx->key, ctx->nonce) != 1) goto end;
-    if (EVP_CIPHER_CTX_ctrl(cctx, EVP_CTRL_CHACHA20_SET_COUNTER, (int)ctx->counter, NULL) != 1) goto end;
-
+   unsigned char iv[16];
+memcpy(iv, ctx->nonce, 12);
+uint32_t ctr = (uint32_t)ctx->counter; // adjust as needed
+memcpy(iv + 12, &ctr, 4); // little-endian
+if (EVP_EncryptInit_ex(cctx, NULL, NULL, ctx->key, iv) != 1) goto end;
     if (EVP_EncryptUpdate(cctx, out, &outl, out, (int)out_len) != 1) goto end;
     // у потокових шифрах буфер in==out дає XOR; простіше згенерувати нулі такого ж розміру.
     // Краще так:
