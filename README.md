@@ -1,128 +1,123 @@
-# Re4ctor RNG Platform (Technical Overview)
-
-This repository hosts the unified Re4ctor RNG components:
-- `r4-cs` — core RNG based on HKDF + ChaCha20 (internal)
-- `re4ctor-ipc` — secure IPC server with HMAC integrity
-- `r4cat` — minimal CLI and C/Python client interface
-
-**Note:** Core generator source is closed. Only client API and IPC protocol are public.
+# Re4ctor RNG Platform  
+**High-Integrity Randomness for Security, Blockchain, and Fair Systems**  
+*(Core R4-CS is proprietary — available via enterprise license or audit access)*
 
 ---
 
-## Features
+## 🔍 Overview
 
-- Deterministic seeding (reproducible output)
-- AF_UNIX socket IPC interface (`/run/r4sock/r4.sock`)
-- HMAC-SHA256 frame protection (integrity required)
-- C and Python API available
-- Tested with PractRand / TestU01 / Dieharder / NIST
+Re4ctor is a high-assurance Random Number Generation (RNG) platform built for:
+- 🎲 **Provably-fair systems & simulations**
+- 🛡️ **Security-critical infrastructure / HSM replacement**
+- ⛓️ **Blockchain randomness & future VRF oracle services**
+
+The cryptographic core (**r4-cs**) remains private to protect IP and licensing value.  
+This repository provides the **public interface**, **client code**, **specs**, and **tamper-proof CI tests**, proving authenticity without exposing the algorithm internals.
 
 ---
 
-## Directory Layout
+## 🧭 Architecture
 
-.
-├─ include/ # Public C headers (r4.h)
-├─ src/ # Client CLI (r4cat) and IPC adapter
-├─ bindings/python/ # Python wrapper (simple subprocess or socket)
-├─ deploy/ # systemd units (server deployment)
-├─ tests/ # tamper tests / PractRand harness
-└─ docs/ # (optional) protocol and architecture notes
+| Layer | Role | Status |
+|-------|------|--------|
+| `r4-cs` | Core HKDF → ChaCha20 DRBG (Closed) | 🔒 Proprietary |
+| `re4ctor-ipc` | Secure IPC over Unix socket (HMAC-framed) | 🟢 Public Binary |
+| `r4cat` / `bindings/python/r4.py` | Public clients (C / Python) | 🟢 Open |
+| `tests/tamper.sh` | Tamper-detection integrity test | ✅ CI Verified |
+
+---
+
+## ⚙️ Installation (Linux / WSL / Ubuntu)
+
+git clone https://github.com/pipavlo82/r4-monorepo.git
+cd r4-monorepo
+make
+
+arduino
+Copy code
+
+Run smoke test (requires running IPC server):
+./bin/r4cat -n 32 -hex # 32 bytes of verified randomness
 
 yaml
 Copy code
 
 ---
 
-## Build (Client Components Only)
+## 🛡️ Security & Trust Model
 
-```bash
-make clean
-make
-This builds:
+| Feature | Status |
+|---------|--------|
+| HKDF-SHA256 → ChaCha20 DRBG | ✅ Core (Private) |
+| HMAC-SHA256 Framed IPC | ✅ Implemented |
+| Tamper Detection | ✅ Client rejects fake server |
+| CI Integrity Test | ✅ Required for every commit (`tests/tamper.sh`) |
+| NIST STS / PractRand / Dieharder | ✅ Passed (reports available) |
 
-bin/r4cat — CLI tool
+🔒 *Core algorithm (r4-cs) is not shipped here to prevent IP theft and allow enterprise licensing.*
 
-lib/libr4.a — static client library
+---
 
-Dependencies: gcc, make, libssl-dev (for HMAC)
+## 🧪 Tamper Test (CI Proven)
 
-Usage (CLI - Local/IPC)
-bash
+The client **must reject any fake or manipulated data stream**.  
+This is enforced in GitHub Actions via `tests/tamper.sh`.
+
+OK: tamper rejected (rc=2), stdout empty
+
+yaml
 Copy code
-# 64 bytes, hex output
-./bin/r4cat -n 64 -hex
 
-# From IPC socket (if server running)
-./bin/r4cat -n 1024 -sock /run/r4sock/r4.sock | hexdump -C
-Exit codes:
+---
 
-pgsql
-Copy code
-0 - success
-2 - HMAC/protocol error
-3 - cannot connect (server missing or perms)
-C API (Minimal)
-c
-Copy code
-int r4_open(const char *path, const char *seed);
-long long r4_read(void *out, size_t n);
-uint32_t r4_u32(void);
-void r4_close(void);
-Example:
+## 💻 Developer API (C / Python)
 
-c
-Copy code
-#include "r4.h"
-#include <stdio.h>
-
-int main() {
-    if (r4_open(NULL, "1") != 0) return 1;
-    printf("%08x\n", r4_u32());
-    r4_close();
-}
+### C Example
+```c
+uint32_t x = r4_u32();
+printf("Random: %08x\n", x);
 Python Example
 python
 Copy code
 from bindings.python.r4 import R4
-
 r = R4()
 print(r.read(32).hex())
 r.close()
-IPC Security (Server Required)
-Socket: /run/r4sock/r4.sock
+🌐 Blockchain & VRF Roadmap
+Phase	Feature
+✅ Phase 1	Secure IPC & Client Library
+🔄 Phase 2	VRF Output Formatting (Ethereum / WASM)
+🔲 Phase 3	Oracle / VRF Network Integration
 
-Key: /etc/r4/secret.key (32 bytes, root:r4users, mode 0640)
+💰 Licensing & Enterprise Access
+Core R4-CS is proprietary
+Available under Commercial License or Audit Partnership.
+Roadmap includes: OEM Integration, Cloud API, Hardware RNG Module.
 
-Each frame: MAGIC + LEN + NONCE + DATA + HMAC
+📧 Contact: [via GitHub Issues or private request]
 
-If HMAC invalid → client rejects, no output.
+🧠 Why Re4ctor?
+Problem with Traditional RNG	Re4ctor Solution
+Open RNG → Easy to forge	HMAC-protected stream
+No provenance	Commit/Reveal, Audit logs
+No IP moat	Proprietary core with verifiable spec
 
-Server Deployment (systemd)
-bash
+📚 Reports & Compliance
+✅ NIST STS, Dieharder, PractRand (Full logs available offline)
+
+🔒 Core spec: docs/SPEC-R4CS.md
+
+📎 Cryptographic paper (in preparation for IACR / USENIX)
+
+🏁 Final Notes
+This repository is not just code — it's a platform for verifiable randomness.
+Trusted by design, auditable by spec, protected by IP.
+
+Investors / Partners — Core access via NDA & Licensing.
+Developers — Free client API integration.
+Auditors — Spec-based verification available.
+
+csharp
 Copy code
-sudo groupadd -f r4users
-sudo mkdir -p /etc/r4
-sudo dd if=/dev/urandom of=/etc/r4/secret.key bs=32 count=1 status=none
-sudo chown root:r4users /etc/r4/secret.key
-sudo chmod 640 /etc/r4/secret.key
-Enable service (in deploy/):
-
-bash
-Copy code
-sudo systemctl enable --now r4-server.socket r4-server.service
-Tamper Test
-Fake server without HMAC = must fail:
-
-bash
-Copy code
-./bin/r4cat -n 32 -sock /run/r4sock/bad.sock
-# -> "r4_read error (HMAC/protocol)" and exit 2
-Status
-RNG engine: internal, closed
-
-IPC + API: public
-
-Tested: PractRand 1TB+, Dieharder, NIST, TestU01
-
-Next: VRF support, external proofs, Rust SDK
+[CI Status Badge Incoming]
+Built by Re4ctor Labs — 2025
