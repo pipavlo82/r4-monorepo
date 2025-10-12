@@ -1,19 +1,15 @@
-# R4 Secure IPC (Unix socket)
+# R4 Secure IPC (Unix socket) + HMAC
 
-Socket path (default): /run/r4sock/r4.sock
-Permissions: 660, group: r4users
+Socket: /run/r4sock/r4.sock
+Key: /etc/r4/secret.key (32B, root:root, 600)
 
 Request (client -> server):
-  struct {
-    uint32_t magic;    // 0x52344631 ('R4F1')
-    uint32_t nbytes;   // 1..(1<<20)
-  } __attribute__((packed));
+  struct { uint32_t magic=0x52344631; uint32_t nbytes; } LE, packed
 
 Response (server -> client):
-  struct {
-    uint32_t magic;    // 0x52344632 ('R4F2')
-    uint32_t nbytes;   // фактично віддано
-    uint8_t  data[n];  // n байтів
-  }
+  struct { uint32_t magic=0x52344632; uint32_t nbytes; } LE, packed
+  uint8_t nonce[8]
+  uint8_t data[nbytes]
+  uint8_t tag[32]   // HMAC-SHA256( key, header||nonce||data )
 
-nbytes ≤ 1 MiB/запит. Невідповідність magic/довжин => розрив.
+Будь-яка невідповідність => розрив.

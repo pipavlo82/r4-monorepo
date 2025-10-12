@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-import os, socket, struct, sys, grp
+import os, socket, struct, sys, grp, hmac, hashlib
 
 SOCK_DIR = "/run/r4sock"
 SOCK_PATH = f"{SOCK_DIR}/r4.sock"
+KEY_PATH  = "/etc/r4/secret.key"
 R4F1 = 0x52344631
 R4F2 = 0x52344632
 MAX_REQ = 1<<20
 
 def main():
+    key = read_key(KEY_PATH)
+
     os.makedirs(SOCK_DIR, exist_ok=True)
     try: os.remove(SOCK_PATH)
     except FileNotFoundError: pass
@@ -34,7 +37,10 @@ def main():
                     c.sendall(struct.pack("<II", R4F2, 0))
                     break
                 data = read_urandom(nbytes)
-                c.sendall(struct.pack("<II", R4F2, len(data)) + data)
+                nonce = os.urandom(8)
+                rhdr = struct.pack("<II", R4F2, len(data))
+                tag = hmac.new(key, rhdr + nonce + data, hashlib.sha256).digest()
+                c.sendall(rhdr + nonce + data + tag)
         except Exception:
             pass
         finally:
@@ -51,6 +57,13 @@ def recvn(sock, n):
 def read_urandom(n):
     with open("/dev/urandom","rb") as f:
         return f.read(n)
+
+def read_key(path):
+    with open(path,"rb") as f:
+        k = f.read()
+    if not k:
+        raise RuntimeError("empty key")
+    return k
 
 if __name__ == "__main__":
     main()
