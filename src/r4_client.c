@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>     // getenv
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
@@ -33,7 +34,8 @@ static int set_timeouts(int fd, int ms) {
 }
 
 static int load_key(unsigned char *out, size_t *outlen) {
-    const char *path = "/etc/r4/secret.key";
+    const char *path = getenv("R4_KEY_PATH");
+    if (!path || !*path) path = "/etc/r4/secret.key";
     int fd = open(path, O_RDONLY);
     if (fd < 0) return -1;
     ssize_t r = read(fd, out, 32);
