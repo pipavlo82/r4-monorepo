@@ -1,21 +1,16 @@
-# R4-CS Cryptographic Specification (Public)
+# R4-CS Cryptographic Spec (Public Overview)
 
-## Key Schedule
-- **KDF:** HKDF-SHA256
-- **Inputs:** `salt` (optional), `ikm` (seed), `info = "r4cs/hkdf/v1"`
-- **Output:** 32-byte `key` || 12-byte `nonce`
+Status: public summary (core remains proprietary).
+Goal: let external reviewers reason about construction; implementation stays closed.
 
-## DRBG
-- **Cipher:** ChaCha20 (IETF)
-- **IV (nonce16):** `LE32(counter) || nonce(12B)`
-- **Counter update:** `counter += ceil(request_bytes / 64)`
+Construction
+- KDF: HKDF-SHA256 (RFC 5869)
+- DRBG: ChaCha20 used as DRBG
+- IV: 16 bytes = LE32(counter) || 12-byte nonce
+- Reseed: HKDF with fresh system entropy + optional external entropy
+- Domain tag: "r4cs/hkdf/v1"
 
-## Reseed (Public)
-- On demand or after a bounded number of blocks (implementation-defined).
-- Optional external entropy via HKDF salt mix-in.
-
-## IPC Integrity
-- Server frames are authenticated with **HMAC-SHA256**.
-- Client **must** drop frames with invalid MAC or malformed structure.
-
-This public spec enables external review without exposing proprietary internals.
+Safety Notes
+- Never reuse the triple (key, nonce, counter).
+- Deterministic seeds allow auditability (commit -> reveal).
+- IPC layer must authenticate frames (see Re4ctor IPC summary).

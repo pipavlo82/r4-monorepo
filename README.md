@@ -147,3 +147,9 @@ Planned GitHub Releases will include:
 ## Documentation
 
 - Product Brief: ./PRODUCT_BRIEF.md
+
+## Quick Links
+- Spec -> docs/SPEC-R4CS.md
+- API -> docs/API.md
+- VRF Overview -> docs/VRF-OVERVIEW.md
+- VRF demo -> examples/vrf
