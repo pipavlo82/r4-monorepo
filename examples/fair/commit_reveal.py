@@ -16,6 +16,7 @@ r.close()
 reveal = {"commit_msg": commit_msg, "rand_hex": rand.hex()}
 print("REVEAL:", json.dumps(reveal))
 
+# Verify
 check = hashlib.sha256(commit_msg.encode()).hexdigest()
 assert check == commit, "commit mismatch"
 

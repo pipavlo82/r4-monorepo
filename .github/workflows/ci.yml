@@ -1,79 +1,44 @@
 name: re4ctor-ci
-
 on:
   push:
     branches: [ main, master ]
     tags: [ "v*" ]
   pull_request:
-
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install deps
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev python3
-
       - name: Build (if Makefile present)
         run: |
           if [ -f Makefile ]; then
-            make -j || (echo "Make failed"; exit 1)
+            make -j
           else
             echo "No Makefile; skipping build."
           fi
-
-      - name: Tamper test (if script exists)
+      - name: Tamper test (if client exists)
         run: |
           if [ -x tests/tamper.sh ]; then
             bash -x tests/tamper.sh
           else
             echo "No tests/tamper.sh; skipping tamper test."
           fi
-
-      - name: PractRand smoke (optional; skip if rng_test not present)
-        run: |
-          if command -v rng_test >/dev/null 2>&1 && [ -x ./bin/r4cat ]; then
-            ./bin/r4cat -n $((16<<20)) | rng_test stdin32 -tlmin 22 -tlmax 22 || true
-          else
-            echo "rng_test or r4cat missing; skipping PractRand smoke."
-          fi
-
       - name: Pack artifacts (if built)
         run: |
           mkdir -p dist
           if [ -d bin ] || [ -d lib ]; then
-            cp -a bin lib include 2>/dev/null || true
-            mkdir -p dist && tar czf dist/r4-bundle-linux-amd64.tar.gz bin lib include || true
+            mkdir -p dist && tar czf dist/r4-bundle-linux-amd64.tar.gz bin lib include 2>/dev/null || true
             (cd dist && sha256sum r4-bundle-linux-amd64.tar.gz > SHA256SUMS) || true
           else
             echo "No bin/lib to package."
           fi
-
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: r4-bundle
           path: dist/
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    needs: [build-test]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: r4-bundle
-          path: dist
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/r4-bundle-linux-amd64.tar.gz
-            dist/SHA256SUMS
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,8 +2,6 @@
 import sys, re, json
 text = sys.stdin.read()
 out = {}
-pvals = re.findall(r"\bp\s*=\s*([0-9\.eE+-]+)", text)
-if pvals: out["p_values_tail"] = pvals[-10:]
-flags = re.findall(r"\b(FAIL|weak)\b", text, re.I)
-out["flags"] = len(flags)
+out["p_values_tail"] = re.findall(r"\bp\s*=\s*([0-9\.eE+-]+)", text)[-10:]
+out["flags"] = len(re.findall(r"\b(FAIL|weak)\b", text, re.I))
 print(json.dumps(out, indent=2))

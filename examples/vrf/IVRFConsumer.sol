@@ -9,7 +9,6 @@ interface IVRFProvider {
 contract VRFConsumer {
     bytes32 public lastBeta;
     event VRFReceived(bytes32 indexed requestId, bytes32 beta);
-
     function onVRF(bytes32 requestId, bytes32 beta) external {
         lastBeta = beta;
         emit VRFReceived(requestId, beta);
