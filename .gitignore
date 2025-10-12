@@ -21,3 +21,15 @@ dist/
 tools/
 out.hex
 *.tar.gz
+# local build & test artifacts
+r4cs_cat
+a.bin
+b.bin
+out.hex*
+h1.txt
+h2.txt
+run_*_logs.zip
+rng_reports/dh_*.txt
+actionlint
+Makefile.bak
+main
