@@ -6,15 +6,18 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install deps
+        shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config libssl-dev
 
-            - name: Prepare dummy re4_stream (quiet, no SIGPIPE)
+      - name: Prepare dummy re4_stream (quiet, no SIGPIPE)
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p tools
@@ -26,21 +29,26 @@ jobs:
           SH
           chmod +x tools/re4_stream_dummy
           echo "$PWD/tools" >> "$GITHUB_PATH"
+
+      - name: Export R4 env
+        shell: bash
+        run: |
           echo "R4_PATH=${GITHUB_WORKSPACE}/tools/re4_stream_dummy" >> "$GITHUB_ENV"
           echo "R4_SEED=1" >> "$GITHUB_ENV"
 
       - name: Build CLI
-        run: |
-          set -euo pipefail
-          make -B r4cs_cat
+        shell: bash
+        run: make -B r4cs_cat
 
       - name: Smoke – hex 64B
+        shell: bash
         run: |
           set -euo pipefail
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
 
-           - name: Smoke – determinism (4096B)
+      - name: Smoke – determinism (4096B)
+        shell: bash
         continue-on-error: true
         run: |
           set -euo pipefail
