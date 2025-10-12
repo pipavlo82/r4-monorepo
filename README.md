@@ -142,4 +142,3 @@ Planned GitHub Releases will include:
 - IPC frames are HMAC-SHA256 authenticated; clients reject unauthenticated data (see **tests/tamper.sh**).
 - Store the 32-byte key at `/etc/r4/secret.key` (`root:r4users`, `0640`).
 - Report vulnerabilities to the email in **SECURITY.md**; PGP optional.
-
