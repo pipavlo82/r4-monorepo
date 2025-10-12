@@ -26,10 +26,9 @@ jobs:
           echo "R4_SEED=1" >> "$GITHUB_ENV"
 
       - name: Build CLI
-        run: |
-          make -B r4cs_cat
+        run: make -B r4cs_cat
 
-      - name: Smoke: hex 64B
+      - name: "Smoke: hex 64B"
         run: |
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
