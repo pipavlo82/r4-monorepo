@@ -1,0 +1,8 @@
+# build
+**/bin/
+**/build/
+**/dist/
+**/lib/*.o
+**/.venv/
+**/__pycache__/
+*.log
