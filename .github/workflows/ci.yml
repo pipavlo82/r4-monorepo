@@ -1,55 +1,48 @@
 name: CI
 on:
   push:
+
 jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install deps
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config libssl-dev
-      - name: Prepare dummy re4_stream
+
+      - name: Prepare dummy re4_stream (no SIGPIPE failures)
         run: |
           set -euo pipefail
           mkdir -p tools
           cat > tools/re4_stream_dummy <<'SH'
-#!/usr/bin/env bash
-# ignore SIGPIPE so writer closing the pipe doesn't fail this step
-trap '' PIPE
-# silence "cat: write error: Broken pipe"
-exec cat /dev/zero 2>/dev/null
-SH
+          #!/usr/bin/env bash
+          set +e
+          trap '' PIPE
+          exec cat /dev/zero
+          SH
           chmod +x tools/re4_stream_dummy
           echo "$PWD/tools" >> "$GITHUB_PATH"
-      - name: Export R4 env
+          echo "R4_PATH=${GITHUB_WORKSPACE}/tools/re4_stream_dummy" >> "$GITHUB_ENV"
+          echo "R4_SEED=1" >> "$GITHUB_ENV"
+
+      - name: Build CLI
         run: |
           set -euo pipefail
-          echo "R4_PATH=${{ github.workspace }}/tools/re4_stream_dummy" >> "$GITHUB_ENV"
-          echo "R4_SEED=1" >> "$GITHUB_ENV"
-      - name: Build CLI (portable CFLAGS)
-        run: |
-          set -euxo pipefail
-          make clean || true
-          make -B r4cs_cat CFLAGS='-O2 -std=c11 -Wall -Wextra'
+          make -B r4cs_cat
+
       - name: Smoke – hex 64B
         run: |
           set -euo pipefail
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
+
       - name: Smoke – determinism (4096B)
         run: |
-          set -euxo pipefail
-          echo "R4_PATH=$R4_PATH R4_SEED=$R4_SEED"
-          ls -lah .
-          file ./r4cs_cat || true
-          ldd ./r4cs_cat || true
-          # швидка перевірка, що бінарник взагалі біжить
-          ./r4cs_cat -n 16 -hex >/dev/null
-          # основний тест
+          set -euo pipefail
           ./r4cs_cat -n 4096 > a.bin
           ./r4cs_cat -n 4096 > b.bin
-          sha256sum a.bin b.bin
           cmp -s a.bin b.bin
