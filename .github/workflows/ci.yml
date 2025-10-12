@@ -1,56 +1,48 @@
 name: CI
 on:
   push:
-
 jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install deps
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config libssl-dev
-
       - name: Prepare dummy re4_stream
         run: |
           set -euo pipefail
           mkdir -p tools
           cat > tools/re4_stream_dummy <<'SH'
-          #!/usr/bin/env bash
-          # ignore SIGPIPE so writer closing the pipe doesn't fail this step
-          trap '' PIPE
-          # silence "cat: write error: Broken pipe"
-          exec cat /dev/zero 2>/dev/null
-          SH
+#!/usr/bin/env bash
+# ignore SIGPIPE so writer closing the pipe doesn't fail this step
+trap '' PIPE
+# silence "cat: write error: Broken pipe"
+exec cat /dev/zero 2>/dev/null
+SH
           chmod +x tools/re4_stream_dummy
           echo "$PWD/tools" >> "$GITHUB_PATH"
-
       - name: Export R4 env
         run: |
           echo "R4_PATH=${GITHUB_WORKSPACE}/tools/re4_stream_dummy" >> "$GITHUB_ENV"
           echo "R4_SEED=1" >> "$GITHUB_ENV"
-
       - name: Build CLI (portable CFLAGS)
         run: |
           set -euxo pipefail
           make clean || true
           make -B r4cs_cat CFLAGS='-O2 -std=c11 -Wall -Wextra'
-
-
       - name: Smoke – hex 64B
         run: |
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
-
-     - name: Smoke – determinism (4096B)
+      - name: Smoke – determinism (4096B)
         run: |
           set -euxo pipefail
-          echo "R4_PATH=$R4_PATH  R4_SEED=$R4_SEED"
+          echo "R4_PATH=$R4_PATH R4_SEED=$R4_SEED"
           ls -lah .
           file ./r4cs_cat || true
-          ldd  ./r4cs_cat || true
+          ldd ./r4cs_cat || true
           # швидка перевірка, що бінарник взагалі біжить
           ./r4cs_cat -n 16 -hex >/dev/null
           # основний тест
