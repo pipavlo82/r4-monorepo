@@ -1,4 +1,7 @@
-# Re4ctor RNG Platform  
+\1
+
+[![CI](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml)
+
 **High-Integrity Randomness for Security, Blockchain, and Fair Systems**  
 *(Core R4-CS is proprietary — available via enterprise license or audit access)*
 
@@ -34,13 +37,10 @@ cd r4-monorepo
 make
 
 arduino
-Copy code
+
 
 Run smoke test (requires running IPC server):
 ./bin/r4cat -n 32 -hex # 32 bytes of verified randomness
-
-yaml
-Copy code
 
 ---
 
@@ -65,9 +65,6 @@ This is enforced in GitHub Actions via `tests/tamper.sh`.
 
 OK: tamper rejected (rc=2), stdout empty
 
-yaml
-Copy code
-
 ---
 
 ## 💻 Developer API (C / Python)
@@ -77,8 +74,7 @@ Copy code
 uint32_t x = r4_u32();
 printf("Random: %08x\n", x);
 Python Example
-python
-Copy code
+
 from bindings.python.r4 import R4
 r = R4()
 print(r.read(32).hex())
@@ -118,6 +114,32 @@ Developers — Free client API integration.
 Auditors — Spec-based verification available.
 
 csharp
-Copy code
+
 [CI Status Badge Incoming]
 Built by Re4ctor Labs — 2025
+
+
+## Investor Pitch
+
+**Problem.** Game/fintech/blockchain backends need verifiable, scalable RNG; most roll their own or trust cloud entropy blindly.  
+**Solution.** Re4ctor splits concerns: a private, high-performance core (r4-cs) + public, HMAC-protected IPC and client SDKs.  
+**Proof.** PractRand/TestU01/NIST STS results available; tamper tests enforce integrity; deterministic seeding enables audits.  
+**Why now.** On-chain/real-money apps demand transparent RNG. Our model: binaries/SaaS with signed outputs and per-tenant keys.  
+**Ask.** Seed/angel to finish VRF module, publish formal spec, and run pilot with 2–3 design partners.
+
+
+## Releases & Binaries
+
+Planned GitHub Releases will include:
+- `re4ctor-ipc` server binary (Linux x86_64), signed
+- `r4cat` client and `libr4.a`
+- SHA256/Sig checksums and minimal SBOM
+
+> TODO: Use GitHub Releases UI to publish artifacts and attach checksums.
+
+## Security & Responsible Disclosure
+
+- IPC frames are HMAC-SHA256 authenticated; clients reject unauthenticated data (see **tests/tamper.sh**).
+- Store the 32-byte key at `/etc/r4/secret.key` (`root:r4users`, `0640`).
+- Report vulnerabilities to the email in **SECURITY.md**; PGP optional.
+
