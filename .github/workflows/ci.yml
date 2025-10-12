@@ -32,17 +32,29 @@ jobs:
           echo "R4_PATH=${GITHUB_WORKSPACE}/tools/re4_stream_dummy" >> "$GITHUB_ENV"
           echo "R4_SEED=1" >> "$GITHUB_ENV"
 
-      - name: Build CLI
+      - name: Build CLI (portable CFLAGS)
         run: |
-          make -B r4cs_cat
+          set -euxo pipefail
+          make clean || true
+          make -B r4cs_cat CFLAGS='-O2 -std=c11 -Wall -Wextra'
+
 
       - name: Smoke – hex 64B
         run: |
           ./r4cs_cat -n 64 -hex | tee out.hex
           grep -Eq '^[0-9a-f]{128}$' out.hex
 
-      - name: Smoke – determinism (4096B)
+     - name: Smoke – determinism (4096B)
         run: |
+          set -euxo pipefail
+          echo "R4_PATH=$R4_PATH  R4_SEED=$R4_SEED"
+          ls -lah .
+          file ./r4cs_cat || true
+          ldd  ./r4cs_cat || true
+          # швидка перевірка, що бінарник взагалі біжить
+          ./r4cs_cat -n 16 -hex >/dev/null
+          # основний тест
           ./r4cs_cat -n 4096 > a.bin
           ./r4cs_cat -n 4096 > b.bin
+          sha256sum a.bin b.bin
           cmp -s a.bin b.bin
