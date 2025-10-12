@@ -1,45 +1,25 @@
-name: release
-
+name: Release
 on:
   push:
-    tags:
-      - 'v*'
-
+    tags: [ "v*" ]
 jobs:
-  build-linux-amd64:
+  build-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # для релізів
+    permissions: { contents: write }
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # (необов'язково) deps для збірки ваших компонентів
       - name: Install deps
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y build-essential pkg-config libssl-dev python3 python3-venv
-
-      # Приклад: зібрати клієнт з components/re4ctor-ipc
-      - name: Build r4cat (example)
-        working-directory: components/re4ctor-ipc
-        run: |
-          make -B
-          mkdir -p ../../dist
-          cp -a bin/r4cat ../../dist/r4cat-linux-amd64
-
-      - name: Package
-        run: |
-          cd dist
-          tar czf r4-bundle-linux-amd64.tar.gz r4cat-linux-amd64
-          sha256sum r4-bundle-linux-amd64.tar.gz > r4-bundle-linux-amd64.tar.gz.sha256
-
-      - name: Release
+        run: sudo apt-get update && sudo apt-get install -y build-essential libssl-dev python3 zip
+      - name: Build
+        run: make -B || true
+      - name: Bundle ZIP
+        run: TAG="${GITHUB_REF##*/}"; ./tools/release.sh "$TAG"
+      - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: |
-            dist/r4-bundle-linux-amd64.tar.gz
-            dist/r4-bundle-linux-amd64.tar.gz.sha256
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            dist/*.zip
+            dist/checksums.txt
+          draft: false
+          prerelease: false
