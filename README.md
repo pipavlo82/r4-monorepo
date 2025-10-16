@@ -53,7 +53,8 @@ Run smoke test (requires running IPC server):
 | Tamper Detection | ✅ Client rejects fake server |
 | CI Integrity Test | ✅ Required for every commit (`tests/tamper.sh`) |
 | NIST STS / PractRand / Dieharder | ✅ Passed (reports available) |
-
+| TestU01 BigCrush                | ✅ Passed                     |
+| ENT                             | ✅ Passed (Entropy 7.999774)  |
 🔒 *Core algorithm (r4-cs) is not shipped here to prevent IP theft and allow enterprise licensing.*
 
 ---
