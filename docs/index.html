@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re4ctor Labs - RNG Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section id="demo">
+        <h1>Re4ctor RNG Demo</h1>
+        <p>Досвід генерації криптографічно безпечних випадкових чисел.</p>
+        <p><a href="https://github.com/pipavlo82/r4-monorepo" target="_blank">Переглянути на GitHub</a></p>
+        <button id="generateBtn">Згенерувати випадкові числа</button>
+        <div id="output"></div>
+        <canvas id="histogram" width="600" height="300"></canvas>
+        <p class="note">Примітка: Це демо використовує Web Crypto API для симуляції. Пропрієтарне ядро Re4ctor (HKDF-SHA256, ChaCha20) використовується у продакшені для підвищеної безпеки.</p>
+    </section>
+    <script src="demo.js"></script>
+</body>
+</html>
