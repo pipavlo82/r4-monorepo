@@ -339,3 +339,13 @@ Would you like me to:
 💾 generate this as a ready-to-paste Markdown file (README.md)
 
 or 🧱 embed it back into your GitHub repo format (with badges, Docker links, etc.)?
+
+## Security / Openness Model
+
+r4 behaves like a small software HSM: you can test its output quality,
+verify release integrity (hash, GPG signature, SBOM),
+but the internal entropy-combiner code remains sealed.
+This prevents trivial forks and targeted backdoors while keeping
+statistical and supply-chain transparency for auditors.
+
+Contact: shtomko@gmail.com
