@@ -1,4 +1,0 @@
-Dieharder summary
-PASSED: 0
-WEAK: 0
-FAILED: 0

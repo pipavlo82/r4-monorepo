@@ -1,9 +1,18 @@
-# build
-**/bin/
-**/build/
-**/dist/
-**/lib/*.o
-**/.venv/
-**/__pycache__/
+# large random stream captures / binary blobs
+*.bin
+*.zip
+
+# Windows / VS build junk
+*.exe
+*.sln
+*.vcproj
+*.pdb
+*.obj
+*.dll
+*.bat
+
+# scratch / temp / local logs
+README.tmp
+*.tmp
 *.log
-/dist/
+*.swp
