@@ -1,111 +1,97 @@
-1. core/ — entropy engine + API
+# r4-monorepo
 
-core/ comes from re4ctor-core and contains:
+Secure randomness core + verifiable randomness roadmap.
 
-CMake/Ninja build (cmake -S . -B build ...)
+This repo contains two tracks:
 
-re4_dump: infinite byte stream of high-entropy output
+1. `packages/core/`  
+   A hardened entropy appliance:
+   - C generator binary (`re4_dump`) that emits high-entropy bytes
+   - API service (`re4ctor-api`) that exposes `/random` over HTTP with rate limiting and API keys
+   - signed release bundle + SBOM
+   - statistical proof (Dieharder / PractRand / TestU01 BigCrush)
+   - systemd unit for running it as a service
 
-re4_tests: DRBG / health self-tests
+   This is what you can run **today**.
 
-proof/: summaries from Dieharder, PractRand, TestU01 BigCrush
+2. `packages/vrf-spec/`  
+   The next step: post-quantum verifiable randomness (PQ-VRF).
+   - design notes, roadmap, investor brief
+   - goal: `/vrf` → `random_bytes + post-quantum signature + public key`
+   - usable for validator selection, lotteries, rollups, staking fairness
 
-signed release bundle (re4_release.tar.gz + .sha256 + .asc)
+   This is what we're building **next**.
 
-SBOM (SPDX 2.3) via syft
+We ship real entropy now. We ship publicly verifiable entropy next.
 
-hardened FastAPI/uvicorn service exposing /random
 
-systemd unit for running it as a non-root, sandboxed service
+---
 
-operator docs (usage, rate limiting, audit logs)
+## 1. What problem we solve
 
-API surface (core/api layer)
+Typical RNG story:
+- "trust me, it's random"
 
-GET /health → "ok"
+Our story:
+- you get a **sealed binary** that produces randomness
+- you get **statistical proof** that output passes industry-grade batteries (Dieharder / PractRand / BigCrush)
+- you get a **signed release bundle** + **SBOM** so you know exactly what binary you're running
+- you get an **HTTP API** (`/random`) you can drop into infra like any other internal service
 
-GET /version → build info, git rev, limits
+For blockchain / validator / zk / staking use cases, you also get a public roadmap to turn that into a **verifiable RNG beacon** with PQ signatures.
 
-GET /info → usage help
+This is not "here's some C code lol".
+This is "here's an entropy appliance."
 
-GET /random → random bytes (requires API key)
 
-Dev/default auth:
-header x-api-key: local-demo
-or query ?key=local-demo
+---
 
-Production: set API_KEY in .env, restart service.
+## 2. Directory layout
 
-Limits:
+```text
+packages/
+  core/        -> production entropy core + API + proof
+  vrf-spec/    -> PQ VRF design, roadmap, investor-facing material
+packages/core/
+Contents:
 
-10 requests/sec per client IP
+src/
+The C core around DRBG, entropy collection, health logic, SP800-90B style min-entropy estimation, etc.
 
-max 1,000,000 bytes per request
+Note: some low-level internals are intentionally private. The public repo ships the compiled binary, not the full DRBG / entropy heuristics. Think "Secure Enclave model": you can call it, test it, verify it — but you don't get the guts.
 
-every /random call is logged with IP, n, fmt, first bytes fingerprint
+re4_dump
+The binary that streams random bytes forever to stdout.
 
-Systemd unit (see core/docs/re4ctor-api.service.example) runs uvicorn under a dedicated user, with sandbox policies (ProtectSystem, ProtectHome, MemoryDenyWriteExecute).
-This is positioned as "entropy appliance on port 8080".
+Example quick check:
 
-Supply-chain trust:
+bash
+Copy code
+./re4_dump | head -c 32 | hexdump -C
+You should never see:
 
-We publish a release tarball with binaries + SBOM.
+all zeroes
 
-We publish sha256 and detached GPG signature.
+the same 32 bytes twice
 
-You can reproduce/verify the exact bits you run.
+docs/USAGE.md
+Operator runbook. How to deploy this thing as a local service or as a systemd unit.
 
-2. vrf/ — PQ verifiable randomness
+docs/re4ctor-api.service.example
+Hardened systemd unit with:
 
-vrf/ is the evolution path: turning raw entropy into verifiable randomness.
+non-root user
 
-Goal:
-Instead of "give me 64 random bytes", a caller can ask for "give me 64 random bytes + a proof that they weren't biased or tampered with".
+rate limiting
 
-This is the PQ-VRF direction (Post-Quantum Verifiable Random Function):
+API key in an .env
 
-Planned /vrf response:
+memory protections & file system lockdown
 
-random: N bytes of entropy
+The idea is: "entropy box on port 8080".
 
-signature: post-quantum signature (Dilithium / Kyber class)
-
-public_key: node's PQ public key
-
-verified: true/false (local check)
-
-Why this matters:
-
-blockchain validator selection / committee rotation
-
-zk-rollup / prover seeding
-
-on-chain lotteries / airdrops / mint fairness
-
-anti-manipulation in proof-of-stake randomness (operator can't "reroll" secretly)
-
-This is not "another /dev/urandom".
-This is "provable entropy you can verify in a smart contract or consensus layer, even in a post-quantum world".
-
-The vrf/ directory contains:
-
-early PQ-VRF design notes
-
-bindings / components / specs
-
-investor-facing and product-facing briefs
-
-roadmap for making /vrf a first-class API next to /random
-
-Long-term intent:
-
-/random stays as the fast firehose endpoint for local systems.
-
-/vrf becomes a slower, attestable endpoint for staking, audit, and consensus.
-
-3. Statistical assurance
-
-We test the shipped re4_dump binary (not some dev build) against:
+proof/
+Human-readable summaries of statistical test runs:
 
 Dieharder
 
@@ -113,70 +99,176 @@ PractRand
 
 TestU01 BigCrush
 
-We commit human-readable summaries under core/proof/:
+We commit summaries, not multi-GB raw logs. Raw data is archived offline.
 
-PASS / WEAK / FAIL lines
+Position today:
 
-interpretation
+no persistent FAILs
 
-audit notes
+occasional WEAK in Dieharder is normal (even /dev/urandom does that)
 
-We do not commit multi-GB raw logs to git.
-They are archived offline and can be shared under NDA.
+PractRand / BigCrush clean for long streams
 
-Position:
+release/
+Software Bill of Materials (SPDX 2.3). We include only the artifacts we ship.
 
-No persistent FAILs across the suites.
+re4_release.tar.gz, .sha256, .asc
+Signed release bundle:
 
-Occasional WEAK in Dieharder is expected (even /dev/urandom shows that).
+tarball of shipped binaries + helpers
 
-Output is treated like hardware RNG tap: measurable, logged, externally auditable.
+SHA-256 checksum
 
-4. Deployment posture
+detached GPG signature
 
-The "core" API layer is meant to run as:
+So downstream can do supply-chain verification:
 
-a local service on 127.0.0.1:8080 during development (x-api-key: local-demo)
+bash
+Copy code
+sha256sum -c re4_release.sha256
+gpg --verify re4_release.tar.gz.asc re4_release.tar.gz
+If both pass, you are running exactly what we built.
 
-or a systemd-managed service bound to LAN, with:
+examples_vrf/
+Small demo clients / scripts.
+CI builds a tiny smoke client (r4cat_light) that just asks the core for bytes and prints them as hex.
+This proves the pipeline is alive and the RNG actually emits nontrivial output.
 
-non-root user
+packages/vrf-spec/
+This is the "future /vrf API".
 
-rate limiting
+The point:
 
-request logging
+/random gives you bytes, but you have to trust the box.
 
-key-based auth
+/vrf gives you bytes plus a proof you can verify anywhere.
 
-This makes it behave like an internal "entropy appliance box" you can drop into infra and consume via HTTP.
+The PQ-VRF model (high level):
 
-We also ship:
+json
+Copy code
+{
+  "random": "<N bytes>",
+  "signature": "<post-quantum signature over (random || context)>",
+  "public_key": "<PQ public key of this node>",
+  "verified": true
+}
+Why it matters:
 
-SBOM (SPDX 2.3)
+validator / leader election in PoS
 
-deterministic release bundle
+on-chain lotteries and airdrops without "the operator secretly rerolled 1000 times"
 
-sha256 + detached GPG signature
+seeding zk prover challenges
 
-Anyone downstream can verify they’re running unmodified bits.
+fairness in rollups and committees
+
+We explicitly target post-quantum safe primitives (Dilithium / Kyber class) so this still works in 2030+ threat models.
+
+3. Deploying the core as an entropy appliance
+The core package includes a FastAPI service (re4ctor-api) that exposes:
+
+GET /health → "ok"
+
+GET /version → build info, git rev, service limits
+
+GET /random → N random bytes (API key required)
+
+Auth model:
+
+during local dev:
+
+text
+Copy code
+x-api-key: local-demo
+in production: set API_KEY=your-secret in .env, restart the service
+
+Basic usage:
+
+bash
+Copy code
+curl -s -H "x-api-key: local-demo" \
+  "http://127.0.0.1:8080/random?n=32&fmt=hex"
+Limits:
+
+10 req/sec per client IP
+
+max 1,000,000 bytes per request
+
+every /random call is logged with IP + first 4 bytes fingerprint for audit
+
+We ship a systemd unit file that:
+
+runs under a dedicated non-root user
+
+applies sandboxing (ProtectSystem, ProtectHome, MemoryDenyWriteExecute)
+
+restarts on failure
+
+loads config from /home/<user>/re4ctor-api/.env
+
+This is meant to be installed like infrastructure.
+It's not just "here's a C file", it's "here's a service you can actually run in prod".
+
+4. Compliance / trust / auditability
+We do not publish our full entropy core internals in the open repo.
+
+Why?
+
+It's IP.
+
+It's attack surface reduction.
+
+It's closer to how HSMs / Secure Enclave / TPMs work: you don't ship the exact whitening/conditioning guts, but you do prove that the surface behaves.
+
+Instead we give you:
+
+deterministic release bundle re4_release.tar.gz
+
+SBOM (SPDX 2.3) for that exact bundle
+
+SHA-256
+
+GPG detached signature
+
+statistical proof on the actual shipped binary stream
+
+So you can:
+
+Verify you're running the right bits.
+
+Run your own dieharder / PractRand / TestU01 loops against /random or re4_dump.
+
+Monitor in production for drift.
 
 5. Roadmap
+Short term:
 
-Harden /random as a production entropy endpoint.
+polish /random as a safe internal entropy source
 
-Expose /vrf: random bytes + PQ signature + public key → externally verifiable, on-chain consumable.
+lock down systemd deployment profile for real ops
 
-Attach PQ identity (Dilithium/Kyber-class keys) to the node and rotate keys sanely.
+keep shipping SBOM + signatures
 
-Treat the service as a randomness oracle / beacon for rollups, staking, leader election, zk proving.
+Medium term:
 
-TL;DR:
-This repo is the convergence of:
+expose /vrf
 
-entropy generation (core/)
+attach a post-quantum signing key to each node
 
-delivery and ops (systemd, SBOM, signed bundles)
+return (random_bytes, PQ_signature, public_key)
 
-verifiable randomness + post-quantum story (vrf/)
+allow external verification that "this randomness could not be silently biased"
 
-Entropy for a quantum world.
+Long term:
+
+become a randomness beacon / oracle for PoS validator rotation, L2 rollup fairness, zk proving challenges, etc.
+
+usable in court / audit / compliance, not just in a hackathon demo
+
+6. TL;DR
+Today: packages/core = high-entropy RNG core + HTTP API /random, rate limited, key-gated, signed release bundle, SBOM, statistical proof (Dieharder / PractRand / BigCrush). Drop-in entropy appliance.
+
+Tomorrow: packages/vrf-spec = PQ-verifiable randomness function (/vrf) with signatures you can independently verify on-chain or in consensus.
+
+Entropy for a post-quantum world.
