@@ -1,0 +1,81 @@
+Re4ctoR Monorepo – NOTICE
+
+This repository contains two main components:
+
+1. packages/core
+   - Production entropy engine and API service.
+   - Ships a signed binary build ("re4_dump" and related artifacts) plus
+     operational wrapper code (FastAPI/uvicorn service, systemd unit,
+     rate limiting, audit logging).
+   - Includes reproducible release bundles:
+       re4_release.tar.gz
+       re4_release.sha256
+       re4_release.tar.gz.asc
+     and a generated SBOM (SPDX 2.3).
+   - Includes statistical validation summaries (Dieharder, PractRand,
+     TestU01 BigCrush) for the shipped binary, not just dev builds.
+   - This code is intended to run as an "entropy appliance": a local/
+     internal service that provides high-quality random bytes over
+     HTTP (/random) with API key auth and rate limiting.
+
+   Licensing:
+   - The operational wrapper code (API service, systemd unit,
+     deployment and operator docs, proof summaries) is provided under
+     Apache-style terms unless otherwise noted in file headers.
+   - The internal DRBG / entropy core logic (src/drbg, src/entropy,
+     seeding heuristics, health logic) is proprietary.
+     Redistribution, reverse engineering, or extraction of that logic
+     is not granted. You are allowed to consume its output, verify its
+     statistical quality, and validate supply-chain integrity via
+     SBOM + signature.
+
+   Security model:
+   - We publish the binary plus all reproducibility metadata
+     (SBOM, hash, GPG signature) so downstream users can confirm
+     "these are the exact bits we built".
+   - We intentionally DO NOT publish the full low-level DRBG/entropy
+     implementation, seed path heuristics, or internal health checks.
+     Think Secure Enclave / HSM model: you can call it and audit its
+     outputs and lifecycle, but we do not ship the full internals.
+
+2. packages/vrf-spec
+   - Post-quantum verifiable randomness roadmap.
+   - Describes a /vrf-style API which returns:
+       { random, signature, public_key, verified }
+     where the signature is generated with post-quantum primitives
+     (Dilithium / Kyber class).
+   - This is designed for validator selection, staking rotation,
+     rollup prover seeding, lotteries, and on-chain fairness where
+     the caller must prove the randomness was not manipulated.
+   - Includes product briefs, roadmap, component breakdown,
+     and early integration notes.
+
+   Status:
+   - vrf-spec is NOT production code. It is architectural,
+     cryptographic, and product design material.
+   - Code samples and demos that exercise VRF-like flows (e.g. mock
+     clients, Solidity consumers, fairness simulation) live under:
+       packages/core/examples_vrf/
+     so they are clearly separated from the main entropy appliance.
+
+Supply chain / verification:
+- Anyone can:
+    1. Download the release tarball.
+    2. Verify SHA-256 against re4_release.sha256.
+    3. Verify detached GPG signature.
+    4. Inspect SBOM (SPDX 2.3).
+- If all checks pass, you are running the exact signed artifact we built.
+
+No warranty:
+- This software and all associated materials are provided "as is",
+  without warranty of any kind, express or implied, including but not
+  limited to fitness for a particular purpose, cryptographic strength,
+  regulatory compliance, or suitability for use in safety-critical or
+  financial systems.
+
+By using this repository you acknowledge:
+- We expose high-entropy bytes and a path toward post-quantum
+  verifiable randomness.
+- We do not publish the proprietary DRBG internals.
+- You must perform your own security review before using this in
+  production, regulated, or on-chain economic settings.
