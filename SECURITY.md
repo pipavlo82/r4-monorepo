@@ -1,6 +1,6 @@
 # Security Policy
 
-If you discover a vulnerability, please email: security+re4ctor@example.com
+If you discover a vulnerability, please email: shtomko@gmail.com
 We will triage within 7 days. Please do not open public issues for sensitive reports.
 
 ## Supported
