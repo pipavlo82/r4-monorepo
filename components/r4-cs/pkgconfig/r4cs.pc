@@ -1,9 +1,0 @@
-prefix=/usr/local
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib
-includedir=${prefix}/include
-Name: r4cs
-Description: R4-CS DRBG (HKDF-SHA256 + ChaCha20) wrapper
-Version: 0.1.0
-Libs: -L${libdir} -lr4cs -lcrypto -lpthread
-Cflags: -I${includedir}

@@ -1,8 +1,0 @@
-# hardhat artifacts & deps
-node_modules/
-artifacts/
-cache/
-coverage/
-typechain/
-# local secrets
-.env
