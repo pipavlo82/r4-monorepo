@@ -1,3 +1,0 @@
-=== test 103 run 3 ===
--bash: /mingw64/bin/dieharder: No such file or directory
-[warn] test 103 run 3 crashed

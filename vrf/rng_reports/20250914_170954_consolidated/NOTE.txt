@@ -1,1 +1,0 @@
-NOTE: Single dieharder rgb_lagged_sum FAIL; not reproduced in later weak-reruns.
