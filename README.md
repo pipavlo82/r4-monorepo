@@ -1,61 +1,55 @@
-r4-monorepo
+⚡️ r4-monorepo
 
-r4 is an entropy appliance and verifiable randomness API.
+🧠 r4 is an entropy appliance and verifiable randomness API.
 
 It ships two things:
 
-A high-entropy core (re4_dump) — closed-source, statistically verified (Dieharder / PractRand / BigCrush), shipped as a signed binary.
+🧩 A high-entropy core (re4_dump) — closed-source, statistically verified (Dieharder / PractRand / BigCrush), shipped as a signed binary.
 
-A hardened HTTP API (/random) — rate-limited, key-protected, designed to run as a service (systemd or Docker).
+🌐 A hardened HTTP API (/random) — rate-limited, key-protected, designed to run as a service (systemd or Docker).
 
 This repo also contains the roadmap for PQ verifiable randomness (vrf-spec): post-quantum attestable randomness for proof-of-stake rotation, zk-rollup seeding, lotteries, etc.
 
-Quickstart (Docker)
+🚀 Quickstart (Docker)
 
 You can run the whole service with one Docker command.
 
-Prereqs:
+Prereqs
 
-Docker Desktop (Windows/macOS) or Docker Engine (Linux)
+🐳 Docker Desktop (Windows/macOS) or Docker Engine (Linux)
 
-Port 8080 free
+🔌 Port 8080 free
 
-Run the container:
+Run the container
+docker run -d \
+  --name r4test \
+  -p 8080:8080 \
+  -e API_KEY=demo \
+  pipavlo/r4-local-test:latest
 
-docker run -d
---name r4test
--p 8080:8080
--e API_KEY=demo
-pipavlo/r4-local-test:latest
-
-Health check:
-
+Health check
 curl -s http://127.0.0.1:8080/health
+# → "ok"
 
-"ok"
-
-Version / build info:
-
+Version / build info
 curl -s http://127.0.0.1:8080/version
 
 {
-"name": "re4ctor-api",
-"version": "0.1.0",
-"api_git": "container-build",
-"core_git": "release-core",
-"limits": {
-"max_bytes_per_request": 1000000,
-"rate_limit": "10/sec per IP (enforced in prod by reverse proxy)"
+  "name": "re4ctor-api",
+  "version": "0.1.0",
+  "api_git": "container-build",
+  "core_git": "release-core",
+  "limits": {
+    "max_bytes_per_request": 1000000,
+    "rate_limit": "10/sec per IP (enforced in prod by reverse proxy)"
+  }
 }
-}
 
-Request cryptographic random bytes:
+Request cryptographic random bytes
+curl -s -H "x-api-key: demo" \
+"http://127.0.0.1:8080/random?n=32&fmt=hex"
+# → 64 hex chars (32 bytes), different every call
 
-curl -s -H "x-api-key: demo"
-"http://127.0.0.1:8080/random?n=32&fmt=hex
-"
-
--> 64 hex chars (32 bytes), different every call
 
 What happens here:
 
@@ -67,17 +61,15 @@ output is served over HTTP with basic rate limiting
 
 no external network calls — randomness is generated locally in your container
 
-Auth model
+🔐 Auth Model
 
 The API requires a key for /random.
 
 Two ways to pass it:
 
-Header:
-x-api-key: demo
+Header: x-api-key: demo
 
-Query:
-?key=demo
+Query: ?key=demo
 
 By default, the container ships with:
 
@@ -86,8 +78,7 @@ By default, the container ships with:
 
 Change this in production.
 
-Example production run:
-
+Example production run
 docker run -d \
   --name r4prod \
   -p 8080:8080 \
@@ -98,9 +89,9 @@ docker run -d \
 Then call:
 
 curl -s -H "x-api-key: my-super-secret" \
-  "http://127.0.0.1:8080/random?n=64&fmt=hex"
+"http://127.0.0.1:8080/random?n=64&fmt=hex"
 
-API reference
+📚 API Reference
 GET /health
 
 Returns "ok" if the API is alive.
@@ -115,7 +106,7 @@ api_git – build tag for the API layer
 
 limits – rate limit and max request size
 
-This is designed for audit / fleet inventory / compliance dashboards.
+Designed for audit / fleet inventory / compliance dashboards.
 
 GET /random
 
@@ -123,32 +114,29 @@ Request random bytes.
 
 Query params:
 
-n (required): number of bytes, e.g. 32, 1024, 4096
-
-fmt (optional):
-
-hex → hex string
-
-unset → raw bytes
+Param	Required	Example	Description
+n	✅	32, 1024	Number of bytes
+fmt	❌	hex / unset	Output format
 
 Auth:
 
-header x-api-key: <key>
-or
+Header x-api-key:
 
-query ?key=<key>
+Query ?key=
 
-Examples:
+Examples
 
-# 16 bytes, hex-encoded
+16 bytes, hex-encoded:
+
 curl -s -H "x-api-key: demo" \
-  "http://127.0.0.1:8080/random?n=16&fmt=hex"
-# -> "63968169edffa881f6a4f6d0adc406eb"
+"http://127.0.0.1:8080/random?n=16&fmt=hex"
 
-# 64 raw bytes saved to file
+
+64 raw bytes saved to file:
+
 curl -s -H "x-api-key: demo" \
-  "http://127.0.0.1:8080/random?n=64" \
-  --output sample.bin
+"http://127.0.0.1:8080/random?n=64" \
+--output sample.bin
 
 hexdump -C sample.bin | head
 
@@ -156,49 +144,42 @@ hexdump -C sample.bin | head
 Error example (invalid key):
 
 curl -i -s -H "x-api-key: WRONG" \
-  "http://127.0.0.1:8080/random?n=16&fmt=hex"
+"http://127.0.0.1:8080/random?n=16&fmt=hex"
 
-# HTTP/1.1 401 Unauthorized
-# {"detail": "invalid api key"}
+HTTP/1.1 401 Unauthorized
+{"detail": "invalid api key"}
 
-What's inside the container
+🧰 What’s Inside the Container
 
-The published Docker image pipavlo/r4-local-test:latest bundles:
+The published image pipavlo/r4-local-test:latest bundles:
 
-/app/runtime/bin/re4_dump
-The high-entropy generator binary. This is the only component allowed to emit randomness.
+/app/runtime/bin/re4_dump — the high-entropy generator binary (only component allowed to emit randomness)
 
-FastAPI + uvicorn REST layer
-Exposes /health, /version, /random.
+FastAPI + Uvicorn REST layer exposing /health, /version, /random
 
-Rate limiting, request logging, and IP metadata hints.
+Rate limiting, request logging, and IP metadata hints
 
-Runtime config via env:
+Runtime config (env vars):
 
-API_KEY (required for /random)
+API_KEY            required for /random
+API_HOST / PORT    default 0.0.0.0:8080
 
-API_HOST / API_PORT (default 0.0.0.0:8080)
 
-No external entropy source is pulled at request time.
-Randomness never leaves the container except via your HTTP call.
+No external entropy source is pulled at request time — randomness never leaves the container except via your HTTP call.
 
-Trust / audit / compliance
+🧮 Trust / Audit / Compliance
 
-This is positioned as an entropy appliance.
+This acts as an entropy appliance.
 
-What we ship:
+We ship:
 
-The binary re4_dump is built from an internal DRBG + entropy combiner.
+re4_release.tar.gz — release tarball
 
-We publish:
+re4_release.sha256 — SHA-256 manifest
 
-release tarball (re4_release.tar.gz)
+re4_release.tar.gz.asc — detached GPG signature
 
-SHA-256 manifest (re4_release.sha256)
-
-detached GPG signature (re4_release.tar.gz.asc)
-
-SBOM (SBOM.spdx.json)
+SBOM.spdx.json — Software Bill of Materials
 
 We run statistical batteries:
 
@@ -208,37 +189,29 @@ PractRand
 
 TestU01 BigCrush
 
-Human-readable summaries of those runs live under:
-packages/core/proof/
+Human-readable summaries live under packages/core/proof/.
+Full multi-GB raw logs are not committed — archived offline and shared under NDA.
 
-These include PASS / WEAK / FAIL annotations and commentary.
+The internal DRBG/entropy core is intentionally not open-sourced, following an HSM / Secure Enclave model:
 
-Full raw multi-GB logs are NOT committed to git. They are archived offline and shared under NDA if required.
+you can measure output quality
 
-The internal DRBG/entropy core is intentionally not open-sourced.
-This is similar to an HSM / Secure Enclave model:
+you can verify supply-chain integrity (hash + signature + SBOM)
 
-you can measure output quality,
+you cannot clone the internal core
 
-you can verify supply-chain integrity (hash + signature + SBOM),
-
-you cannot just clone the internal core.
-
-Production deployment
+🏭 Production Deployment
 
 Two supported modes:
 
-1. Docker (recommended)
+1. 🐳 Docker (recommended)
 
-Run behind an internal reverse proxy (nginx / traefik / API gateway).
-
+Run behind a reverse proxy (nginx / traefik / API gateway).
 Expose /random only internally.
-
 Keep API_KEY secret.
+Monitor /version for expected core_git.
 
-Monitor /version to confirm expected core_git.
-
-Example systemd unit (host side, auto-start via Docker):
+Example systemd unit:
 
 [Unit]
 Description=R4 entropy API container
@@ -257,49 +230,48 @@ ExecStop=/usr/bin/docker stop r4-entropy
 [Install]
 WantedBy=multi-user.target
 
-2. Bare metal / systemd (no Docker)
+2. ⚙️ Bare Metal / systemd
 
-We also support running uvicorn + re4_dump directly under systemd as a non-root service with sandboxing:
+Run uvicorn + re4_dump directly under systemd as non-root with sandboxing:
 
 ProtectSystem=strict
-
 ProtectHome=true
-
 MemoryDenyWriteExecute=true
 
+
 See:
+
 packages/core/docs/USAGE.md
+
 packages/core/docs/re4ctor-api.service.example
 
-Roadmap: VRF / post-quantum verifiable randomness
+🔭 Roadmap — VRF / Post-Quantum Verifiable Randomness
 
 Today:
 
 /random returns high-quality entropy bytes
 
-you authenticate with an API key
+you authenticate with API key
 
-you trust that we are not biasing output
+you trust we’re not biasing output
 
-Next:
-provable randomness suitable for consensus / staking.
+Next: provable randomness for consensus / staking.
+The vrf-spec/ package tracks the next milestone:
 
-The vrf-spec/ package (see packages/vrf-spec) tracks the next milestone:
-
-attach a post-quantum identity (Dilithium / Kyber class keys) to each node
+attach post-quantum identity (Dilithium / Kyber class keys)
 
 sign each randomness response
 
-allow external verifiers (validators, rollup sequencers, smart contracts) to prove:
+allow external verifiers to prove:
 
 the bytes came from an authorized node
 
-the operator could not secretly re-roll until they got a "good" outcome
+the operator couldn’t re-roll for a “better” outcome
 
 Planned /vrf response shape:
 
 {
-  "random": "<bytes>",
+  "random": "",
   "signature": "<pq_sig>",
   "public_key": "<node_key>",
   "verified": true
@@ -308,13 +280,13 @@ Planned /vrf response shape:
 
 Intended consumers:
 
-validator set rotation in PoS networks
+Validator set rotation in PoS
 
 zk-rollup sequencers / prover seeds
 
-on-chain lotteries / airdrops / mint fairness
+On-chain lotteries / airdrops / mint fairness
 
-anti-manipulation randomness feeds
+Anti-manipulation randomness feeds
 
 Positioning:
 
@@ -322,47 +294,48 @@ Positioning:
 
 /vrf = attestable randomness with cryptographic accountability
 
-Status
+📦 Status
 
 This repo is public.
-
 The core entropy code is not.
 
-The container image is public:
+Public Docker image:
 
 docker pull pipavlo/r4-local-test:latest
 
-This is already enough to:
 
-integrate into backend services,
+Enough to:
 
-generate keys/secrets,
+integrate into backend services
 
-feed randomness into systems that can’t rely on cloud RNG,
+generate keys/secrets
 
-demo to infra / security / validators / investors.
+feed offline systems needing strong RNG
 
-License / NOTICE
+demo to infra / security / validator teams
+
+📄 License / NOTICE
 
 See LICENSE and NOTICE.
 
 Summary:
 
-Wrapper code, API logic, docs are available for review.
+Wrapper code, API logic, docs → public & reviewable
 
-The entropy core ships as a compiled binary with a signed, reproducible release bundle.
+Entropy core → compiled & signed binary (reproducible build)
 
-The internals of the DRBG / entropy combiner are intentionally not published.
+Internal DRBG/entropy combiner → private (HSM model)
 
-This is closer to an HSM than a normal RNG library:
-you can call it,
-you can test statistical quality,
-you get verifiable supply-chain artifacts (hash, GPG sig, SBOM),
-but you do not automatically get the private core.
+You can test output quality, verify signatures and SBOM, but not access the private core.
 
-Contact / Sponsors
+🤝 Contact / Sponsors
 
-If you want enterprise access, on-prem deployments, validator-facing beacons, or PQ-signed /vrf service:
-(enterprise / auditors / rollup teams / staking infra)
+For enterprise access, on-prem deployments, validator beacons, or PQ-signed /vrf services (enterprise / auditors / rollup / staking infra):
 
-→ add your contact / sponsor channel here
+→ Add your contact / sponsor channel here.
+
+Would you like me to:
+
+💾 generate this as a ready-to-paste Markdown file (README.md)
+
+or 🧱 embed it back into your GitHub repo format (with badges, Docker links, etc.)?
