@@ -1,8 +1,8 @@
-# large random stream captures / binary blobs
+# ==== random binary dumps / captures ====
 *.bin
 *.zip
 
-# Windows / VS build junk
+# ==== Windows / Visual Studio trash ====
 *.exe
 *.sln
 *.vcproj
@@ -10,8 +10,10 @@
 *.obj
 *.dll
 *.bat
+mas/
+w32.bat
 
-# scratch / temp / local logs
+# ==== temp / scratch ====
 README.tmp
 *.tmp
 *.log
