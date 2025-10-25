@@ -11,8 +11,7 @@ packages/
 core/ → production entropy core + API + proof
 vrf-spec/ → PQ-VRF design, roadmap, investor materials
 
-yaml
-Copy code
+
 
 ---
 
