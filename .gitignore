@@ -18,3 +18,11 @@ README.tmp
 *.tmp
 *.log
 *.swp
+# build artifacts (do not commit compiled junk)
+bin/
+dist/
+lib/*.o
+*.o
+*.obj
+*.out
+*.log
