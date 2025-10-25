@@ -1,0 +1,6 @@
+RNG_test using PractRand version 0.94
+RNG = RNG_stdin64, seed = unknown
+test set = expanded, folding = standard (64 bit)
+
+rng=RNG_stdin64, seed=unknown
+length= internal error: length out of bounds?

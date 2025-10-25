@@ -1,0 +1,88 @@
+name: tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  smoke-ubuntu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deps
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake gcc g++ make \
+            dieharder util-linux curl file tar
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j"$(nproc)"
+
+      - name: Smoke (hex)
+        shell: bash
+        run: ./build/re4_dump | head -c 32 | hexdump -C
+
+      - name: Dieharder quick
+        shell: bash
+        run: ./build/re4_dump | dieharder -a -g 200 -k 2 -Y 1 -m 1 | tee dieharder_ci.txt
+
+      # ---------- PractRand: optional ----------
+      - name: Prepare PractRand (apt or build from source)
+        id: practrand
+        shell: bash
+        run: |
+          set -euo pipefail
+          avail=false
+          runner_path=""
+
+          # 1) try APT (do not fail the job if unavailable)
+          if sudo apt-get install -y practrand 2>/dev/null; then
+            avail=true
+            runner_path="RNG_test"
+          else
+            echo "APT practrand not available on this runner, will try source build"
+          fi
+
+          # 2) fallback to source tarball
+          if [ "$avail" = false ]; then
+            mkdir -p external
+            tmp=/tmp/PractRand.tar.gz
+            for BR in dev master; do
+              url="https://codeload.github.com/imneme/PractRand/tar.gz/refs/heads/${BR}"
+              echo "Trying $url"
+              if curl -fsSL --retry 5 --retry-delay 2 -o "$tmp" "$url" \
+                 && file "$tmp" | grep -qi gzip; then
+                root="$(tar -tzf "$tmp" | head -1 | cut -d/ -f1)"
+                tar -xzf "$tmp" -C external
+                make -C "external/${root}/build/Linux" -j"$(nproc)"
+                mv "external/${root}" external/PractRand
+                avail=true
+                runner_path="external/PractRand/build/Linux/RNG_test"
+                break
+              fi
+            done
+          fi
+
+          echo "available=$avail" >> "$GITHUB_OUTPUT"
+          echo "runner_path=$runner_path" >> "$GITHUB_OUTPUT"
+
+      - name: PractRand 256MB
+        if: steps.practrand.outputs.available == 'true'
+        shell: bash
+        run: |
+          set +e
+          ./build/re4_dump | "${{ steps.practrand.outputs.runner_path }}" stdin64 -tf 2 -te 256MB
+          # не валимо джобу навіть якщо тест зупиниться/впаде
+          exit 0

@@ -1,156 +1,182 @@
-\1
+1. core/ — entropy engine + API
 
-[![CI](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml)
+core/ comes from re4ctor-core and contains:
 
-**High-Integrity Randomness for Security, Blockchain, and Fair Systems**  
-*(Core R4-CS is proprietary — available via enterprise license or audit access)*
+CMake/Ninja build (cmake -S . -B build ...)
 
----
+re4_dump: infinite byte stream of high-entropy output
 
-## 🔍 Overview
+re4_tests: DRBG / health self-tests
 
-Re4ctor is a high-assurance Random Number Generation (RNG) platform built for:
-- 🎲 **Provably-fair systems & simulations**
-- 🛡️ **Security-critical infrastructure / HSM replacement**
-- ⛓️ **Blockchain randomness & future VRF oracle services**
+proof/: summaries from Dieharder, PractRand, TestU01 BigCrush
 
-The cryptographic core (**r4-cs**) remains private to protect IP and licensing value.  
-This repository provides the **public interface**, **client code**, **specs**, and **tamper-proof CI tests**, proving authenticity without exposing the algorithm internals.
+signed release bundle (re4_release.tar.gz + .sha256 + .asc)
 
----
+SBOM (SPDX 2.3) via syft
 
-## 🧭 Architecture
+hardened FastAPI/uvicorn service exposing /random
 
-| Layer | Role | Status |
-|-------|------|--------|
-| `r4-cs` | Core HKDF → ChaCha20 DRBG (Closed) | 🔒 Proprietary |
-| `re4ctor-ipc` | Secure IPC over Unix socket (HMAC-framed) | 🟢 Public Binary |
-| `r4cat` / `bindings/python/r4.py` | Public clients (C / Python) | 🟢 Open |
-| `tests/tamper.sh` | Tamper-detection integrity test | ✅ CI Verified |
+systemd unit for running it as a non-root, sandboxed service
 
----
+operator docs (usage, rate limiting, audit logs)
 
-## ⚙️ Installation (Linux / WSL / Ubuntu)
+API surface (core/api layer)
 
-git clone https://github.com/pipavlo82/r4-monorepo.git
-cd r4-monorepo
-make
+GET /health → "ok"
 
-arduino
+GET /version → build info, git rev, limits
 
+GET /info → usage help
 
-Run smoke test (requires running IPC server):
-./bin/r4cat -n 32 -hex # 32 bytes of verified randomness
+GET /random → random bytes (requires API key)
 
----
+Dev/default auth:
+header x-api-key: local-demo
+or query ?key=local-demo
 
-## 🛡️ Security & Trust Model
+Production: set API_KEY in .env, restart service.
 
-| Feature | Status |
-|---------|--------|
-| HKDF-SHA256 → ChaCha20 DRBG | ✅ Core (Private) |
-| HMAC-SHA256 Framed IPC | ✅ Implemented |
-| Tamper Detection | ✅ Client rejects fake server |
-| CI Integrity Test | ✅ Required for every commit (`tests/tamper.sh`) |
-| NIST STS / PractRand / Dieharder | ✅ Passed (reports available) |
-| TestU01 BigCrush                | ✅ Passed
-| ENT (10M samples)               | ✅ Passed (Entropy 7.999980)  |                     |
-🔒 *Core algorithm (r4-cs) is not shipped here to prevent IP theft and allow enterprise licensing.*
+Limits:
 
----
+10 requests/sec per client IP
 
-## 🧪 Tamper Test (CI Proven)
+max 1,000,000 bytes per request
 
-The client **must reject any fake or manipulated data stream**.  
-This is enforced in GitHub Actions via `tests/tamper.sh`.
+every /random call is logged with IP, n, fmt, first bytes fingerprint
 
-OK: tamper rejected (rc=2), stdout empty
+Systemd unit (see core/docs/re4ctor-api.service.example) runs uvicorn under a dedicated user, with sandbox policies (ProtectSystem, ProtectHome, MemoryDenyWriteExecute).
+This is positioned as "entropy appliance on port 8080".
 
----
+Supply-chain trust:
 
-## 💻 Developer API (C / Python)
+We publish a release tarball with binaries + SBOM.
 
-### C Example
-```c
-uint32_t x = r4_u32();
-printf("Random: %08x\n", x);
-Python Example
+We publish sha256 and detached GPG signature.
 
-from bindings.python.r4 import R4
-r = R4()
-print(r.read(32).hex())
-r.close()
-🌐 Blockchain & VRF Roadmap
-Phase	Feature
-✅ Phase 1	Secure IPC & Client Library
-🔄 Phase 2	VRF Output Formatting (Ethereum / WASM)
-🔲 Phase 3	Oracle / VRF Network Integration
+You can reproduce/verify the exact bits you run.
 
-💰 Licensing & Enterprise Access
-Core R4-CS is proprietary
-Available under Commercial License or Audit Partnership.
-Roadmap includes: OEM Integration, Cloud API, Hardware RNG Module.
+2. vrf/ — PQ verifiable randomness
 
-📧 Contact: [via GitHub Issues or private request]
+vrf/ is the evolution path: turning raw entropy into verifiable randomness.
 
-🧠 Why Re4ctor?
-Problem with Traditional RNG	Re4ctor Solution
-Open RNG → Easy to forge	HMAC-protected stream
-No provenance	Commit/Reveal, Audit logs
-No IP moat	Proprietary core with verifiable spec
+Goal:
+Instead of "give me 64 random bytes", a caller can ask for "give me 64 random bytes + a proof that they weren't biased or tampered with".
 
-📚 Reports & Compliance
-✅ NIST STS, Dieharder, PractRand (Full logs available offline)
+This is the PQ-VRF direction (Post-Quantum Verifiable Random Function):
 
-🔒 Core spec: docs/SPEC-R4CS.md
+Planned /vrf response:
 
-📎 Cryptographic paper (in preparation for IACR / USENIX)
+random: N bytes of entropy
 
-🏁 Final Notes
-This repository is not just code — it's a platform for verifiable randomness.
-Trusted by design, auditable by spec, protected by IP.
+signature: post-quantum signature (Dilithium / Kyber class)
 
-Investors / Partners — Core access via NDA & Licensing.
-Developers — Free client API integration.
-Auditors — Spec-based verification available.
+public_key: node's PQ public key
 
-csharp
+verified: true/false (local check)
 
-[CI Status Badge Incoming]
-Built by Re4ctor Labs — 2025
+Why this matters:
 
+blockchain validator selection / committee rotation
 
-## Investor Pitch
+zk-rollup / prover seeding
 
-**Problem.** Game/fintech/blockchain backends need verifiable, scalable RNG; most roll their own or trust cloud entropy blindly.  
-**Solution.** Re4ctor splits concerns: a private, high-performance core (r4-cs) + public, HMAC-protected IPC and client SDKs.  
-**Proof.** PractRand/TestU01/NIST STS results available; tamper tests enforce integrity; deterministic seeding enables audits.  
-**Why now.** On-chain/real-money apps demand transparent RNG. Our model: binaries/SaaS with signed outputs and per-tenant keys.  
-**Ask.** Seed/angel to finish VRF module, publish formal spec, and run pilot with 2–3 design partners.
+on-chain lotteries / airdrops / mint fairness
 
+anti-manipulation in proof-of-stake randomness (operator can't "reroll" secretly)
 
-## Releases & Binaries
+This is not "another /dev/urandom".
+This is "provable entropy you can verify in a smart contract or consensus layer, even in a post-quantum world".
 
-Planned GitHub Releases will include:
-- `re4ctor-ipc` server binary (Linux x86_64), signed
-- `r4cat` client and `libr4.a`
-- SHA256/Sig checksums and minimal SBOM
+The vrf/ directory contains:
 
-> TODO: Use GitHub Releases UI to publish artifacts and attach checksums.
+early PQ-VRF design notes
 
-## Security & Responsible Disclosure
+bindings / components / specs
 
-- IPC frames are HMAC-SHA256 authenticated; clients reject unauthenticated data (see **tests/tamper.sh**).
-- Store the 32-byte key at `/etc/r4/secret.key` (`root:r4users`, `0640`).
-- Report vulnerabilities to the email in **SECURITY.md**; PGP optional.
+investor-facing and product-facing briefs
 
+roadmap for making /vrf a first-class API next to /random
 
-## Documentation
+Long-term intent:
 
-- Product Brief: ./PRODUCT_BRIEF.md
+/random stays as the fast firehose endpoint for local systems.
 
-## Quick Links
-- Spec -> docs/SPEC-R4CS.md
-- API -> docs/API.md
-- VRF Overview -> docs/VRF-OVERVIEW.md
-- VRF demo -> examples/vrf
+/vrf becomes a slower, attestable endpoint for staking, audit, and consensus.
+
+3. Statistical assurance
+
+We test the shipped re4_dump binary (not some dev build) against:
+
+Dieharder
+
+PractRand
+
+TestU01 BigCrush
+
+We commit human-readable summaries under core/proof/:
+
+PASS / WEAK / FAIL lines
+
+interpretation
+
+audit notes
+
+We do not commit multi-GB raw logs to git.
+They are archived offline and can be shared under NDA.
+
+Position:
+
+No persistent FAILs across the suites.
+
+Occasional WEAK in Dieharder is expected (even /dev/urandom shows that).
+
+Output is treated like hardware RNG tap: measurable, logged, externally auditable.
+
+4. Deployment posture
+
+The "core" API layer is meant to run as:
+
+a local service on 127.0.0.1:8080 during development (x-api-key: local-demo)
+
+or a systemd-managed service bound to LAN, with:
+
+non-root user
+
+rate limiting
+
+request logging
+
+key-based auth
+
+This makes it behave like an internal "entropy appliance box" you can drop into infra and consume via HTTP.
+
+We also ship:
+
+SBOM (SPDX 2.3)
+
+deterministic release bundle
+
+sha256 + detached GPG signature
+
+Anyone downstream can verify they’re running unmodified bits.
+
+5. Roadmap
+
+Harden /random as a production entropy endpoint.
+
+Expose /vrf: random bytes + PQ signature + public key → externally verifiable, on-chain consumable.
+
+Attach PQ identity (Dilithium/Kyber-class keys) to the node and rotate keys sanely.
+
+Treat the service as a randomness oracle / beacon for rollups, staking, leader election, zk proving.
+
+TL;DR:
+This repo is the convergence of:
+
+entropy generation (core/)
+
+delivery and ops (systemd, SBOM, signed bundles)
+
+verifiable randomness + post-quantum story (vrf/)
+
+Entropy for a quantum world.

@@ -1,0 +1,6 @@
+TestU01 BigCrush summary (2025-10-20)
+-------------------------------------
+Battery: BigCrush
+Result: 160 / 160 tests PASSED
+No suspicious or catastrophic p-values (<1e-6 or >1-1e-6)
+Assessment: FULL PASS

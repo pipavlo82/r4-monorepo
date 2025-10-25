@@ -1,0 +1,3 @@
+=== lagged_sum run 3 ===
+-bash: /usr/bin/dieharder: No such file or directory
+[warn] lagged_sum run 3 crashed

@@ -40,7 +40,14 @@ _Notes:_ “WEAK” on default settings can occur due to sampling variance; incr
 - Runs: **2**  
 - Result: **All tests were passed**  
 - Logs/configs: see [`rng_reports/`](rng_reports/).
-
+## ENT Test Results
+- Date: October 15, 2025
+- Sample Size: 10,000,000 bytes
+- Entropy: 7.999980 bits per byte
+- Chi square: 281.96, p = 11.83%
+- Mean: 127.4537
+- Monte Carlo Pi: 3.143377257 (error 0.06%)
+- Serial correlation: 0.000271
 ### NIST STS
 .### NIST Statistical Test Suite (STS)
 
@@ -133,7 +140,6 @@ The numbers above are end-to-end (generation + I/O to disk) from the demo pipeli
 The internal custom_rng_bytes steps show ~0.01 s per call in logs (very fast); total wall-clock depends on Python, VRF/reseed steps, and disk I/O.
 
 Prior micro-benchmarks of the core generator reached 90+ MB/s; the demo runs here show ~59–67 MB/s end-to-end on this machine/config.
-
 
 ## Artifacts
 - Logs folder: [`rng_reports/`](rng_reports/) (subfolders per date, e.g., `2025-09-08/`).

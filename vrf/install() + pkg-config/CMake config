@@ -1,0 +1,32 @@
+# CMakeLists.txt (добав донизу)
+include(GNUInstallDirs)
+
+# експорт публічних хедерів уже є: target_include_directories(re4ctor_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+install(TARGETS re4ctor_core
+        EXPORT re4ctorCoreTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(EXPORT re4ctorCoreTargets
+        NAMESPACE re4::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/re4ctor_core)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/re4ctor_coreConfigVersion.cmake"
+  VERSION 0.1.0
+  COMPATIBILITY SameMajorVersion)
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/re4ctor_coreConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/re4ctor_coreConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/re4ctor_core)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/re4ctor_coreConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/re4ctor_coreConfigVersion.cmake"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/re4ctor_core)

@@ -1,0 +1,63 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a1a3d, #2a4066, #3d6b8a);
+    color: white;
+    text-align: center;
+    padding: 3em;
+}
+#demo {
+    max-width: 900px;
+    margin: auto;
+    animation: fadeIn 1s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+h1 {
+    color: #00ffcc;
+    text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+    font-size: 2.8em;
+    margin-bottom: 0.5em;
+}
+a {
+    color: #ff00ff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+a:hover {
+    color: #ff66ff;
+}
+#generateBtn {
+    background: linear-gradient(45deg, #ff00ff, #00ffcc);
+    border: none;
+    padding: 1em 2.5em;
+    cursor: pointer;
+    font-size: 1.3em;
+    border-radius: 8px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+#generateBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+}
+#output {
+    margin: 1.5em 0;
+    font-size: 1.1em;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1em;
+    border-radius: 5px;
+}
+#histogram {
+    margin-top: 2em;
+    border: 2px solid #00ffcc;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+}
+.note {
+    font-size: 0.9em;
+    color: #cccccc;
+    margin-top: 1em;
+}

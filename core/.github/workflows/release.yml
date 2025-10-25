@@ -1,0 +1,28 @@
+name: release
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y cmake gcc
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+      - name: Archive
+        run: |
+          mkdir -p dist
+          cp build/re4_dump dist/
+          tar -C dist -czf re4_dump_linux_x86_64.tar.gz re4_dump
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: re4_dump_linux_x86_64
+          path: re4_dump_linux_x86_64.tar.gz
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: re4_dump_linux_x86_64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

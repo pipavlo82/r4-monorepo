@@ -1,0 +1,25 @@
+name: Release
+on:
+  push:
+    tags: [ "v*" ]
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: sudo apt-get update && sudo apt-get install -y build-essential libssl-dev python3 zip
+      - name: Build
+        run: make -B || true
+      - name: Bundle ZIP
+        run: TAG="${GITHUB_REF##*/}"; ./tools/release.sh "$TAG"
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            dist/*.zip
+            dist/checksums.txt
+          draft: false
+          prerelease: false

@@ -1,0 +1,38 @@
+name: build-matrix
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build gcc
+
+      - name: Install deps (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install cmake ninja || true
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        shell: bash
+
+      - name: Build (verbose)
+        run: cmake --build build -j 4 --verbose
+        shell: bash
+
+      - name: Smoke
+        run: ./build/re4_dump | head -c 32 | hexdump -C
+        shell: bash

@@ -1,0 +1,33 @@
+const hre = require("hardhat");
+const { execFileSync } = require("node:child_process");
+const { createHash } = require("node:crypto");
+const path = require("node:path");
+require("dotenv").config();
+
+function sha256(buf){ return createHash("sha256").update(buf).digest(); }
+function hex(buf){ return Buffer.from(buf).toString("hex"); }
+
+async function main(){
+  const consumerAddr = process.env.CONSUMER_ADDR;
+  if(!consumerAddr) throw new Error("Set CONSUMER_ADDR in .env");
+
+  const root = path.resolve(__dirname, "..", "..");
+  const r4cat = path.join(root, "bin", "r4cat");
+  try { execFileSync("bash", ["-lc", `test -x "${r4cat}"`]); }
+  catch { throw new Error("Build r4cat first: cd ~/r4-monorepo && make -B"); }
+
+  const rand = execFileSync(r4cat, ["-n", "32"]); // 32 bytes
+  const roundId = "0x" + hex(sha256(rand));
+  const ts = Buffer.from(String(Math.floor(Date.now()/1000)));
+  const proof = sha256(Buffer.concat([rand, ts]));   // <-- одна пара дужок
+
+  console.log("roundId   :", roundId);
+  console.log("randomness:", rand.toString("hex"));
+  console.log("proof     :", proof.toString("hex"));
+
+  const consumer = await hre.ethers.getContractAt("ConsumerDemo", consumerAddr);
+  const tx = await consumer.fulfillRandomness(roundId, rand, proof);
+  const rcpt = await tx.wait();
+  console.log("tx hash   :", rcpt.hash);
+}
+main().catch((e)=>{ console.error(e); process.exit(1); });

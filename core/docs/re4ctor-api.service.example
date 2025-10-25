@@ -1,0 +1,32 @@
+[Unit]
+Description=re4ctor RNG API
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/re4ctor/re4ctor-local/re4ctor-api
+EnvironmentFile=/opt/re4ctor/re4ctor-local/re4ctor-api/.env
+ExecStart=/opt/re4ctor/re4ctor-local/re4ctor-api/.venv/bin/python3 -m uvicorn main:app --host ${API_HOST} --port ${API_PORT} --workers 1
+
+User=re4rng
+Group=re4rng
+
+# Security hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+CapabilityBoundingSet=
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+UMask=077
+
+# Resource limits
+LimitNPROC=64
+LimitNOFILE=4096
+
+Restart=on-failure
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
