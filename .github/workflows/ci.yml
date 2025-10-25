@@ -1,44 +1,70 @@
 name: re4ctor-ci
+
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     tags: [ "v*" ]
   pull_request:
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev python3
-      - name: Build (if Makefile present)
+          sudo apt-get install -y build-essential ninja-build cmake curl gpg
+
+      # --- build core via cmake/ninja ---
+      - name: Build core (CMake)
         run: |
-          if [ -f Makefile ]; then
-            make -j
-          else
-            echo "No Makefile; skipping build."
-          fi
-      - name: Tamper test (if client exists)
+          cd packages/core
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j"$(nproc)"
+          file build/re4_dump || true
+          ls -l build || true
+
+      # --- smoke test entropy tap ---
+      - name: Smoke test re4_dump
+        run: |
+          cd packages/core/build
+          ./re4_dump | head -c 32 | hexdump -C
+
+      # --- build minimal client from Makefile (r4cat_light) ---
+      - name: Build client (r4cat)
+        run: |
+          make -j
+          test -x bin/r4cat
+          ls -l bin/r4cat
+
+      # --- optional tamper test (won't fail CI if missing) ---
+      - name: Tamper test (if present)
         run: |
           if [ -x tests/tamper.sh ]; then
             bash -x tests/tamper.sh
           else
-            echo "No tests/tamper.sh; skipping tamper test."
+            echo "no tamper.sh -> skipping"
           fi
-      - name: Pack artifacts (if built)
+
+      # --- generate SBOM with syft ---
+      - name: Generate SBOM (SPDX)
         run: |
-          mkdir -p dist
-          if [ -d bin ] || [ -d lib ]; then
-            mkdir -p dist && tar czf dist/r4-bundle-linux-amd64.tar.gz bin lib include 2>/dev/null || true
-            (cd dist && sha256sum r4-bundle-linux-amd64.tar.gz > SHA256SUMS) || true
-          else
-            echo "No bin/lib to package."
-          fi
-      - name: Upload artifact
-        if: always()
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+            | sudo sh -s -- -b /usr/local/bin
+          cd packages/core
+          syft dir:. -o spdx-json > release/SBOM.spdx.json
+          test -s release/SBOM.spdx.json
+          head -20 release/SBOM.spdx.json || true
+
+      # --- upload build artifacts for auditing / release prep ---
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: r4-bundle
-          path: dist/
+          name: re4ctor-build
+          path: |
+            packages/core/build/re4_dump
+            packages/core/release/SBOM.spdx.json
+            bin/r4cat

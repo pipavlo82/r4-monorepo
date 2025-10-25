@@ -79,3 +79,18 @@ By using this repository you acknowledge:
 - We do not publish the proprietary DRBG internals.
 - You must perform your own security review before using this in
   production, regulated, or on-chain economic settings.
+Re4ctoR / r4-monorepo
+
+Core entropy implementation (DRBG / entropy source internals) remains proprietary.
+Public artifacts include:
+- compiled binaries
+- REST API surface (/random)
+- SBOM (SPDX 2.3)
+- GPG-signed bundles
+- statistical proofs (Dieharder, PractRand, BigCrush summaries)
+
+Consumers get auditable output quality and verifiable supply chain integrity,
+without access to the internal entropy plumbing.
+
+Copyright (c) 2025 Pavlo Tvardovskyi
+Licensed under the Apache License, Version 2.0.
