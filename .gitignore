@@ -26,3 +26,26 @@ lib/*.o
 *.obj
 *.out
 *.log
+core/build/
+build/
+dist/*.egg-info
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+__pycache__/
+*.pyc
+.venv/
+venv/
+ENV/
+env/
+# JS/TS deps
+node_modules/
+examples/vrf-hardhat/node_modules/
+# hardhat build stuff / secrets
+examples/vrf-hardhat/.env
+examples/vrf-hardhat/artifacts/
+examples/vrf-hardhat/cache/
