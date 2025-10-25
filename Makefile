@@ -1,18 +1,29 @@
-CC=gcc
-CFLAGS=-O3 -march=native -std=c11 -Wall -Wextra
-INCLUDES=-Iinclude
-LDLIBS=-lcrypto
+CC      := gcc
+CFLAGS  := -O2 -Wall -Wextra -std=c11
+INCLUDES:= -Ipackages/core/examples_vrf/src -Ipackages/core/examples_vrf/src/ref
+LDFLAGS := 
 
-all: bin/r4cat lib/libr4.a
+SRC_DIR := packages/core/examples_vrf/src
+BIN_DIR := bin
 
-bin/r4cat: src/r4cat.c src/r4_client.c include/r4.h
-	@mkdir -p bin lib
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ src/r4cat.c src/r4_client.c $(LDLIBS)
+# minimal smoke client for CI
+SRCS    := $(SRC_DIR)/r4cat_light.c
+OBJS    := $(SRCS:.c=.o)
 
-lib/libr4.a: src/r4_client.c include/r4.h
-	@mkdir -p lib
-	$(CC) $(CFLAGS) $(INCLUDES) -c src/r4_client.c -o lib/r4_client.o
-	ar rcs $@ lib/r4_client.o
+TARGET  := $(BIN_DIR)/r4cat
+
+.PHONY: all clean dirs
+
+all: dirs $(TARGET)
+
+dirs:
+	mkdir -p $(BIN_DIR)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $(OBJS) $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -rf bin lib
+	rm -rf $(OBJS) $(TARGET)
