@@ -87,4 +87,4 @@ Security contact: security@re4ctor.dev
 GPG Fingerprint: ED5B 0368 114D A3AE 355E 4C61 6605 6461 E00D 386B
 
 If you believe you found a weakness (bias, repeatability, predictable state, API abuse vector), please DO NOT open a public GitHub issue.
-Instead email security@re4ctor.dev with details. A public summary can be coordinated after triage.
+Instead email shtomko@gmail.com with details. A public summary can be coordinated after triage.
