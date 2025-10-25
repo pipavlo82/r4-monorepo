@@ -1,3 +1,3 @@
-github: [pipavlo82]
-custom: ["https://buymeacoffee.com/re4ctor"]
+git add .github/FUNDING.yml
+git commit -m "chore(funding): remove Patreon and add custom sponsor links"
 
