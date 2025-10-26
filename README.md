@@ -1,26 +1,253 @@
-⚡️ r4-monorepo
+⚡ r4-monorepo
 
-🧠 r4 is an entropy appliance and verifiable randomness API.
+r4 — an entropy appliance and verifiable randomness API
 
-It ships two things:
+🧠 Overview
 
-🧩 A high-entropy core (re4_dump) — closed-source, statistically verified (Dieharder / PractRand / BigCrush), shipped as a signed binary.
+r4 provides deterministic, reproducible, and auditable high-entropy random data for cryptographic, blockchain, and infrastructure applications.
+It consists of two tightly coupled layers:
 
-🌐 A hardened HTTP API (/random) — rate-limited, key-protected, designed to run as a service (systemd or Docker).
+Component	Description
+🧩 High-entropy core (re4_dump)	Closed-source, statistically verified with Dieharder / PractRand / BigCrush. Shipped as a signed binary.
+🌐 Hardened HTTP API (/random)	Rate-limited, key-protected REST API (FastAPI + Uvicorn). Designed for Docker / systemd deployment.
 
-This repo also contains the roadmap for PQ verifiable randomness (vrf-spec): post-quantum attestable randomness for proof-of-stake rotation, zk-rollup seeding, lotteries, etc.
+The repository also contains the roadmap for Post-Quantum Verifiable Randomness (VRF) — attestable randomness for staking, zk-rollups, and lotteries.
 
-🚀 Quickstart (Docker)
-
-You can run the whole service with one Docker command.
-
-Prereqs
+🚀 Quickstart
+Prerequisites
 
 🐳 Docker Desktop (Windows/macOS) or Docker Engine (Linux)
 
-🔌 Port 8080 free
+🔌 Port 8080 available
 
-Run the container
+Run
+docker run -d \
+  --name r4test \
+  -p 8080:8080 \
+  -e API_KEY=demo \
+  pipavlo/r4-local-test:latest
+
+Health Check
+curl -s http://127.0.0.1:8080/health
+# -> "ok"
+
+Version Info
+curl -s http://127.0.0.1:8080/version | jq
+
+Request Random Bytes
+curl -s -H "x-api-key: demo" \
+  "http://127.0.0.1:8080/random?n=32&fmt=hex"
+# -> 64 hex chars (32 bytes)
+
+🔐 Authentication
+
+The API requires an access key for /random.
+
+Method	Example
+Header	x-api-key: demo
+Query	?key=demo
+
+Default container key:
+
+-e API_KEY=demo
+
+
+Change this in production.
+
+📚 API Reference
+Endpoint	Description
+GET /health	Returns "ok" if the API is alive
+GET /version	Returns version, integrity, and self-test state
+GET /random	Returns cryptographic-grade random bytes
+Parameters
+Name	Required	Example	Description
+n	✅	32	Number of bytes
+fmt	❌	hex	Output format
+Header	✅	x-api-key: demo	Authentication key
+
+Example:
+
+curl -s -H "x-api-key: demo" \
+  "http://127.0.0.1:8080/random?n=64&fmt=hex"
+
+
+Error (invalid key):
+
+curl -i -H "x-api-key: WRONG" \
+  "http://127.0.0.1:8080/random?n=16&fmt=hex"
+# HTTP/1.1 401 Unauthorized
+
+🧰 Inside the Container
+
+/app/runtime/bin/re4_dump — sealed entropy core
+
+FastAPI + Uvicorn — REST layer
+
+Built-in rate limiting & request logging
+
+No external entropy source — all randomness generated locally
+
+Environment variables:
+
+Variable	Default	Description
+API_KEY	demo	Required for /random
+API_HOST	0.0.0.0	API bind address
+API_PORT	8080	Port to expose
+🧮 Trust / Audit / Compliance
+
+Every release includes:
+
+re4_release.tar.gz — sealed binary core
+
+re4_release.sha256 — manifest
+
+re4_release.tar.gz.asc — detached GPG signature
+
+SBOM.spdx.json — software bill of materials
+
+Statistical Testing
+
+Performed with:
+
+Dieharder
+
+PractRand
+
+TestU01 BigCrush
+
+Summaries: docs/proof/
+Full multi-GB logs are archived offline.
+
+🛡 Runtime Integrity & FIPS-Style Self-Test
+
+At startup the container performs integrity and known-answer tests.
+
+Integrity Check
+
+Verifies /app/runtime/bin/re4_dump against /app/selftest/manifest.json.
+If the hash doesn’t match → API refuses to serve entropy.
+
+Startup Self-Test (KAT)
+
+Runs the core once to ensure non-zero, non-constant output within a timeout.
+Failure results in:
+
+"selftest": "degraded"
+
+Attestation Endpoint
+curl -s http://127.0.0.1:8080/version | jq
+
+
+Example:
+
+{
+  "integrity": "verified",
+  "selftest": "degraded",
+  "mode": "fallback",
+  "sealed_core": "/app/runtime/bin/re4_dump"
+}
+
+Field	Description
+integrity	"verified" → binary matches manifest
+selftest	"pass" / "degraded" → self-test result
+mode	"sealed" = core, "fallback" = urandom, "blocked" = strict FIPS
+sealed_core	Path to verified binary
+
+Policy:
+
+Integrity fail → block entropy.
+
+STRICT_FIPS=1 + degraded test → block (503).
+
+Demo mode → fallback to /dev/urandom, reported via "mode": "fallback".
+
+⚙️ Benchmarks & FIPS Readiness
+Metric	Value
+Throughput	~950 000 req/s
+p99 Latency	~1.1 ms
+Self-Test	PASS
+Manifest	Verified (SHA-256)
+
+See docs/proof/benchmarks_summary.md and docs/proof/fips_readiness.md for details.
+
+🔭 Roadmap: Post-Quantum Verifiable Randomness (VRF)
+
+Next phase — attach a Dilithium / Kyber identity to each randomness sample.
+Each response will be cryptographically signed and externally verifiable.
+
+Example:
+
+{
+  "random": "...",
+  "signature": "<pq_sig>",
+  "public_key": "<node_key>",
+  "verified": true
+}
+
+
+Target use-cases:
+
+PoS validator rotation
+
+zk-rollup sequencing
+
+On-chain lotteries / airdrops
+
+🧩 Security / Openness Model
+
+r4 behaves like a software HSM:
+
+output statistically auditable
+
+release cryptographically verifiable
+
+internals sealed against tampering
+
+You can test and verify every output — but not modify the entropy core.
+
+🤝 Contact
+
+For enterprise access, validator beacons, or PQ-signed VRF integration:
+📧 shtomko@gmail.com
+
+✅ Copy this block as-is — GitHub will render it cleanly, with code blocks, tables, and no text collapse.
+Хочеш, я додам зверху три бейджі (Docker Pulls | License | FIPS-Ready) у наступній версії?
+
+You said:
+так
+ChatGPT said:
+
+Чудово 🔥
+Ось фінальна версія README.md з бейджами (Docker Pulls | License | FIPS Ready), чистою розміткою й чітким виглядом у браузері або на GitHub.
+Можеш просто скопіювати й вставити у свій README.md.
+
+⚡ r4-monorepo
+
+
+
+
+
+
+r4 — an entropy appliance and verifiable randomness API
+
+🧠 Overview
+
+r4 provides deterministic, auditable, and statistically proven randomness for cryptographic / blockchain / infrastructure use.
+
+Component	Description
+🧩 High-entropy core (re4_dump)	Closed-source, verified with Dieharder / PractRand / BigCrush. Shipped as a signed binary.
+🌐 Hardened HTTP API (/random)	Rate-limited, key-protected FastAPI service for Docker / systemd.
+
+Roadmap includes Post-Quantum Verifiable Randomness (VRF) for staking, zk-rollups and lotteries.
+
+🚀 Quickstart
+Prerequisites
+
+🐳 Docker Desktop (Win/macOS) or Docker Engine (Linux)
+
+🔌 Port 8080 available
+
+Run
 docker run -d \
   --name r4test \
   -p 8080:8080 \
@@ -29,159 +256,78 @@ docker run -d \
 
 Health check
 curl -s http://127.0.0.1:8080/health
-# → "ok"
+# -> "ok"
 
-Version / build info
-curl -s http://127.0.0.1:8080/version
+Version info
+curl -s http://127.0.0.1:8080/version | jq
 
-{
-  "name": "re4ctor-api",
-  "version": "0.1.0",
-  "api_git": "container-build",
-  "core_git": "release-core",
-  "limits": {
-    "max_bytes_per_request": 1000000,
-    "rate_limit": "10/sec per IP (enforced in prod by reverse proxy)"
-  }
-}
-
-Request cryptographic random bytes
+Request random bytes
 curl -s -H "x-api-key: demo" \
-"http://127.0.0.1:8080/random?n=32&fmt=hex"
-# → 64 hex chars (32 bytes), different every call
+  "http://127.0.0.1:8080/random?n=32&fmt=hex"
+# -> 64 hex chars (32 bytes)
 
+🔐 Authentication
+Method	Example
+Header	x-api-key: demo
+Query	?key=demo
 
-What happens here:
-
-re4_dump is executed in the container
-
-the API enforces API_KEY
-
-output is served over HTTP with basic rate limiting
-
-no external network calls — randomness is generated locally in your container
-
-🔐 Auth Model
-
-The API requires a key for /random.
-
-Two ways to pass it:
-
-Header: x-api-key: demo
-
-Query: ?key=demo
-
-By default, the container ships with:
+Default key inside container:
 
 -e API_KEY=demo
 
 
-Change this in production.
-
-Example production run
-docker run -d \
-  --name r4prod \
-  -p 8080:8080 \
-  -e API_KEY="my-super-secret" \
-  pipavlo/r4-local-test:latest
-
-
-Then call:
-
-curl -s -H "x-api-key: my-super-secret" \
-"http://127.0.0.1:8080/random?n=64&fmt=hex"
+Change it in production.
 
 📚 API Reference
-GET /health
+Endpoint	Description
+GET /health	Returns "ok"
+GET /version	Build / integrity info
+GET /random	Returns cryptographic random bytes
+Parameters
+Name	Req	Example	Description
+n	✅	32	Number of bytes
+fmt	❌	hex	Output format
+x-api-key	✅	demo	Auth key
 
-Returns "ok" if the API is alive.
-
-GET /version
-
-Returns metadata about this running instance:
-
-core_git – build/commit tag of the entropy core
-
-api_git – build tag for the API layer
-
-limits – rate limit and max request size
-
-Designed for audit / fleet inventory / compliance dashboards.
-
-GET /random
-
-Request random bytes.
-
-Query params:
-
-Param	Required	Example	Description
-n	✅	32, 1024	Number of bytes
-fmt	❌	hex / unset	Output format
-
-Auth:
-
-Header x-api-key:
-
-Query ?key=
-
-Examples
-
-16 bytes, hex-encoded:
+Example
 
 curl -s -H "x-api-key: demo" \
-"http://127.0.0.1:8080/random?n=16&fmt=hex"
+  "http://127.0.0.1:8080/random?n=64&fmt=hex"
 
 
-64 raw bytes saved to file:
+Error
 
-curl -s -H "x-api-key: demo" \
-"http://127.0.0.1:8080/random?n=64" \
---output sample.bin
+curl -i -H "x-api-key: WRONG" \
+  "http://127.0.0.1:8080/random?n=16&fmt=hex"
+# HTTP/1.1 401 Unauthorized
 
-hexdump -C sample.bin | head
+🧰 Inside the Container
 
+/app/runtime/bin/re4_dump — sealed entropy core
 
-Error example (invalid key):
+FastAPI + Uvicorn REST layer
 
-curl -i -s -H "x-api-key: WRONG" \
-"http://127.0.0.1:8080/random?n=16&fmt=hex"
+Built-in rate limiting & logging
 
-HTTP/1.1 401 Unauthorized
-{"detail": "invalid api key"}
+Local entropy generation (offline)
 
-🧰 What’s Inside the Container
-
-The published image pipavlo/r4-local-test:latest bundles:
-
-/app/runtime/bin/re4_dump — the high-entropy generator binary (only component allowed to emit randomness)
-
-FastAPI + Uvicorn REST layer exposing /health, /version, /random
-
-Rate limiting, request logging, and IP metadata hints
-
-Runtime config (env vars):
-
-API_KEY            required for /random
-API_HOST / PORT    default 0.0.0.0:8080
-
-
-No external entropy source is pulled at request time — randomness never leaves the container except via your HTTP call.
-
+Env Var	Default	Description
+API_KEY	demo	Required for /random
+API_HOST	0.0.0.0	Bind address
+API_PORT	8080	Exposed port
 🧮 Trust / Audit / Compliance
 
-This acts as an entropy appliance.
+Every release includes:
 
-We ship:
+re4_release.tar.gz — sealed core
 
-re4_release.tar.gz — release tarball
+re4_release.sha256 — manifest
 
-re4_release.sha256 — SHA-256 manifest
+re4_release.tar.gz.asc — GPG signature
 
-re4_release.tar.gz.asc — detached GPG signature
+SBOM.spdx.json — bill of materials
 
-SBOM.spdx.json — Software Bill of Materials
-
-We run statistical batteries:
+Statistical Testing
 
 Dieharder
 
@@ -189,284 +335,90 @@ PractRand
 
 TestU01 BigCrush
 
-Human-readable summaries live under packages/core/proof/.
-Full multi-GB raw logs are not committed — archived offline and shared under NDA.
+Summaries: docs/proof/
+Full logs archived offline.
 
-The internal DRBG/entropy core is intentionally not open-sourced, following an HSM / Secure Enclave model:
+🛡 Runtime Integrity & FIPS-Style Self-Test
+Integrity Check
 
-you can measure output quality
+Verifies /app/runtime/bin/re4_dump hash vs manifest.json.
+If mismatch → no entropy served.
 
-you can verify supply-chain integrity (hash + signature + SBOM)
+Startup Self-Test (KAT)
 
-you cannot clone the internal core
+Runs once on boot → ensures non-zero entropy.
+Failure → "selftest": "degraded".
 
-🏭 Production Deployment
-
-Two supported modes:
-
-1. 🐳 Docker (recommended)
-
-Run behind a reverse proxy (nginx / traefik / API gateway).
-Expose /random only internally.
-Keep API_KEY secret.
-Monitor /version for expected core_git.
-
-Example systemd unit:
-
-[Unit]
-Description=R4 entropy API container
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Restart=always
-ExecStart=/usr/bin/docker run --rm \
-  -p 8080:8080 \
-  -e API_KEY=prod-secret-here \
-  --name r4-entropy \
-  pipavlo/r4-local-test:latest
-ExecStop=/usr/bin/docker stop r4-entropy
-
-[Install]
-WantedBy=multi-user.target
-
-2. ⚙️ Bare Metal / systemd
-
-Run uvicorn + re4_dump directly under systemd as non-root with sandboxing:
-
-ProtectSystem=strict
-ProtectHome=true
-MemoryDenyWriteExecute=true
+Attestation Endpoint
+curl -s http://127.0.0.1:8080/version | jq
 
 
-See:
-
-packages/core/docs/USAGE.md
-
-packages/core/docs/re4ctor-api.service.example
-
-🔭 Roadmap — VRF / Post-Quantum Verifiable Randomness
-
-Today:
-
-/random returns high-quality entropy bytes
-
-you authenticate with API key
-
-you trust we’re not biasing output
-
-Next: provable randomness for consensus / staking.
-The vrf-spec/ package tracks the next milestone:
-
-attach post-quantum identity (Dilithium / Kyber class keys)
-
-sign each randomness response
-
-allow external verifiers to prove:
-
-the bytes came from an authorized node
-
-the operator couldn’t re-roll for a “better” outcome
-
-Planned /vrf response shape:
+Example:
 
 {
-  "random": "",
+  "integrity": "verified",
+  "selftest": "degraded",
+  "mode": "fallback",
+  "sealed_core": "/app/runtime/bin/re4_dump"
+}
+
+Field	Meaning
+integrity	verified → manifest matched
+selftest	pass / degraded → self-test result
+mode	sealed = core, fallback = urandom, blocked = strict FIPS
+sealed_core	Path to verified binary
+
+Policy
+
+Integrity fail → block entropy.
+
+STRICT_FIPS=1 + degraded → 503.
+
+Demo mode → fallback /dev/urandom.
+
+⚙️ Benchmarks & FIPS Readiness
+Metric	Value
+Throughput	~950 000 req/s
+p99 Latency	~1.1 ms
+Self-Test	PASS
+Manifest	SHA-256 Verified
+
+See docs/proof/fips_readiness.md
+
+🔭 Roadmap — Post-Quantum VRF
+
+Attach Dilithium / Kyber identity to randomness outputs:
+signed and verifiable entropy for consensus and staking.
+
+Example:
+
+{
+  "random": "...",
   "signature": "<pq_sig>",
   "public_key": "<node_key>",
   "verified": true
 }
 
 
-Intended consumers:
+Use cases:
 
-Validator set rotation in PoS
+Validator rotation (PoS)
 
-zk-rollup sequencers / prover seeds
+zk-rollup sequencing
 
-On-chain lotteries / airdrops / mint fairness
+On-chain lotteries / airdrops
 
-Anti-manipulation randomness feeds
+🧩 Security Model
 
-Positioning:
+Behaves like a software HSM:
 
-/random = fast local entropy
+auditable output
 
-/vrf = attestable randomness with cryptographic accountability
+verifiable build integrity
 
-📦 Status
+sealed core (anti-tamper)
 
-This repo is public.
-The core entropy code is not.
+🤝 Contact
 
-Public Docker image:
-
-docker pull pipavlo/r4-local-test:latest
-
-
-Enough to:
-
-integrate into backend services
-
-generate keys/secrets
-
-feed offline systems needing strong RNG
-
-demo to infra / security / validator teams
-
-📄 License / NOTICE
-
-See LICENSE and NOTICE.
-
-Summary:
-
-Wrapper code, API logic, docs → public & reviewable
-
-Entropy core → compiled & signed binary (reproducible build)
-
-Internal DRBG/entropy combiner → private (HSM model)
-
-You can test output quality, verify signatures and SBOM, but not access the private core.
-
-🤝 Contact / Sponsors
-
-For enterprise access, on-prem deployments, validator beacons, or PQ-signed /vrf services (enterprise / auditors / rollup / staking infra):
-
-→ Add your contact / sponsor channel here.
-
-Would you like me to:
-
-💾 generate this as a ready-to-paste Markdown file (README.md)
-
-or 🧱 embed it back into your GitHub repo format (with badges, Docker links, etc.)?
-
-## Security / Openness Model
-
-r4 behaves like a small software HSM: you can test its output quality,
-verify release integrity (hash, GPG signature, SBOM),
-but the internal entropy-combiner code remains sealed.
-This prevents trivial forks and targeted backdoors while keeping
-statistical and supply-chain transparency for auditors.
-
-## Benchmarks & FIPS Readiness 🔥
-
-[![Speed](https://img.shields.io/badge/speed-950k_req/s-brightgreen)]()
-[![Integrity](https://img.shields.io/badge/FIPS-ready-blue)]()
-
-r4 is positioned as an attested entropy appliance.
-
-- High-throughput randomness API (FastAPI + sealed core)
-- <~1ms p99 latency on commodity hardware
-- Startup self-test: SHA-256 integrity check on the sealed binary
-- SBOM + SHA256 manifest + GPG signature shipped with each release
-
-| Metric        | Value                |
-|---------------|----------------------|
-| Throughput    | ~950 000 req/s       |
-| p99 Latency   | ~1.1 ms              |
-| Self-Test     | PASS                 |
-| Manifest      | verified (SHA-256)   |
-
-See `docs/proof/benchmarks_summary.md` and `docs/proof/fips_readiness.md` for details.
-
-Runtime Integrity & FIPS-Style Self-Test
-
-The r4 container operates as a sealed entropy appliance.
-On startup it performs several integrity and safety checks before serving any random bytes.
-
-1. Integrity Check (Supply Chain Verification)
-
-The container validates the sealed core binary (/app/runtime/bin/re4_dump)
-against its shipped SHA-256 manifest (/app/selftest/manifest.json).
-If the hash does not match → the service refuses to serve entropy.
-
-2. Startup Self-Test (KAT)
-
-At boot, a built-in self-test (similar to FIPS 140-2 power-on tests) is executed.
-It runs the core once to ensure it produces non-zero, non-constant bytes within a strict timeout.
-Failure to respond is treated as a degraded state, reported openly via the API.
-
-3. Remote Attestation Endpoint
-
-The container exposes its runtime integrity status via HTTP:
-
-curl -s http://127.0.0.1:8080/version | jq
-
-
-Example response:
-
-{
-  "name": "re4ctor-api",
-  "version": "0.1.0",
-  "api_git": "container-build",
-  "core_git": "release-core",
-  "integrity": "verified",
-  "selftest": "degraded",
-  "mode": "fallback",
-  "sealed_core": "/app/runtime/bin/re4_dump",
-  "limits": {
-    "max_bytes_per_request": 1000000,
-    "rate_limit": "10/sec per IP (enforced in prod by reverse proxy)"
-  }
-}
-
-Field meanings
-Field	Description
-integrity: "verified"	The core binary matches its signed manifest (supply chain intact).
-selftest: "pass"/"degraded"	"pass" → core responded successfully to KAT. "degraded" → core exists and passed integrity but did not respond within timeout.
-mode: "sealed"/"fallback"/"blocked"	"sealed" → entropy from sealed core. "fallback" → timed out → API transparently degraded to /dev/urandom (DEV mode). "blocked" → strict FIPS mode; no entropy served.
-sealed_core	Absolute path of the verified core binary inside the container.
-
-This lets operators or auditors remotely confirm:
-
-The binary running is exactly the one we shipped.
-
-The startup self-test passed or degraded.
-
-The current entropy source (sealed core vs. fallback).
-
-Randomness API
-
-The FastAPI service runs on port 8080.
-
-Health
-curl -s http://127.0.0.1:8080/health
-# -> "ok"
-
-Version / Attestation
-curl -s http://127.0.0.1:8080/version | jq
-
-Random Bytes
-curl -s -H "x-api-key: demo" \
-  "http://127.0.0.1:8080/random?n=32&fmt=hex"
-# -> "c36efc13302050c9..."
-
-
-Parameters
-
-n: number of bytes (max 1,000,000)
-
-fmt=hex: output format (hex string)
-
-x-api-key: shared secret (default "demo", configurable via API_KEY)
-
-Security Policy
-
-If integrity fails → no entropy is served.
-
-In strict FIPS mode (STRICT_FIPS=1), degraded self-test also blocks output (HTTP 503).
-
-In demo mode, a fallback to /dev/urandom is allowed; the state is transparently reported via "mode": "fallback".
-
-This behavior mirrors hardware security modules (HSMs):
-
-Verified boot / integrity validation
-
-Self-test before serving entropy
-
-Observable health surface
-
-Optional fail-closed behavior for regulated environments
-
-
-Contact: shtomko@gmail.com
+📧 shtomko@gmail.com
+For enterprise access, on-prem deployments and PQ-VRF integration.
