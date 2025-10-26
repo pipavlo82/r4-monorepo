@@ -18,6 +18,7 @@ README.tmp
 *.tmp
 *.log
 *.swp
+
 # build artifacts (do not commit compiled junk)
 bin/
 dist/
@@ -25,27 +26,40 @@ lib/*.o
 *.o
 *.obj
 *.out
-*.log
-core/build/
-build/
-dist/*.egg-info
-*.o
-*.obj
 *.dll
 *.so
 *.dylib
 *.a
 *.lib
+core/build/
+build/
+dist/*.egg-info
+
+# python cache / compiled stuff
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+
+# virtual envs
 .venv/
 venv/
 ENV/
 env/
+
+# local env config (DO NOT LEAK KEYS)
+api/.env
+examples/vrf-hardhat/.env
+
 # JS/TS deps
 node_modules/
 examples/vrf-hardhat/node_modules/
+
 # hardhat build stuff / secrets
-examples/vrf-hardhat/.env
 examples/vrf-hardhat/artifacts/
 examples/vrf-hardhat/cache/
+
+# OS junk
+.DS_Store
+Thumbs.db
