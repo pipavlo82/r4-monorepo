@@ -46,7 +46,62 @@ All proof summaries and statistical audit logs are published under:
 
 📦 [SBOM (SPDX JSON)](packages/core/release/SBOM.spdx.json) — reproducible build manifest
 
+### Integrity / Attestation
+
+On startup every container:
+1. Verifies the sealed core binary (`/app/runtime/bin/re4_dump`) against a shipped SHA-256 manifest.
+2. Runs a self-test (KAT) to make sure the core actually produces non-trivial entropy in time.
+3. Exposes its state over `/version`.
+
+Example `/version` response:
+
+```json
+{
+  "integrity": "verified",
+  "selftest": "degraded",
+  "mode": "fallback",
+  "sealed_core": "/app/runtime/bin/re4_dump",
+  "limits": {
+    "max_bytes_per_request": 1000000,
+    "rate_limit": "10/sec per IP (enforced in prod by reverse proxy)"
+  }
+}
+Field meanings:
+
+"integrity": "verified" → binary hash matches the signed manifest.
+
+"selftest": "pass" | "degraded" | "fail" → startup Known Answer Test status.
+
+"mode": "sealed" | "fallback" | "blocked"
+
+sealed = core OK
+
+fallback = core slow / degraded, service is temporarily using /dev/urandom (only in demo mode)
+
+blocked = strict FIPS mode; no entropy served.
+
+If integrity fails → no randomness is served at all.
+If STRICT_FIPS=1 and selftest ≠ "pass" → 503 and still no randomness.
+
+This mimics HSM behavior:
+
+verified boot
+
+power-on self-test
+
+remote attestation surface (/version)
+
+optional fail-closed policy
 ---
+
+ця секція — прям золото для безпекарів. зараз у README воно є частинами, але не як один концентрований блок. встав її як новий підзаголовок `### Integrity / Attestation`. це дає тобі право казати “FIPS-style sealed entropy appliance” і звучати серйозно.
+
+після вставки:
+```bash
+nano README.md   # вставляєш блок вище
+git add README.md
+git commit -m "docs: add Integrity / Attestation section (HSM-style boot + /version semantics)"
+git push origin main
 
 ### 🧰 Quickstart (Docker)
 
