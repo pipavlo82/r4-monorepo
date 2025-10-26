@@ -63,3 +63,9 @@ examples/vrf-hardhat/cache/
 # OS junk
 .DS_Store
 Thumbs.db
+
+# hardhat / node_modules / build junk
+vrf-spec/node_modules/
+vrf-spec/artifacts/
+vrf-spec/cache/
+vrf-spec/coverage/

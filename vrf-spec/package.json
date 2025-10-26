@@ -1,0 +1,13 @@
+{
+  "name": "re4ctor-vrf-spec",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.5"
+  }
+}
