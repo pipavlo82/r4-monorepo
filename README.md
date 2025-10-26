@@ -348,4 +348,25 @@ but the internal entropy-combiner code remains sealed.
 This prevents trivial forks and targeted backdoors while keeping
 statistical and supply-chain transparency for auditors.
 
+## Benchmarks & FIPS Readiness 🔥
+
+[![Speed](https://img.shields.io/badge/speed-950k_req/s-brightgreen)]()
+[![Integrity](https://img.shields.io/badge/FIPS-ready-blue)]()
+
+r4 is positioned as an attested entropy appliance.
+
+- High-throughput randomness API (FastAPI + sealed core)
+- <~1ms p99 latency on commodity hardware
+- Startup self-test: SHA-256 integrity check on the sealed binary
+- SBOM + SHA256 manifest + GPG signature shipped with each release
+
+| Metric        | Value                |
+|---------------|----------------------|
+| Throughput    | ~950 000 req/s       |
+| p99 Latency   | ~1.1 ms              |
+| Self-Test     | PASS                 |
+| Manifest      | verified (SHA-256)   |
+
+See `docs/proof/benchmarks_summary.md` and `docs/proof/fips_readiness.md` for details.
+
 Contact: shtomko@gmail.com
