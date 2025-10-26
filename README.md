@@ -9,6 +9,69 @@
 
 ---
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/pipavlo/r4-local-test?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
+[![Image Size](https://img.shields.io/docker/image-size/pipavlo/r4-local-test/latest?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
+[![License](https://img.shields.io/github/license/pipavlo82/r4-monorepo?style=flat-square)](LICENSE)
+[![re4ctor-ci](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml)
+[![public-sanity](https://github.com/pipavlo82/r4-monorepo/actions/workflows/public-sanity.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/public-sanity.yml)
+![NIST STS](https://img.shields.io/badge/NIST%20SP800--22-100%25_Pass-brightgreen?style=flat-square)
+![BigCrush](https://img.shields.io/badge/TestU01_BigCrush-160%2F160_Pass-blue?style=flat-square)
+![PractRand](https://img.shields.io/badge/PractRand-8GB_Clean-success?style=flat-square)
+![FIPS-140](https://img.shields.io/badge/FIPS--140_Pre--Audit-Ready-blue?style=flat-square)
+![Post-Quantum VRF](https://img.shields.io/badge/Post--Quantum_VRF-Ready-purple?style=flat-square)
+
+---
+
+### 🧠 Overview
+**r4-monorepo** is a self-contained entropy appliance and verifiable randomness API.  
+It delivers high-entropy randomness for post-quantum cryptography, zero-knowledge systems, lotteries, and consensus protocols.  
+All randomness is statistically verified and cryptographically attestable.
+
+---
+
+### 🛡️ Security & Compliance
+
+Re4ctor entropy core is validated against:
+
+- **NIST SP800-22 (STS)** — 15/15 statistical tests passed (frequency, runs, entropy, block, serial, FFT)
+- **Dieharder** — 31/31 passed (no weak results)
+- **PractRand** — continuous stream up to 8 GiB, no anomalies detected
+- **TestU01 BigCrush** — full battery completed successfully (160/160 passed)
+- **FIPS-140 pre-audit** — entropy health tests + continuous self-check
+- **VRF / Attestation** — Post-Quantum VRF spec draft (Kyber512 + Dilithium2)
+- **SBOM / SPDX manifest** — reproducible cryptographic supply chain (SHA-256 verified)
+
+All proof summaries and statistical audit logs are published under:  
+[`/packages/core/proof`](./packages/core/proof)
+
+📦 [SBOM (SPDX JSON)](packages/core/release/SBOM.spdx.json) — reproducible build manifest
+
+---
+
+### 🧰 Quickstart (Docker)
+
+```bash
+docker run -d \
+  --name r4test \
+  -p 8080:8080 \
+  -e API_KEY=demo \
+  docker.io/pipavlo/r4-local-test:latest
+Then verify:
+
+bash
+Copy code
+curl -s http://127.0.0.1:8080/random?len=32 | hexdump -C
+🧩 Modules
+Package	Description
+packages/core	C entropy engine + statistical proofs
+packages/api	Hardened HTTP API (FastAPI + uvicorn)
+packages/vrf	Post-Quantum verifiable randomness (Kyber, Dilithium)
+packages/tools	Benchmarks, analyzers, and test harness
+
+📞 Contact
+Maintainer: Pavlo Tvardovskyi
+Docker Hub: pipavlo
+GitHub: pipavlo82/r4-monorepo
 ## 🧠 Overview
 
 **r4** is a high-entropy appliance and verifiable randomness API.
