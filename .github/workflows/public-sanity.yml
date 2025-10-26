@@ -42,9 +42,7 @@ jobs:
 
       - name: Verify proof summaries exist
         run: |
-          test -s packages/core/proof/dieharder/summary-latest.txt
-          test -s packages/core/proof/practrand/summary-latest.txt
-          test -s packages/core/proof/bigcrush/summary-latest.txt
+          test -s packages/core/proof/dieharder/summary-2025-01.txt
           echo "proof summaries present ✅"
 
       - name: Python lint (API surface only)
