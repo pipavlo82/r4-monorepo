@@ -1,20 +1,5 @@
 # ⚡ r4-monorepo — entropy appliance & verifiable randomness API
 
-`r4` is a sealed entropy core with a verifiable API for high-trust randomness delivery.  
-It mimics a software HSM: deterministic boot, startup self-tests, reproducible builds,  
-and post-quantum roadmap for verifiable randomness (VRF).
-
----
-
-## 🧩 Components
-
-| Component | Description |
-|------------|-------------|
-| **High-Entropy Core (`re4_dump`)** | Closed-source, statistically verified (Dieharder / PractRand / BigCrush). Shipped as a signed binary. |
-| **HTTP API (`/random`)** | Hardened FastAPI layer — rate-limited, key-protected, Docker-ready. |
-
-
-
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/pipavlo/r4-local-test?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
 [![Docker Image Size](https://img.shields.io/docker/image-size/pipavlo/r4-local-test/latest?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
