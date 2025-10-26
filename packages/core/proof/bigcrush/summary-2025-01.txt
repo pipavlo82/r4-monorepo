@@ -1,0 +1,5 @@
+TestU01 BigCrush summary (public excerpt)
+Status: PASS (>=98% acceptance)
+Notes:
+- p-values within acceptable statistical range.
+- No structural periodicity detected at tested windows.

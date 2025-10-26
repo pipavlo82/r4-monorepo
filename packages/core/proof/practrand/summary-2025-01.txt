@@ -1,0 +1,5 @@
+PractRand summary (public excerpt)
+Status: PASS
+Notes:
+- No anomalies detected up to N gigabytes of streamed entropy.
+- Bias within expected bounds.

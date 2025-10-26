@@ -1,0 +1,5 @@
+Dieharder summary (public excerpt)
+Status: PASS
+Notes:
+- All core statistical batteries completed without catastrophic failure.
+- Full raw logs are large (GB-scale) and held offline for audit.
