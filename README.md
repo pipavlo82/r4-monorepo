@@ -13,8 +13,39 @@ and post-quantum roadmap for verifiable randomness (VRF).
 | **High-Entropy Core (`re4_dump`)** | Closed-source, statistically verified (Dieharder / PractRand / BigCrush). Shipped as a signed binary. |
 | **HTTP API (`/random`)** | Hardened FastAPI layer — rate-limited, key-protected, Docker-ready. |
 
-Also includes the roadmap for **Post-Quantum Verifiable Randomness (vrf-spec)** —  
-attestable entropy for Proof-of-Stake rotation, zk-rollups, lotteries, and secure protocols.
+
+
+
+[![Docker Pulls](https://img.shields.io/docker/pulls/pipavlo/r4-local-test?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
+[![Docker Image Size](https://img.shields.io/docker/image-size/pipavlo/r4-local-test/latest?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
+[![License](https://img.shields.io/github/license/pipavlo82/r4-monorepo?style=flat-square)](LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/pipavlo82/r4-monorepo/docker-build.yml?branch=main&style=flat-square)](https://github.com/pipavlo82/r4-monorepo/actions)
+
+---
+
+## 🧠 Overview
+
+**r4** is a high-entropy appliance and verifiable randomness API.
+
+It delivers:
+
+- 🔒 **Sealed entropy core (`re4_dump`)** — closed-source, statistically verified via Dieharder / PractRand / BigCrush, shipped as a signed binary.  
+- 🌐 **Hardened FastAPI layer** — key-protected `/random` endpoint for secure entropy distribution over HTTP (Docker or systemd).
+
+The repo also tracks the **Post-Quantum VRF roadmap** (`vrf-spec/`) — future attested randomness for proof-of-stake rotation, zk-rollup seeding, and lotteries.
+
+---
+
+📦 **Docker Image**
+
+```bash
+docker pull pipavlo/r4-local-test:latest
+☑️ Pre-built, signed, and self-testing container.
+Each startup performs integrity verification and FIPS-style Known Answer Test (KAT) before serving any entropy.
+
+Full validation reports → packages/core/proof/
+
+Contact → shtomko@gmail.com
 
 ---
 
