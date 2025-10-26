@@ -5,7 +5,7 @@
 [![Docker Image Size](https://img.shields.io/docker/image-size/pipavlo/r4-local-test/latest?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
 [![License](https://img.shields.io/github/license/pipavlo82/r4-monorepo?style=flat-square)](LICENSE)
 [![Build](https://img.shields.io/github/actions/workflow/status/pipavlo82/r4-monorepo/re4ctor-ci.yml?branch=main&style=flat-square)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/re4ctor-ci.yml)
-[![Sanity](https://img.shields.io/github/actions/workflow/status/pipavlo82/r4-monorepo/public-sanity.yml?branch=main&label=public-sanity&style=flat-square)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/public-sanity.yml)
+[![Public Sanity](https://img.shields.io/github/actions/workflow/status/pipavlo82/r4-monorepo/public-sanity.yml?branch=main&label=sanity-check&style=flat-square)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/public-sanity.yml)
 
 ---
 
