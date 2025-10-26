@@ -369,4 +369,104 @@ r4 is positioned as an attested entropy appliance.
 
 See `docs/proof/benchmarks_summary.md` and `docs/proof/fips_readiness.md` for details.
 
+Runtime Integrity & FIPS-Style Self-Test
+
+The r4 container operates as a sealed entropy appliance.
+On startup it performs several integrity and safety checks before serving any random bytes.
+
+1. Integrity Check (Supply Chain Verification)
+
+The container validates the sealed core binary (/app/runtime/bin/re4_dump)
+against its shipped SHA-256 manifest (/app/selftest/manifest.json).
+If the hash does not match → the service refuses to serve entropy.
+
+2. Startup Self-Test (KAT)
+
+At boot, a built-in self-test (similar to FIPS 140-2 power-on tests) is executed.
+It runs the core once to ensure it produces non-zero, non-constant bytes within a strict timeout.
+Failure to respond is treated as a degraded state, reported openly via the API.
+
+3. Remote Attestation Endpoint
+
+The container exposes its runtime integrity status via HTTP:
+
+curl -s http://127.0.0.1:8080/version | jq
+
+
+Example response:
+
+{
+  "name": "re4ctor-api",
+  "version": "0.1.0",
+  "api_git": "container-build",
+  "core_git": "release-core",
+  "integrity": "verified",
+  "selftest": "degraded",
+  "mode": "fallback",
+  "sealed_core": "/app/runtime/bin/re4_dump",
+  "limits": {
+    "max_bytes_per_request": 1000000,
+    "rate_limit": "10/sec per IP (enforced in prod by reverse proxy)"
+  }
+}
+
+Field meanings
+Field	Description
+integrity: "verified"	The core binary matches its signed manifest (supply chain intact).
+selftest: "pass"/"degraded"	"pass" → core responded successfully to KAT. "degraded" → core exists and passed integrity but did not respond within timeout.
+mode: "sealed"/"fallback"/"blocked"	"sealed" → entropy from sealed core. "fallback" → timed out → API transparently degraded to /dev/urandom (DEV mode). "blocked" → strict FIPS mode; no entropy served.
+sealed_core	Absolute path of the verified core binary inside the container.
+
+This lets operators or auditors remotely confirm:
+
+The binary running is exactly the one we shipped.
+
+The startup self-test passed or degraded.
+
+The current entropy source (sealed core vs. fallback).
+
+Randomness API
+
+The FastAPI service runs on port 8080.
+
+Health
+curl -s http://127.0.0.1:8080/health
+# -> "ok"
+
+Version / Attestation
+curl -s http://127.0.0.1:8080/version | jq
+
+Random Bytes
+curl -s -H "x-api-key: demo" \
+  "http://127.0.0.1:8080/random?n=32&fmt=hex"
+# -> "c36efc13302050c9..."
+
+
+Parameters
+
+n: number of bytes (max 1,000,000)
+
+fmt=hex: output format (hex string)
+
+x-api-key: shared secret (default "demo", configurable via API_KEY)
+
+Security Policy
+
+If integrity fails → no entropy is served.
+
+In strict FIPS mode (STRICT_FIPS=1), degraded self-test also blocks output (HTTP 503).
+
+In demo mode, a fallback to /dev/urandom is allowed; the state is transparently reported via "mode": "fallback".
+
+This behavior mirrors hardware security modules (HSMs):
+
+Verified boot / integrity validation
+
+Self-test before serving entropy
+
+Observable health surface
+
+Optional fail-closed behavior for regulated environments
+
+
 Contact: shtomko@gmail.com
