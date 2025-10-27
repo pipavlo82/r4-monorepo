@@ -17,7 +17,22 @@ A high-integrity random number platform: private optimized core, HMAC-protected 
 - Deterministic seeding (for audits & reproducible sims).
 - Tamper tests (`tests/tamper.sh`).
 
+## 🧪 MVP Status — All Core Features Ready
+
+| Feature                               | Status | Notes |
+|----------------------------------------|--------|-------|
+| ✅ `C/Python SDKs`                     | Ready  | `libr4.a`, `r4cat.py` fully usable |
+| ✅ `r4cat CLI`                         | Ready  | Command-line streaming with entropy/seed control |
+| ✅ `HMAC-framed Unix socket transport` | Ready  | IPC server with per-frame HMAC; rejects tampering |
+| ✅ `Deterministic seeding`             | Ready  | Fixed seeds produce reproducible output |
+| ✅ `Tamper tests`                      | Ready  | `tests/tamper.sh` simulates frame corruption |
+
+> All MVP features are **implemented and tested**.  
+Ready for integration, audit, and scale-out deployments.
+
 ## Road to “Provably Fair”
+...
+
 - Public spec + test reports.
 - VRF module (client-verifiable proofs).
 - Signed transcripts & attestations.
