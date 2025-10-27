@@ -10,31 +10,12 @@
 [![Release](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml)
 [![FIPS 204 Ready](https://img.shields.io/badge/FIPS-204%20Ready-green?style=flat-square)](./docs/FIPS_204_roadmap.md)
 [![PQ Crypto](https://img.shields.io/badge/PQ-Dilithium%20%2B%20Kyber-purple?style=flat-square)](./vrf-spec/)
-## 🧪 MVP Status — All Core Features Ready
 
-| Feature                               | Status | Notes |
-|----------------------------------------|--------|-------|
-| ✅ `C/Python SDKs`                     | Ready  | `libr4.a`, `r4cat.py` fully usable |
-| ✅ `r4cat CLI`                         | Ready  | Command-line streaming with entropy/seed control |
-| ✅ `HMAC-framed Unix socket transport` | Ready  | IPC server with per-frame HMAC; rejects tampering |
-| ✅ `Deterministic seeding`             | Ready  | Fixed seeds produce reproducible output |
-| ✅ `Tamper tests`                      | Ready  | `tests/tamper.sh` simulates frame corruption |
-
-> All MVP features are **implemented and tested**. Ready for integration, audit, and scale-out deployments.
-
-### 🔎 More Resources
-
-📜 **Provably fair on-chain lottery with ECDSA and Dilithium3 signatures:**  
-[vrf-spec/README.md](vrf-spec/README.md)
-
-🏆 **R4 vs Chainlink / drand / AWS HSM / Thales (latency, cost, PQ readiness):**  
-[Full competitive comparison](docs/COMPETITORS.md)
-
-
+<div align="center">
 
 ## 📋 Table of Contents
 
-[What is R4?](#-overview) • [Quick Start](#-quickstart-docker) • [API Reference](#-api-reference) • [Use Cases](#-use-cases) • [Security](#-security--compliance) • [Deployment](#-production-deployment) • [Roadmap](#-roadmap-progress--2025) •  [Contact](#-contact--support)
+[What is R4?](#-overview) • [Quick Start](#-quickstart-docker) • [API Reference](#-api-reference) • [Use Cases](#-use-cases) • [Security](#-security--compliance) • [Deployment](#-production-deployment) • [Roadmap](#-roadmap-progress--2025) • [MVP Status](#-mvp-status) • [Contact](#-contact--support)
 
 </div>
 
@@ -233,6 +214,18 @@ The published image `pipavlo/r4-local-test:latest` bundles:
 
 ---
 
+## 🧪 MVP Status — All Core Features Ready
+
+| Feature                               | Status | Notes |
+|----------------------------------------|--------|-------|
+| ✅ `C/Python SDKs`                     | Ready  | `libr4.a`, `r4cat.py` fully usable |
+| ✅ `r4cat CLI`                         | Ready  | Command-line streaming with entropy/seed control |
+| ✅ `HMAC-framed Unix socket transport` | Ready  | IPC server with per-frame HMAC; rejects tampering |
+| ✅ `Deterministic seeding`             | Ready  | Fixed seeds produce reproducible output |
+| ✅ `Tamper tests`                      | Ready  | `tests/tamper.sh` simulates frame corruption |
+
+> All MVP features are **implemented and tested**. Ready for integration, audit, and scale-out deployments.
+
 ### 🚀 Python SDK Usage Example
 
 ```python
@@ -257,6 +250,12 @@ python3 test_r4sdk.py
 ```
 
 > **Note:** Make sure your R4 service is running locally on port 8082 and the API key matches your config.
+
+### 📚 SDK Documentation
+
+🐍 **Python SDK:** [`sdk_py_r4/README.md`](sdk_py_r4/README.md)  
+🔗 **C SDK:** [`packages/sdk_c/README.md`](packages/sdk_c/README.md)  
+⚙️ **CLI Tool:** [`sdk_py_r4/r4cat.md`](sdk_py_r4/r4cat.md)
 
 ### 🔎 More Resources
 
@@ -636,6 +635,3 @@ For enterprise access, on-prem deployments, validator beacons, or PQ-signed `/vr
 [⬆ Back to top](#-r4-monorepo)
 
 </div>
-
----
-
