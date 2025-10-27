@@ -264,12 +264,28 @@ console.log('Event:', receipt.events[0].args);
 - Vulnerable to quantum computers (Shor's algorithm)
 - Centralized trust in Re4ctoR signer key
 
-### Future: Post-Quantum VRF
+---
 
-🔜 **Roadmap** (Q2 2025):
-- Dilithium-3 signature scheme
-- Kyber-1024 key encapsulation
-- Multi-signature threshold setup
+### ✅ Now Live: Post-Quantum RNG (Dilithium-3)
+
+🔐 **What’s new**:
+- Re4ctoR now serves **Dilithium-signed entropy** on port `8081`
+- Available endpoints:
+  - `/random_pq?n=32&fmt=hex`
+  - `/verify_pq` (verifies signature)
+- Dual-port system:
+  - `:8080` → legacy entropy (ChaCha20 + HMAC)
+  - `:8081` → **PQ entropy (Dilithium-3)**
+
+🧪 Signature verification is handled in Python (`pqdilithium`) and can be ported to Rust/WASM for off-chain clients.
+
+🧠 Roadmap:
+- On-chain Dilithium verifier in Solidity (research ongoing)
+- Kyber encapsulation for client-side entropy provisioning
+- Threshold signing (multi-node consensus)
+
+This strengthens the Re4ctoR VRF against **quantum threats** and positions it for **next-gen blockchain** applications.
+
 
 ---
 
@@ -326,6 +342,7 @@ npm run format
 - [Hardhat Documentation](https://hardhat.org/docs)
 - [OpenZeppelin ECDSA Library](https://docs.openzeppelin.com/contracts/4.x/api/utils#ECDSA)
 - [Ethereum Signed Message Format](https://eips.ethereum.org/EIPS/eip-191)
+- [Post-Quantum RNG API (Dilithium)](../README.md#🔐-r4pq-dual-port-mode)
 
 ---
 
