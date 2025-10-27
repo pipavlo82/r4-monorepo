@@ -24,6 +24,15 @@
 - [Roadmap](#-pq-vrf-roadmap)
 - [Project Structure](#-whats-inside)
 - [MVP Status](#mvp-status)
+## MVP Status
+
+| Feature                               | Status | Notes |
+|----------------------------------------|--------|-------|
+| ✅ `C/Python SDKs`                     | Ready  | `libr4.a`, `r4cat.py` fully usable |
+| ✅ `r4cat CLI`                         | Ready  | Command-line streaming with entropy/seed control |
+| ✅ `HMAC-framed Unix socket transport` | Ready  | IPC server with per-frame HMAC; rejects tampering |
+| ✅ `Deterministic seeding`             | Ready  | Fixed seeds produce reproducible output |
+| ✅ `Tamper tests`                      | Ready  | `tests/tamper.sh` simulates frame corruption |
 
 ---
 
