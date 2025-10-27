@@ -23,7 +23,7 @@
 - [Deployment](#-production-deployment)
 - [Roadmap](#-pq-vrf-roadmap)
 - [Project Structure](#-whats-inside)
-   docs/COMPETITION.md
+
 ---
 
 ## 🎯 What is R4?
