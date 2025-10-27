@@ -13,19 +13,7 @@ Entropy appliance and verifiable randomness API with **post-quantum cryptography
 
 ## 🧠 Overview
 
-- [What is R4?](#-what-is-r4)
-- [Quick Start](#-quick-start)
-- [Architecture](#-architecture)
-- [API Reference](#-api-reference)
-- [On-Chain VRF](#-on-chain-verification-vrf)
-- [Use Cases](#-use-cases)
-- [Security & Compliance](#-security--compliance)
-- [Deployment](#-production-deployment)
-- [Roadmap](#-pq-vrf-roadmap)
-- [Project Structure](#-whats-inside)
-- [R4 vs Competitors](./docs/COMPETITION.md) 
 **r4** delivers high-entropy randomness via HTTP API with enterprise-grade post-quantum cryptography.
->>>>>>> 54aa969 (release: R4PQ dual-port (8080 core / 8081 PQ signed RNG). Add PQ API (/random_pq, /verify_pq), updated README w/ 2025 roadmap, Dockerfile, and CI sanity check.)
 
 **Ships two components:**
 
@@ -410,9 +398,6 @@ This repo is **public**. The core entropy code is not.
 ```bash
 docker pull pipavlo/r4-local-test:latest
 ```
-### Competitive Landscape
-
-See [R4 vs Competitors](./docs/COMPETITION.md) for a deep comparison vs Chainlink VRF, drand, AWS CloudHSM, Thales HSM, and others.
 
 **Enough to:**
 - Integrate into backend services
