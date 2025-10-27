@@ -263,8 +263,6 @@ python3 test_r4sdk.py
 ### 📚 SDK Documentation
 
 🐍 **Python SDK:** [`sdk_py_r4/README.md`](sdk_py_r4/README.md)  
-🔗 **C SDK:** [`packages/sdk_c/README.md`](packages/sdk_c/README.md)  
-⚙️ **CLI Tool:** [`sdk_py_r4/r4cat.md`](sdk_py_r4/r4cat.md)
 
 ### 🔎 More Resources
 
