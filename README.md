@@ -23,6 +23,7 @@
 - [Deployment](#-production-deployment)
 - [Roadmap](#-pq-vrf-roadmap)
 - [Project Structure](#-whats-inside)
+- [R4 vs Competitors](./docs/COMPETITION.md) 
 
 ---
 
