@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Q4
-- VRF module: design + PoC (on-chain-friendly).
-- IPC hardening: rate caps per connection, rotate keys ops guide.
+- ✅ ✅ ✅ **VRF PoC (Dilithium): готово.**
+- IPC hardening: rate caps per connection, ops guide for key rotation.
 - CI polishing: tamper test, smoke build for clients.
+
 
 ## Q1
 - VRF proofs & verifier libs (C/Python), example contracts (Solidity).
