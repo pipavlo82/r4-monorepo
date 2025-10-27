@@ -26,9 +26,9 @@ jobs:
       - name: Import smoke test (modules must load)
         run: |
           python -c "import fastapi"
-          python -c 'from api import app as _app_check'
-          python -c 'from api.sign_ecdsa import ecdsa_sign'
-          python -c 'from api.sign_dilithium import PQ_AVAILABLE; print(\"PQ_AVAILABLE=\", PQ_AVAILABLE)'
+          python -c "from api import app as _app_check"
+          python -c "from api.sign_ecdsa import ecdsa_sign"
+          python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
 
       - name: Build Docker image (r4pq test)
         run: |
@@ -39,8 +39,8 @@ jobs:
           docker run -d \
             --name r4pq-ci-test \
             -p 8081:8081 \
-            -e API_KEY="ci-demo" \
-            -e RATE_LIMIT="30/minute" \
+            -e API_KEY='ci-demo' \
+            -e RATE_LIMIT='30/minute' \
             r4pq-ci-test
           # give uvicorn a moment to boot
           sleep 2
