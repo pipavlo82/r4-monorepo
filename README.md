@@ -23,6 +23,8 @@
 - [Deployment](#-production-deployment)
 - [Roadmap](#-pq-vrf-roadmap)
 - [Project Structure](#-whats-inside)
+- [MVP Status](#mvp-status)
+
 ---
 
 ### 🔎 More
