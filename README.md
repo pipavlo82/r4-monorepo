@@ -781,50 +781,6 @@ docker build -f packages/api/Dockerfile -t r4-local:dev .
 
 ---
 
-## 📬 Contact & Support
-
-**Maintainer**: Pavlo Tvardovskyi
-
-- 📧 **Email**: [shtomko@gmail.com](mailto:shtomko@gmail.com)
-- 🐙 **GitHub**: [@pipavlo82](https://github.com/pipavlo82)
-- 🐳 **Docker Hub**: [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)
-
-### Enterprise Inquiries
-
-For custom deployments, SLA agreements, regulatory audits, or PQ-VRF early access:
-
-📧 **shtomko@gmail.com**
-
----
-
-## 📚 Additional Resources
-
-- [API Usage Guide](./docs/USAGE.md)
-- [Deployment Guide](./docs/DEPLOYMENT.md)
-- [Security Model](./docs/SECURITY.md)
-- [Statistical Proofs](./packages/core/proof/)
-- [VRF Specification](./vrf-spec/)
-
----
-
-## 🏷️ Tags
-
-`#entropy` `#rng` `#fips` `#pqcrypto` `#verifiable` `#docker` `#hsm` `#blockchain` `#web3` `#cryptography` `#randomness`
-
----
-
-<div align="center">
-
-**© 2025 Re4ctoR Project**
-
-Built with ⚡ for high-assurance randomness
-
-[⬆ Back to top](#-r4-monorepo)
-
-</div>
-
----
-
 ## 🔭 Roadmap Progress — 2025
 
 | Quarter | Milestone | Status | Notes |
@@ -1082,15 +1038,35 @@ You can test output quality, verify signatures and SBOM, but not access the priv
 
 ---
 
-## 🤝 Contact / Sponsors
-
-For enterprise access, on-prem deployments, validator beacons, or PQ-signed `/vrf` services (enterprise / auditors / rollup / staking infra):
+## 📬 Contact & Support
 
 **Maintainer**: Pavlo Tvardovskyi
 
-📧 **Email**: [shtomko@gmail.com](mailto:shtomko@gmail.com)  
-🐙 **GitHub**: [@pipavlo82](https://github.com/pipavlo82)  
-🐳 **Docker Hub**: [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)
+- 📧 **Email**: [shtomko@gmail.com](mailto:shtomko@gmail.com)
+- 🐙 **GitHub**: [@pipavlo82](https://github.com/pipavlo82)
+- 🐳 **Docker Hub**: [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)
+
+### Enterprise Inquiries
+
+For custom deployments, SLA agreements, regulatory audits, or PQ-VRF early access:
+
+📧 **shtomko@gmail.com**
+
+---
+
+## 📚 Additional Resources
+
+- [API Usage Guide](./docs/USAGE.md)
+- [Deployment Guide](./docs/DEPLOYMENT.md)
+- [Security Model](./docs/SECURITY.md)
+- [Statistical Proofs](./packages/core/proof/)
+- [VRF Specification](./vrf-spec/)
+
+---
+
+## 🏷️ Tags
+
+`#entropy` `#rng` `#fips` `#pqcrypto` `#verifiable` `#docker` `#hsm` `#blockchain` `#web3` `#cryptography` `#randomness`
 
 ---
 
@@ -1098,8 +1074,7 @@ For enterprise access, on-prem deployments, validator beacons, or PQ-signed `/vr
 
 **© 2025 Re4ctoR Project**
 
-Built with ⚡ for high-assurance randomness in the post-quantum era
+Built with ⚡ for high-assurance randomness
 
 [⬆ Back to top](#-r4-monorepo)
-
-</div>
+         </div>
