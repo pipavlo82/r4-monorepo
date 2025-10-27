@@ -8,7 +8,7 @@
 [![Sanity Check](https://img.shields.io/badge/sanity--check-passing-brightgreen?style=flat-square)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/public-sanity.yml)
 [![VRF Tests](https://github.com/pipavlo82/r4-monorepo/actions/workflows/vrf-tests.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/vrf-tests.yml)
 [![Release](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml)
-
+[![sanity](https://github.com/pipavlo82/r4-monorepo/actions/workflows/sanity.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/sanity.yml)
 ---
 
 ## 📋 Table of Contents
