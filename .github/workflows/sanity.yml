@@ -1,0 +1,72 @@
+name: sanity
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  sanity-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Python deps
+        run: |
+          pip install --no-cache-dir -r api/requirements.txt
+
+      - name: Import smoke test (modules must load)
+        run: |
+          python -c "import fastapi"
+          python -c 'from api import app as _app_check'
+          python -c 'from api.sign_ecdsa import ecdsa_sign'
+          python -c 'from api.sign_dilithium import PQ_AVAILABLE; print(\"PQ_AVAILABLE=\", PQ_AVAILABLE)'
+
+      - name: Build Docker image (r4pq test)
+        run: |
+          docker build -t r4pq-ci-test .
+
+      - name: Run container
+        run: |
+          docker run -d \
+            --name r4pq-ci-test \
+            -p 8081:8081 \
+            -e API_KEY="ci-demo" \
+            -e RATE_LIMIT="30/minute" \
+            r4pq-ci-test
+          # give uvicorn a moment to boot
+          sleep 2
+
+      - name: Hit /version
+        run: |
+          curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
+          test -s /tmp/version.json
+
+      - name: Hit /random_pq?sig=ecdsa
+        run: |
+          curl -s "http://127.0.0.1:8081/random_pq?sig=ecdsa" | tee /tmp/rand.json
+          test -s /tmp/rand.json
+
+      - name: Show outputs
+        run: |
+          echo "----- /version -----"
+          cat /tmp/version.json
+          echo
+          echo "----- /random_pq?sig=ecdsa -----"
+          cat /tmp/rand.json
+          echo
+
+      - name: Cleanup container
+        if: always()
+        run: |
+          docker logs r4pq-ci-test || true
+          docker stop r4pq-ci-test || true
+          docker rm r4pq-ci-test || true
