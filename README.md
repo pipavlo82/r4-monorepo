@@ -229,7 +229,30 @@ This forms the **MVP of the Re4ctoR VRF**:
 
 ```
 Off-chain entropy → ECDSA signature → On-chain verification
+
 ```
+### 🎲 Provably Fair Lottery (LotteryR4.sol)
+
+We include a reference on-chain lottery contract:
+**\`vrf-spec/contracts/LotteryR4.sol\`**
+
+How it works:
+1. Players join via `enterLottery()`
+2. Re4ctoR node generates 32 bytes of randomness and signs it with its private key
+3. The contract verifies the ECDSA signature (via `R4VRFVerifier`)
+4. A winner is selected on-chain:
+   `winnerIndex = uint256(randomness) % players.length`
+5. We emit `WinnerSelected(winner, index, randomness)`
+
+Hardhat test (`vrf-spec/test/lottery.js`) proves:
+- ✅ honest randomness → valid draw
+- 🔐 forged / attacker randomness → revert
+
+This is a blueprint for:
+- on-chain casinos
+- NFT mints / raffles
+- transparent loot drops
+- validator / committee elections
 
 ## 🔐 Security & Compliance
 
