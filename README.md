@@ -10,6 +10,15 @@
 [![Release](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml)
 [![FIPS 204 Ready](https://img.shields.io/badge/FIPS-204%20Ready-green?style=flat-square)](./docs/FIPS_204_roadmap.md)
 [![PQ Crypto](https://img.shields.io/badge/PQ-Dilithium%20%2B%20Kyber-purple?style=flat-square)](./vrf-spec/)
+### 🔎 More
+
+- 📜 Provably fair on-chain lottery with ECDSA and Dilithium3 signatures:  
+  [vrf-spec/README.md](vrf-spec/README.md)
+
+- 🏆 R4 vs Chainlink / drand / AWS HSM / Thales (latency, cost, PQ readiness):  
+  [Full competitive comparison](docs/COMPETITORS.md)
+
+---
 
 <div align="center">
 
