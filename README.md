@@ -23,6 +23,15 @@
 - [Deployment](#-production-deployment)
 - [Roadmap](#-pq-vrf-roadmap)
 - [Project Structure](#-whats-inside)
+---
+
+### 🔎 More
+
+- 📜 Provably fair on-chain lottery with ECDSA and Dilithium3 signatures:  
+  [vrf-spec/README.md](vrf-spec/README.md)
+
+- 🏆 R4 vs Chainlink / drand / AWS HSM / Thales (latency, cost, PQ readiness):  
+  [Full competitive comparison](docs/COMPETITORS.md)
 
 ---
 
