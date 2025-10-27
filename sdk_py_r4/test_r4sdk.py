@@ -1,6 +1,6 @@
 from r4sdk import R4Client
 
-client = R4Client(api_key="demo", host="http://localhost:8082")
+client = R4Client(api_key="local-demo", host="http://localhost:8080")
 
 try:
     rand = client.get_random(16)
