@@ -681,6 +681,9 @@ r4-monorepo/
 ├── LICENSE                             # Proprietary core + MIT wrapper
 └── README.md                           # This file
 ```
+### Competitive Landscape
+
+See [R4 vs Competitors](./docs/COMPETITION.md) for a deep comparison vs Chainlink VRF, drand, AWS CloudHSM, Thales HSM, and others.
 
 **License**: Wrapper code MIT, sealed core proprietary (HSM model)
 
