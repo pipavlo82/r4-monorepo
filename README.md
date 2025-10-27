@@ -387,6 +387,29 @@ WantedBy=multi-user.target
 ✅ Internal-only exposure (no public internet)  
 
 ---
+## 🐍 Python SDK — `r4sdk`
+
+This lightweight Python client allows you to query randomness from your local R4 entropy appliance.
+
+### 🔧 Installation
+pip install requests  # if not already installed
+No need to install the SDK as a package — just use the provided r4sdk/client.py in your project.
+
+🚀 Usage Example
+from r4sdk import R4Client
+client = R4Client(api_key="demo", host="http://localhost:8082")
+rand = client.get_random(16)
+print("🔐 Random bytes:", rand.hex())
+
+🧪 Test Run
+cd sdk_py_r4
+python3 test_r4sdk.py
+Expected output:
+Copy code
+🔐 Random bytes: 1a2b3c... (16 bytes)
+Note: Make sure your R4 service is running locally on port 8082 and the API key matches your config.
+
+---
 
 ## 🔭 Roadmap Progress — 2025
 
