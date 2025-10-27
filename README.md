@@ -32,13 +32,9 @@
 
 
 
----
-
-<div align="center">
-
 ## 📋 Table of Contents
 
-[What is R4?](#-overview) • [Quick Start](#-quickstart-docker) • [API Reference](#-api-reference) • [Use Cases](#-use-cases) • [Security](#-security--compliance) • [Deployment](#-production-deployment) • [Roadmap](#-roadmap-progress--2025) • •[Contact](#-contact--support)
+[What is R4?](#-overview) • [Quick Start](#-quickstart-docker) • [API Reference](#-api-reference) • [Use Cases](#-use-cases) • [Security](#-security--compliance) • [Deployment](#-production-deployment) • [Roadmap](#-roadmap-progress--2025) •  [Contact](#-contact--support)
 
 </div>
 
@@ -237,6 +233,51 @@ The published image `pipavlo/r4-local-test:latest` bundles:
 
 ---
 
+## 🧪 MVP Status — All Core Features Ready
+
+| Feature                               | Status | Notes |
+|----------------------------------------|--------|-------|
+| ✅ `C/Python SDKs`                     | Ready  | `libr4.a`, `r4cat.py` fully usable |
+| ✅ `r4cat CLI`                         | Ready  | Command-line streaming with entropy/seed control |
+| ✅ `HMAC-framed Unix socket transport` | Ready  | IPC server with per-frame HMAC; rejects tampering |
+| ✅ `Deterministic seeding`             | Ready  | Fixed seeds produce reproducible output |
+| ✅ `Tamper tests`                      | Ready  | `tests/tamper.sh` simulates frame corruption |
+
+> All MVP features are **implemented and tested**. Ready for integration, audit, and scale-out deployments.
+
+### 🚀 Python SDK Usage Example
+
+```python
+from r4sdk import R4Client
+
+client = R4Client(api_key="demo", host="http://localhost:8082")
+rand = client.get_random(16)
+print("🔐 Random bytes:", rand.hex())
+```
+
+### 🧪 Test Run
+
+```bash
+cd sdk_py_r4
+python3 test_r4sdk.py
+```
+
+**Expected output:**
+
+```
+🔐 Random bytes: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
+```
+
+> **Note:** Make sure your R4 service is running locally on port 8082 and the API key matches your config.
+
+### 🔎 More Resources
+
+📜 **Provably fair on-chain lottery with ECDSA and Dilithium3 signatures:**  
+[vrf-spec/README.md](vrf-spec/README.md)
+
+🏆 **R4 vs Chainlink / drand / AWS HSM / Thales (latency, cost, PQ readiness):**  
+[Full competitive comparison](docs/COMPETITORS.md)
+
 ---
 
 ## 📊 Use Cases
@@ -385,29 +426,6 @@ WantedBy=multi-user.target
 ✅ Monitor `/version` endpoint for integrity drift  
 ✅ Rate limit per IP at reverse proxy level  
 ✅ Internal-only exposure (no public internet)  
-
----
-## 🐍 Python SDK — `r4sdk`
-
-This lightweight Python client allows you to query randomness from your local R4 entropy appliance.
-
-### 🔧 Installation
-pip install requests  # if not already installed
-No need to install the SDK as a package — just use the provided r4sdk/client.py in your project.
-
-🚀 Usage Example
-from r4sdk import R4Client
-client = R4Client(api_key="demo", host="http://localhost:8082")
-rand = client.get_random(16)
-print("🔐 Random bytes:", rand.hex())
-
-🧪 Test Run
-cd sdk_py_r4
-python3 test_r4sdk.py
-Expected output:
-Copy code
-🔐 Random bytes: 1a2b3c... (16 bytes)
-Note: Make sure your R4 service is running locally on port 8082 and the API key matches your config.
 
 ---
 
@@ -630,3 +648,6 @@ For enterprise access, on-prem deployments, validator beacons, or PQ-signed `/vr
 [⬆ Back to top](#-r4-monorepo)
 
 </div>
+
+---
+
