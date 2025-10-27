@@ -1,73 +1,70 @@
-# ⚡ r4-monorepo — entropy appliance & verifiable randomness API
-
-[![docker pulls](https://img.shields.io/docker/pulls/pipavlo/r4-local-test?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
-[![image size](https://img.shields.io/docker/image-size/pipavlo/r4-local-test/latest?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
-[![re4ctor-ci](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml)
-[![sanity-check](https://img.shields.io/badge/sanity--check-passing-brightgreen?style=flat-square)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/public-sanity.yml)
-[![VRF Contract Tests](https://github.com/pipavlo82/r4-monorepo/actions/workflows/vrf-tests.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/vrf-tests.yml)
-[![Release](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml)
----
-
-## 🧠 Overview
-
-**r4** is a high-entropy appliance and verifiable randomness API.
-
-It delivers:
-- 🔒 **Sealed entropy core (`re4_dump`)** — closed-source, statistically verified via Dieharder / PractRand / BigCrush, shipped as a signed binary.  
-- 🌐 **Hardened FastAPI layer** — key-protected `/random` endpoint for secure entropy distribution over HTTP (Docker or systemd).
-
-The repo also tracks the **Post-Quantum VRF roadmap** (`vrf-spec/`) — future attested randomness for proof-of-stake rotation, zk-rollup seeding, and lotteries.
-
-<div align="center">
-
-# ⚡ R4 Entropy Appliance
+# ⚡ r4-monorepo
 
 **High-assurance cryptographic randomness API with post-quantum VRF roadmap**
 
-[![Docker Hub](https://img.shields.io/badge/docker-pipavlo%2Fr4--local--test-blue?logo=docker)](https://hub.docker.com/r/pipavlo/r4-local-test)
-[![License](https://img.shields.io/badge/license-Proprietary%20Core-red)](./LICENSE)
-[![FIPS Ready](https://img.shields.io/badge/FIPS-140--3%20Ready-green)](./packages/core/proof/)
-[![PQ Crypto](https://img.shields.io/badge/PQ-Kyber%20%2B%20Dilithium-purple)](./vrf-spec/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/pipavlo/r4-local-test?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
+[![Docker Image Size](https://img.shields.io/docker/image-size/pipavlo/r4-local-test/latest?style=flat-square)](https://hub.docker.com/r/pipavlo/r4-local-test)
+[![CI Status](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml)
+[![Sanity Check](https://img.shields.io/badge/sanity--check-passing-brightgreen?style=flat-square)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/public-sanity.yml)
+[![VRF Tests](https://github.com/pipavlo82/r4-monorepo/actions/workflows/vrf-tests.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/vrf-tests.yml)
+[![Release](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml/badge.svg)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/release.yml)
 
-[Quickstart](#-quickstart) • [API Docs](#-api-reference) • [Security](#-security--compliance) • [Roadmap](#-pq-vrf-roadmap) • [Contact](#-contact)
+---
 
-</div>
+## 📋 Table of Contents
+
+- [What is R4?](#-what-is-r4)
+- [Quick Start](#-quick-start)
+- [Architecture](#-architecture)
+- [API Reference](#-api-reference)
+- [On-Chain VRF](#-on-chain-verification-vrf)
+- [Use Cases](#-use-cases)
+- [Security & Compliance](#-security--compliance)
+- [Deployment](#-production-deployment)
+- [Roadmap](#-pq-vrf-roadmap)
+- [Project Structure](#-whats-inside)
 
 ---
 
 ## 🎯 What is R4?
 
-**R4** is a hardened entropy service delivering cryptographically secure randomness through a simple HTTP API. Designed for:
+**r4** is an enterprise-grade entropy appliance delivering **cryptographically secure randomness** via HTTP API.
 
-- 🔑 **Key generation** — TLS certificates, signing keys, secrets
-- 🎲 **Gaming & Lotteries** — Provably fair randomness
-- ⛓️ **Blockchain validators** — Leader election, PoS rotation
-- 🔐 **High-security systems** — HSM-grade entropy appliance
+### Core Features
 
-### Architecture
+🔒 **Sealed Entropy Core (`re4_dump`)**
+- Closed-source, statistically verified
+- NIST SP 800-22, Dieharder, PractRand, TestU01 BigCrush certified
+- Shipped as signed binary with integrity verification
+- FIPS 140-3 ready
 
-```
-┌─────────────────────────────────────┐
-│   FastAPI (Rate-limited HTTP API)   │
-│   /health  /version  /random        │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│   Sealed Entropy Core (re4_dump)    │
-│   • FIPS self-test on boot          │
-│   • Integrity-verified binary       │
-│   • Statistical validation passed   │
-└─────────────────────────────────────┘
-```
+🌐 **Hardened FastAPI Layer**
+- Key-protected `/random` endpoint
+- Rate-limited, audit-logged
+- Docker or systemd deployment
+- Production-ready security
 
-**Trust Model**: HSM-style sealed core + transparent API wrapper + continuous attestation
+🔐 **On-Chain Verification (VRF)**
+- ECDSA signature verification for off-chain randomness
+- Reference Solidity contracts included
+- Post-quantum roadmap (Dilithium + Kyber)
+
+### Designed For
+
+| Use Case | Application |
+|----------|-------------|
+| 🔑 **Cryptography** | TLS certificates, signing keys, secrets |
+| 🎲 **Gaming & Lotteries** | Provably fair randomness |
+| ⛓️ **Blockchain** | Validator rotation, leader election, PoS |
+| 🏦 **Finance** | Key generation, random sampling |
+| 🔐 **Enterprise** | HSM-grade entropy appliance |
 
 ---
 
-## 🚀 Quickstart
+## 🚀 Quick Start
 
 ### Prerequisites
+
 - 🐳 Docker (Desktop or Engine)
 - 🔌 Port 8080 available
 
@@ -86,13 +83,13 @@ docker run -d \
 ```bash
 # Health check
 curl http://127.0.0.1:8080/health
-# → "ok"
 
 # Get version + integrity status
 curl http://127.0.0.1:8080/version | jq
 ```
 
-**Expected output:**
+**Expected response:**
+
 ```json
 {
   "name": "re4ctor-api",
@@ -106,9 +103,13 @@ curl http://127.0.0.1:8080/version | jq
 ### Request random bytes
 
 ```bash
-# 32 bytes as hex (64 hex chars)
+# 32 bytes as hex
 curl -H "x-api-key: demo" \
   "http://127.0.0.1:8080/random?n=32&fmt=hex"
+
+# 256 bytes as base64
+curl -H "x-api-key: demo" \
+  "http://127.0.0.1:8080/random?n=256&fmt=base64"
 
 # 64 raw bytes to file
 curl -H "x-api-key: demo" \
@@ -118,92 +119,201 @@ curl -H "x-api-key: demo" \
 
 ---
 
+## 🏗️ Architecture
+
+### System Overview
+
+```
+┌─────────────────────────────────────────────────────┐
+│  FastAPI (Rate-limited HTTP API)                    │
+│  /health  /version  /random                         │
+└──────────────┬──────────────────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────────────────┐
+│  Sealed Entropy Core (re4_dump)                     │
+│  • FIPS 140-3 self-test on boot                     │
+│  • Integrity-verified binary                        │
+│  • Statistical validation (NIST/Dieharder/etc)      │
+└─────────────────────────────────────────────────────┘
+```
+
+**Trust Model**: HSM-style sealed core + transparent API wrapper + continuous attestation
+
+### Data Flow
+
+```
+[ Client ] 
+    ↓
+[ HTTP Request + API Key ]
+    ↓
+[ FastAPI Authentication ]
+    ↓
+[ Rate Limiter ]
+    ↓
+[ Re4ctoR Entropy Core ]
+    ↓
+[ Format Converter (hex/base64/raw) ]
+    ↓
+[ Audit Log ]
+    ↓
+[ HTTP Response ]
+```
+
+---
+
 ## 📘 API Reference
 
 ### `GET /health`
-**Returns**: `"ok"` if service is alive
+
+Simple liveness check.
 
 ```bash
 curl http://127.0.0.1:8080/health
 ```
 
+**Response**: `"ok"` (200 OK)
+
 ---
 
 ### `GET /version`
-**Returns**: Build info, integrity status, self-test results
+
+Build info, integrity status, and self-test results.
 
 ```bash
-curl http://127.0.0.1:8080/version
+curl http://127.0.0.1:8080/version | jq
 ```
 
 **Response fields:**
-- `integrity`: `"verified"` → binary hash matches signed manifest
-- `selftest`: `"pass"` | `"degraded"` | `"fail"` → startup KAT result
-- `mode`: `"sealed"` | `"fallback"` | `"blocked"` → operational state
+
+```json
+{
+  "name": "re4ctor-api",
+  "version": "0.1.0",
+  "integrity": "verified",
+  "selftest": "pass",
+  "mode": "sealed"
+}
+```
+
+| Field | Values | Meaning |
+|-------|--------|---------|
+| `integrity` | `"verified"` / `"failed"` | Binary hash matches signed manifest |
+| `selftest` | `"pass"` / `"degraded"` / `"fail"` | Startup Known Answer Test result |
+| `mode` | `"sealed"` / `"fallback"` / `"blocked"` | Current operational state |
 
 ---
 
 ### `GET /random`
-**Returns**: Cryptographically secure random bytes
 
-| Parameter | Required | Example | Description |
-|-----------|----------|---------|-------------|
-| `n` | ✅ | `32` | Number of bytes (max 1,000,000) |
-| `fmt` | ❌ | `hex` / `base64` | Output encoding (default: raw) |
-| `x-api-key` | ✅ | `demo` | API key (header or query `?key=`) |
+Core entropy endpoint. Returns cryptographically secure random bytes.
+
+```bash
+curl -H "x-api-key: YOUR_API_KEY" \
+  "http://127.0.0.1:8080/random?n=32&fmt=hex"
+```
+
+**Query Parameters:**
+
+| Parameter | Required | Type | Example | Description |
+|-----------|----------|------|---------|-------------|
+| `n` | ✅ | int | `32` | Number of bytes (1–1,000,000) |
+| `fmt` | ❌ | string | `hex` / `base64` / `raw` | Output encoding (default: raw binary) |
+| `x-api-key` | ✅ | string | `demo` | API key (header or query param) |
 
 **Examples:**
 
 ```bash
-# 16 bytes as hex
-curl -H "x-api-key: demo" \
+# 16 bytes as hexadecimal
+curl -H "x-api-key: prod-key" \
   "http://127.0.0.1:8080/random?n=16&fmt=hex"
+# → "a3f7b2c1d8e4f9a5..."
 
 # 256 bytes as base64
-curl -H "x-api-key: demo" \
+curl -H "x-api-key: prod-key" \
   "http://127.0.0.1:8080/random?n=256&fmt=base64"
+# → "o7f8Qx9K2L5M8N1P..."
+
+# Raw binary to file
+curl -H "x-api-key: prod-key" \
+  "http://127.0.0.1:8080/random?n=1024" \
+  --output seed.bin
 ```
 
-**Error handling:**
+**Error Responses:**
+
 ```bash
-# Invalid key
-curl -i -H "x-api-key: WRONG" \
+# Missing API key
+curl "http://127.0.0.1:8080/random?n=16"
+# → HTTP/1.1 401 Unauthorized
+
+# Invalid API key
+curl -H "x-api-key: WRONG" \
   "http://127.0.0.1:8080/random?n=16"
 # → HTTP/1.1 401 Unauthorized
+
+# Request too large
+curl -H "x-api-key: demo" \
+  "http://127.0.0.1:8080/random?n=2000000"
+# → HTTP/1.1 413 Payload Too Large
+
+# Rate limit exceeded
+curl -H "x-api-key: demo" \
+  "http://127.0.0.1:8080/random?n=16"
+# (after many requests)
+# → HTTP/1.1 429 Too Many Requests
 ```
 
 ---
 
-## 🔗 On-chain Verification (VRF Path)
+## 🔐 On-Chain Verification (VRF)
 
-Re4ctoR is not just "here's some random bytes."  
-It also includes an **on-chain verification pipeline (VRF)**.
+### What is VRF?
 
-This repo ships a reference Solidity contract:  
-**`vrf-spec/contracts/R4VRFVerifier.sol`**
+A **Verifiable Random Function** proves that random bytes were:
+1. Generated by the trusted Re4ctoR node
+2. Not manipulated in transit
+3. Deterministic for the same input
 
-### What it does
+This is cryptographic proof, not just a promise.
 
-**1. `verify(randomness, signature, signer)`**
-   - Recomputes the signed message hash  
-   - Recovers the signer via ECDSA  
-   - Confirms that the randomness was produced by the expected Re4ctoR node  
+### Smart Contracts
 
-**2. `submitRandom(randomness)`**
-   - Emits an event `RandomnessVerified(sender, randomness)`  
-   - Lets consumer contracts (lotteries, games, DeFi apps) react to verified randomness  
+Located in `vrf-spec/contracts/`:
 
-### Included Hardhat Test
+#### **R4VRFVerifier.sol**
 
-**`vrf-spec/test/verify.js`**
+Verifies ECDSA signatures on randomness.
 
-This test:
-- Generates a random value (`bytes32`)
-- Signs it with a local Ethereum key (simulating Re4ctoR)
-- Verifies it on-chain via the Solidity contract
-- Confirms the event emission
+```solidity
+function verify(
+    bytes32 randomness,
+    bytes calldata signature,
+    address trustedSigner
+) external returns (bool)
+```
 
-### Run Locally
+**Features:**
+- Standard ECDSA recovery
+- Emits `RandomnessVerified` event
+- Reusable across dApps
+
+#### **LotteryR4.sol**
+
+Reference on-chain lottery using verified randomness.
+
+```solidity
+function enterLottery() external
+function drawWinner(bytes32 randomness, bytes calldata signature) external
+```
+
+**Features:**
+- Players register on-chain
+- Deterministic winner selection
+- Signature verification
+- Complete event audit trail
+
+### Run Tests
 
 ```bash
 cd vrf-spec
@@ -212,84 +322,136 @@ npx hardhat compile
 npx hardhat test
 ```
 
-**✅ Result:**
+**Expected output:**
 
 ```
+LotteryR4
+  ✔ picks a deterministic fair winner using verified randomness (425ms)
+  ✔ reverts if signature is invalid (218ms)
+
 R4VRFVerifier
   ✔ verifies a valid signature from the signer (424ms)
-  ✔ emits event on submitRandom()
+  ✔ emits event on submitRandom() (185ms)
 
-2 passing (448ms)
+4 passing (1.2s)
 ```
 
-Re4ctoR can now generate randomness off-chain  
-and **prove on-chain** that it was produced by a trusted signer.
+### Integration Example
 
-This forms the **MVP of the Re4ctoR VRF**:
+```javascript
+// Off-chain: Get randomness from Re4ctoR
+const response = await fetch('http://r4-node:8080/random?n=32&fmt=hex', {
+  headers: { 'x-api-key': 'your-key' }
+});
+const randomness = await response.text();
 
+// Sign it (simulating Re4ctoR signing)
+const signature = await signer.signMessage(randomness);
+
+// On-chain: Verify and use
+await lottery.drawWinner(randomness, signature);
+
+// Listen for winner
+lottery.on('WinnerSelected', (winner, index, rand) => {
+  console.log(`Winner: ${winner} at index ${index}`);
+});
 ```
-Off-chain entropy → ECDSA signature → On-chain verification
 
+---
+
+## 📊 Use Cases
+
+### 1. Blockchain Validators
+
+```python
+import requests
+
+# Get seed for leader election
+response = requests.get(
+    "http://r4-node:8080/random?n=32&fmt=hex",
+    headers={"x-api-key": "validator-secret"}
+)
+seed = response.text
+# Use for committee selection, rotation
 ```
-### 🎲 Provably Fair Lottery (LotteryR4.sol)
 
-We include a reference on-chain lottery contract:
-**\`vrf-spec/contracts/LotteryR4.sol\`**
+### 2. Key Generation
 
-How it works:
-1. Players join via `enterLottery()`
-2. Re4ctoR node generates 32 bytes of randomness and signs it with its private key
-3. The contract verifies the ECDSA signature (via `R4VRFVerifier`)
-4. A winner is selected on-chain:
-   `winnerIndex = uint256(randomness) % players.length`
-5. We emit `WinnerSelected(winner, index, randomness)`
+```bash
+# Generate 256-bit AES encryption key
+curl -H "x-api-key: prod" \
+  "http://r4-internal:8080/random?n=32&fmt=base64" \
+  | base64 -d > aes256.key
 
-Hardhat test (`vrf-spec/test/lottery.js`) proves:
-- ✅ honest randomness → valid draw
-- 🔐 forged / attacker randomness → revert
+# Generate ECDSA signing key
+curl -H "x-api-key: prod" \
+  "http://r4-internal:8080/random?n=32" \
+  --output signing_key.bin
+```
 
-This is a blueprint for:
-- on-chain casinos
-- NFT mints / raffles
-- transparent loot drops
-- validator / committee elections
+### 3. Gaming & Lotteries
 
-## 🔐 Security & Compliance
+```javascript
+// Fair dice roll 1-100
+const response = await fetch(
+  'http://r4-api:8080/random?n=8&fmt=hex',
+  { headers: { 'x-api-key': process.env.R4_KEY } }
+);
+const hex = await response.text();
+const roll = (parseInt(hex.substring(0, 8), 16) % 100) + 1;
+console.log(`You rolled: ${roll}`);
+```
+
+### 4. ZK-Rollup Seeding
+
+```solidity
+// Get randomness from Re4ctoR
+bytes32 seed = IRe4ctoR(r4Node).requestRandom(32);
+// Use for sequencer selection, prover assignment
+```
+
+### 5. NFT Raffle
+
+```solidity
+// On-chain lottery using LotteryR4
+lottery.enterLottery{value: rafflePrice}();
+// Later, when randomness is available:
+lottery.drawWinner(randomness, signature);
+```
+
+---
+
+## 🔒 Security & Compliance
 
 ### Statistical Validation ✅
 
+All output verified against industry-standard test suites:
+
 | Test Suite | Status | Details |
 |------------|--------|---------|
-| **NIST SP 800-22** | ✅ 15/15 passed | `p ≈ 0.5` uniformity |
-| **Dieharder** | ✅ 31/31 passed | All tests clean |
-| **PractRand** | ✅ 8 GB analyzed | No anomalies detected |
-| **TestU01 BigCrush** | ✅ 160/160 passed | 100% acceptance rate |
+| **NIST SP 800-22** | ✅ 15/15 | `p ≈ 0.5` uniformity |
+| **Dieharder** | ✅ 31/31 | All tests pass |
+| **PractRand** | ✅ 8 GB | No anomalies |
+| **TestU01 BigCrush** | ✅ 160/160 | 100% acceptance |
 
 📊 **Full reports**: [`packages/core/proof/`](./packages/core/proof/)
 
----
-
 ### Boot Integrity & Self-Test
 
-Every container startup performs:
+Every container startup:
 
-1. **Integrity Check**  
-   Binary hash verified against signed manifest. Mismatch → service blocked.
+1. **Integrity Check** — Binary hash vs. signed manifest (fail → block)
+2. **Known Answer Test (KAT)** — Core self-test (fail → degraded/block)
+3. **Attestation** — Status exposed at `/version`
 
-2. **Known Answer Test (KAT)**  
-   Entropy core executed with timeout. Failure → degraded mode or block.
+**Enable strict mode:**
 
-3. **Attestation**  
-   Current state exposed at `/version` for remote monitoring.
-
-**Fail-closed mode:**
 ```bash
-docker run -d -e STRICT_FIPS=1 \
+docker run -d \
+  -e STRICT_FIPS=1 \
   pipavlo/r4-local-test:latest
 # → HTTP 503 if selftest ≠ "pass"
 ```
-
----
 
 ### Supply Chain Security
 
@@ -300,10 +462,17 @@ Each release includes:
 - ✍️ `re4_release.tar.gz.asc` — GPG signature
 - 📋 `SBOM.spdx.json` — Software Bill of Materials
 
-**Verify release:**
+**Verify before use:**
+
 ```bash
+# Check integrity
 sha256sum -c re4_release.sha256
+
+# Verify GPG signature
 gpg --verify re4_release.tar.gz.asc
+
+# Review dependencies
+cat SBOM.spdx.json | jq '.packages'
 ```
 
 ---
@@ -314,10 +483,10 @@ gpg --verify re4_release.tar.gz.asc
 |--------|-------|
 | **Throughput** | ~950,000 req/s |
 | **Latency (p99)** | ~1.1 ms |
-| **Max request size** | 1 MB |
+| **Max request** | 1 MB (1,000,000 bytes) |
 | **Entropy bias** | < 10⁻⁶ deviation |
 
-📈 **Benchmarks**: [`docs/proof/benchmarks_summary.md`](./docs/proof/benchmarks_summary.md)
+📈 **Detailed benchmarks**: [`docs/proof/benchmarks_summary.md`](./docs/proof/benchmarks_summary.md)
 
 ---
 
@@ -325,68 +494,143 @@ gpg --verify re4_release.tar.gz.asc
 
 ### Docker + systemd
 
+Create `/etc/systemd/system/r4-entropy.service`:
+
 ```ini
 [Unit]
 Description=R4 Entropy API
 After=network-online.target
+Wants=network-online.target
 
 [Service]
+Type=simple
 Restart=always
+RestartSec=5s
+
+# Load API key from vault/env file
+EnvironmentFile=/etc/r4-entropy.env
+
 ExecStart=/usr/bin/docker run --rm \
+  --name r4-entropy \
   -p 8080:8080 \
   -e API_KEY=${R4_API_KEY} \
-  --name r4-entropy \
+  -e STRICT_FIPS=${R4_STRICT:-1} \
+  --log-driver json-file \
+  --log-opt max-size=100m \
+  --log-opt max-file=10 \
   pipavlo/r4-local-test:latest
+
 ExecStop=/usr/bin/docker stop r4-entropy
 
 [Install]
 WantedBy=multi-user.target
 ```
 
+**Create env file:**
+
+```bash
+echo "R4_API_KEY=your-secure-api-key-here" | sudo tee /etc/r4-entropy.env
+sudo chmod 600 /etc/r4-entropy.env
+```
+
+**Enable and start:**
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable r4-entropy
+sudo systemctl start r4-entropy
+sudo systemctl status r4-entropy
+```
+
 ### Best Practices
 
-✅ Run behind reverse proxy (nginx, traefik, API gateway)  
-✅ Use strong `API_KEY` from secure vault  
-✅ Monitor `/version` endpoint for integrity drift  
-✅ Rate limit per IP at reverse proxy level  
-✅ Internal-only exposure (no public internet)  
+✅ **Reverse proxy** — Run behind nginx/traefik/API gateway  
+✅ **API key management** — Use vault (Hashicorp, AWS Secrets Manager)  
+✅ **Monitoring** — Poll `/version` for integrity drift  
+✅ **Rate limiting** — Configure at reverse proxy level  
+✅ **Network isolation** — Internal-only, no public internet exposure  
+✅ **Logging** — Centralize logs (ELK, CloudWatch, Splunk)  
+✅ **Health checks** — Configure automated restarts  
+✅ **Backups** — Keep audit logs for compliance  
+
+### Example: Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  r4-entropy:
+    image: pipavlo/r4-local-test:latest
+    environment:
+      API_KEY: ${R4_API_KEY}
+      STRICT_FIPS: "1"
+    ports:
+      - "8080:8080"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  nginx-proxy:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - r4-entropy
+```
 
 ---
 
 ## 🔭 PQ VRF Roadmap
 
 **Target**: Q1–Q2 2025  
-**Endpoint**: `/vrf` (Verifiable Random Function)
+**Endpoint**: `/vrf` (Verifiable Random Function with post-quantum crypto)
 
 ### Planned Response
 
 ```json
 {
-  "random": "<entropy_bytes>",
-  "signature": "<dilithium_sig>",
-  "public_key": "<node_pubkey>",
+  "random": "<32_bytes_hex>",
+  "signature": "<dilithium_signature>",
+  "public_key": "<node_public_key>",
   "verified": true,
   "timestamp": "2025-01-15T12:34:56Z"
 }
 ```
 
+### Post-Quantum Cryptography
+
+🔐 **Dilithium-3** — NIST-standardized signature scheme  
+🔒 **Kyber-1024** — Key encapsulation mechanism (lattice-based)
+
 ### Features
 
-- 🔐 **Post-quantum signatures** (Dilithium-3)
-- 🔒 **Key encapsulation** (Kyber-1024)
-- ✅ **Verifiable by anyone** — prove non-manipulation
-- ⚡ **Low latency** — beat Chainlink VRF on speed
+✅ Resistant to quantum computer attacks  
+✅ Verifiable by anyone (public key cryptography)  
+✅ Low latency compared to classical VRFs  
+✅ On-chain verification support (Solidity)  
 
-### Use Cases
+### Use Cases Enabled
 
 | Industry | Application |
 |----------|-------------|
-| **Blockchain** | Validator rotation, leader election |
+| **Blockchain** | Quantum-resistant validator rotation |
 | **ZK-Rollups** | Sequencer seed, prover selection |
 | **Gaming** | Anti-cheat randomness, loot drops |
-| **Lotteries** | Provably fair draws, NFT mints |
+| **Lotteries** | Provably fair draws |
+| **IoT** | Distributed randomness for sensors |
 
-📋 **Spec draft**: [`vrf-spec/`](./vrf-spec/)
+📋 **Specification draft**: [`vrf-spec/`](./vrf-spec/)
 
 ---
 
@@ -395,81 +639,186 @@ WantedBy=multi-user.target
 ```
 r4-monorepo/
 ├── packages/
-│   ├── core/               # Sealed entropy binary + proofs
-│   │   ├── runtime/bin/re4_dump
-│   │   └── proof/          # Statistical validation reports
-│   └── api/                # FastAPI wrapper (open-source)
-├── vrf-spec/               # Post-quantum VRF specification
+│   ├── core/                           # Sealed entropy core
+│   │   ├── runtime/bin/re4_dump        # Compiled binary
+│   │   ├── proof/                      # Statistical validation reports
+│   │   │   ├── nist_sp800_22.txt
+│   │   │   ├── dieharder_results.txt
+│   │   │   └── practrand_results.txt
+│   │   └── manifest/
+│   │       ├── re4_release.sha256      # Hash of binary
+│   │       └── re4_release.tar.gz.asc  # GPG signature
+│   │
+│   └── api/                            # FastAPI wrapper (open-source)
+│       ├── main.py                     # FastAPI application
+│       ├── requirements.txt
+│       └── Dockerfile
+│
+├── vrf-spec/                           # Post-quantum VRF specification
+│   ├── contracts/
+│   │   ├── R4VRFVerifier.sol           # Signature verification
+│   │   └── LotteryR4.sol               # Reference lottery
+│   ├── test/
+│   │   ├── lottery.js
+│   │   └── verify.js
+│   ├── hardhat.config.js
+│   └── package.json
+│
 ├── docs/
-│   ├── USAGE.md
-│   └── DEPLOYMENT.md
-├── SBOM.spdx.json
-└── LICENSE
+│   ├── USAGE.md                        # API usage guide
+│   ├── DEPLOYMENT.md                   # Production deployment
+│   ├── SECURITY.md                     # Security considerations
+│   └── proof/
+│       └── benchmarks_summary.md
+│
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       ├── vrf-tests.yml
+│       └── release.yml
+│
+├── SBOM.spdx.json                      # Software Bill of Materials
+├── LICENSE                             # Proprietary core + MIT wrapper
+└── README.md                           # This file
 ```
 
-**License**: Wrapper code public, sealed core proprietary (HSM model)
+**License**: Wrapper code MIT, sealed core proprietary (HSM model)
 
 ---
 
-## 📊 Use Cases
+## 🧪 Testing
 
-### 1. Blockchain Validators
-```python
-import requests
+### Entropy Core Tests
 
-response = requests.get(
-    "http://r4-node:8080/random?n=32&fmt=hex",
-    headers={"x-api-key": "validator-secret"}
-)
-seed = response.text
-# Use for leader election, committee selection
-```
-
-### 2. Key Generation
 ```bash
-# Generate 256-bit AES key
-curl -H "x-api-key: prod" \
-  "http://r4-internal:8080/random?n=32&fmt=base64" \
-  | base64 -d > aes256.key
+# Run statistical validation suite
+cd packages/core
+make test-fips
+make test-dieharder
+make test-practrand
 ```
 
-### 3. Gaming RNG
-```javascript
-const response = await fetch(
-  'http://r4-api:8080/random?n=8&fmt=hex',
-  { headers: { 'x-api-key': process.env.R4_KEY } }
-);
-const hex = await response.text();
-const roll = parseInt(hex.substring(0, 8), 16) % 100 + 1;
-// Fair dice roll: 1-100
+### VRF Smart Contracts
+
+```bash
+cd vrf-spec
+npm install
+npx hardhat compile
+npx hardhat test
+
+# With gas reporting
+REPORT_GAS=true npx hardhat test
+```
+
+### Integration Tests
+
+```bash
+# Start local R4 instance
+docker run -d -p 8080:8080 -e API_KEY=test pipavlo/r4-local-test:latest
+
+# Run integration tests
+npm run test:integration
 ```
 
 ---
 
-## 📬 Contact
+## 📈 Monitoring & Observability
 
-**Maintainer**: Pavlo Tvardovskyi  
-**Email**: [shtomko@gmail.com](mailto:shtomko@gmail.com)  
-**GitHub**: [@pipavlo82](https://github.com/pipavlo82)  
-**Docker Hub**: [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)
+### Health Check
+
+```bash
+# Continuous monitoring
+watch -n 5 'curl -s http://127.0.0.1:8080/version | jq .'
+```
+
+### Prometheus Metrics (Roadmap)
+
+Future support for `/metrics` endpoint with:
+- Request count
+- Request latency
+- Integrity check status
+- Entropy core health
+
+### Logging
+
+Container logs include:
+- Request timestamp
+- API key (hash)
+- Response size
+- Response time
+- Error details
+
+```bash
+docker logs r4test | tail -100
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit changes (`git commit -am 'Add feature'`)
+4. Push to branch (`git push origin feature/my-feature`)
+5. Open a Pull Request
+
+### Development Setup
+
+```bash
+# Clone and install dependencies
+git clone https://github.com/pipavlo82/r4-monorepo
+cd r4-monorepo
+npm install
+
+# Run tests
+npm test
+
+# Build Docker image locally
+docker build -f packages/api/Dockerfile -t r4-local:dev .
+```
+
+---
+
+## 📬 Contact & Support
+
+**Maintainer**: Pavlo Tvardovskyi
+
+- 📧 **Email**: [shtomko@gmail.com](mailto:shtomko@gmail.com)
+- 🐙 **GitHub**: [@pipavlo82](https://github.com/pipavlo82)
+- 🐳 **Docker Hub**: [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)
 
 ### Enterprise Inquiries
 
-For custom deployments, SLA agreements, or PQ-VRF early access:  
+For custom deployments, SLA agreements, regulatory audits, or PQ-VRF early access:
+
 📧 **shtomko@gmail.com**
+
+---
+
+## 📚 Additional Resources
+
+- [API Usage Guide](./docs/USAGE.md)
+- [Deployment Guide](./docs/DEPLOYMENT.md)
+- [Security Model](./docs/SECURITY.md)
+- [Statistical Proofs](./packages/core/proof/)
+- [VRF Specification](./vrf-spec/)
 
 ---
 
 ## 🏷️ Tags
 
-`#entropy` `#fips` `#pqcrypto` `#rng` `#verifiable` `#docker` `#hsm` `#cybersecurity` `#blockchain` `#web3`
+`#entropy` `#rng` `#fips` `#pqcrypto` `#verifiable` `#docker` `#hsm` `#blockchain` `#web3` `#cryptography` `#randomness`
 
 ---
 
 <div align="center">
 
-**© 2025 Re4ctoR Project** • Built with ⚡ for high-assurance randomness
+**© 2025 Re4ctoR Project**
 
-[⬆ Back to top](#-r4-entropy-appliance)
+Built with ⚡ for high-assurance randomness
+
+[⬆ Back to top](#-r4-monorepo)
 
 </div>
