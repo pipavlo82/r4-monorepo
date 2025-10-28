@@ -1,0 +1,45 @@
+name: Publish r4sdk to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write   # дозволяє GitHub Actions автентифікуватись в PyPI через OIDC (trusted publisher)
+  contents: read
+
+jobs:
+  build-and-publish:
+    name: Build and publish r4sdk
+    runs-on: ubuntu-latest
+
+    # всі кроки нижче будуть виконуватись всередині папки sdk_py_r4/
+    defaults:
+      run:
+        working-directory: sdk_py_r4
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+
+    - name: Install build tooling
+      run: |
+        pip install --upgrade build
+
+    - name: Build wheel & sdist
+      run: |
+        rm -rf dist build *.egg-info
+        python3 setup.py sdist bdist_wheel
+        ls -R dist
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        verbose: true
+        # жодних токенів тут не треба
+        # PyPI звірить, що цей workflow (publish-pypi.yml) у репо pipavlo82/r4-monorepo має право публікувати пакет r4sdk
