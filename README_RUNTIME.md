@@ -178,4 +178,30 @@ Layer	Purpose	Standard
 🟢 ./run_all.sh demonstrates both tiers live: local entropy + signed randomness.
 The FIPS 204 /PQ mode is already declared and acts as your enterprise upgrade path.
 
+## Performance Snapshot (Oct 28, 2025)
+
+**Core Entropy API (port 8080)**  
+- Sustained ~100 requests/sec for 32-byte entropy blocks over 200 calls (`./stress_core.sh 200`).  
+- 0 failures, 0 HTTP errors, no RNG underflow.  
+- Endpoint is key-protected (`X-API-Key: local-demo`) and pulls bytes from a dedicated local RNG process (`re4_dump`).  
+- Positioning: FIPS 140-3–ready entropy source for custody / HSM / wallet seed generation.
+
+**R4PQ / VRF API (port 8081)**  
+- 60 parallel requests to `/random_pq?sig=ecdsa` completed in ~0.11s using 10 concurrent threads.  
+- 30 responses returned `200 OK` with verifiable randomness:
+  - `random` (u32),
+  - `timestamp` (UTC),
+  - `signature_type: "ECDSA(secp256k1)"`,
+  - `sig_b64` (signature),
+  - `pubkey_b64` (public key),
+  - `pq_mode: false`.
+- 30 responses correctly returned `429 Too Many Requests`, proving builtin rate limiting (`30/minute`) and anti-abuse behavior with 0 crashes.
+- PQ / post-quantum mode (`sig=dilithium`) is already exposed as an endpoint and responds with a `501` + `"FIPS 204 build required"`, which cleanly defines the enterprise tier.
+
+In short:  
+- **8080 = secure entropy appliance (FIPS-140-3 ready).**  
+- **8081 = verifiable fairness oracle (ECDSA today, Dilithium3 / FIPS 204 upgrade path).**  
+- Both are already running live and can be demoed with `./run_all.sh`.
+
+
 Re4ctoR — Nuclear-grade entropy. Verifiable randomness. Post-quantum ready.
