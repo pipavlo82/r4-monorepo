@@ -1,3 +1,23 @@
+# ==== local runtime / secrets (added 2025-10-27) ====
+.venv/
+logs/
+*.pid
+keys/
+core/release/
+tracked.txt
+
+# protect sensitive files
+*.key
+*.pem
+*.crt
+*.tar.gz
+*.tgz
+
+# WSL / OS artifacts
+.DS_Store
+.swp
+.swo
+
 # ==== random binary dumps / captures ====
 *.bin
 *.zip
