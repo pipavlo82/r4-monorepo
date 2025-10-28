@@ -4,26 +4,23 @@ import secrets
 import hashlib
 import json
 
-from fastapi import FastAPI, Request, Query
+from fastapi import FastAPI, Request, Query, HTTPException
 from pydantic import BaseModel
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from dotenv import load_dotenv
 
-# локальні модулі підпису
 from api.sign_ecdsa import ecdsa_sign, ecdsa_verify
 from api.sign_dilithium import dilithium_sign, dilithium_verify, PQ_AVAILABLE
-
 
 # -------------------------------------------------
 # ENV / CONFIG
 # -------------------------------------------------
 load_dotenv()
-
 API_KEY    = os.getenv("API_KEY", "demo")
-RATE_LIMIT = os.getenv("RATE_LIMIT", "30/minute")  # напр. "30/minute"
-PORT       = int(os.getenv("PORT", "8081"))        # інформативно, uvicorn задає порт при запуску
+RATE_LIMIT = os.getenv("RATE_LIMIT", "30/minute")
+PORT       = int(os.getenv("PORT", "8081"))
 
 # -------------------------------------------------
 # Rate Limiter + FastAPI app
@@ -45,39 +42,28 @@ app.add_exception_handler(429, _rate_limit_exceeded_handler)
 
 START_TIME = time.time()
 
-
 # -------------------------------------------------
 # Helpers
 # -------------------------------------------------
 def _now_timestamp_utc():
-    """UTC timestamp у форматі YYYY-MM-DD HH:MM:SS (для /version, /random)."""
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
 
 def _now_iso_utc():
-    """UTC ISO timestamp (Z-секундами) для підписаних раундів."""
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
 def _random_hex_256_bits():
-    """256 біт криптографічно сильного рандому у hex (32 байти -> 64 hex chars)."""
     return secrets.token_hex(32)
 
 def _random_u32():
-    """32-бітне криптографічно сильне число як int. Зручно для ігор/лотерей."""
     return int.from_bytes(secrets.token_bytes(4), "little")
 
-
 # -------------------------------------------------
-# Legacy / public endpoints (твоя поточна поведінка)
+# Public/basic endpoints
 # -------------------------------------------------
 
 @app.get("/version")
 @limiter.limit("10/minute")
 def version(request: Request):
-    """
-    Healthcheck endpoint.
-    Це те, що клієнти/інвестори вже можуть викликати, щоб побачити що нода жива.
-    Ми не ламаємо існуючий формат.
-    """
     return {
         "version":    "v1.0.0",
         "build":      "r4-demo",
@@ -86,15 +72,9 @@ def version(request: Request):
         "timestamp":  _now_timestamp_utc()
     }
 
-
 @app.get("/random")
 @limiter.limit(RATE_LIMIT)
 def random_hex(request: Request):
-    """
-    Основний endpoint (історичний/простий).
-    Повертає 256 біт випадковості + timestamp.
-    Без криптопідпису.
-    """
     rnd_hex = _random_hex_256_bits()
     ts     = _now_timestamp_utc()
     return {
@@ -102,20 +82,15 @@ def random_hex(request: Request):
         "timestamp":  ts
     }
 
-
 @app.get("/metrics")
 @limiter.limit("60/minute")
 def metrics(request: Request):
-    """
-    Легка метрика для старого режиму.
-    """
     uptime_s = int(time.time() - START_TIME)
     return {
         "service": "re4ctor-api",
         "uptime_seconds": uptime_s,
         "requests_per_minute_allowed": RATE_LIMIT,
     }
-
 
 # -------------------------------------------------
 # PQ / Provably Fair endpoints
@@ -128,16 +103,20 @@ def random_pq(
     sig: str = Query("dilithium", enum=["ecdsa", "dilithium"])
 ):
     """
-    НОВИЙ endpoint для гемблінгу / аудиторів / інвесторів.
+    /random_pq:
+    - sig=ecdsa     -> classic ECDSA(secp256k1)
+    - sig=dilithium -> post-quantum Dilithium3 (if available)
 
-    Повертає випадкове число + криптографічний підпис:
-    - sig=ecdsa       -> класичний підпис ECDSA(secp256k1)
-    - sig=dilithium   -> пост-квантовий підпис Dilithium3 (FIPS 204 ML-DSA)
-                         якщо PQ_AVAILABLE == True
-
-    Якщо Dilithium не зібраний на цій машині, повернемо статус 501 у JSON,
-    замість того щоб падати.
+    We now also expose on-chain fields (v,r,s,msg_hash,signer_addr)
+    for sig=ecdsa so Solidity can verify with ecrecover.
     """
+
+    # --- auth (basic API key gate like your 8080 node does) ---
+    header_key = request.headers.get("x-api-key")
+    if header_key not in (API_KEY,):
+        # still allow demo mode if you want public? if no -> uncomment below
+        # raise HTTPException(status_code=401, detail="invalid key")
+        pass
 
     rnd_int = _random_u32()
     ts_iso  = _now_iso_utc()
@@ -147,39 +126,53 @@ def random_pq(
         "timestamp": ts_iso
     }
 
+    # ECDSA path (with on-chain fields)
     if sig == "ecdsa":
         proof = ecdsa_sign(payload)
         return {
+            # core randomness data
             "random":          payload["random"],
             "timestamp":       payload["timestamp"],
-            "signature_type":  proof["signature_type"],          # "ECDSA(secp256k1)"
+
+            # signing metadata (human / audit)
+            "signature_type":  proof["signature_type"],
             "sig_b64":         proof["sig_b64"],
             "pubkey_b64":      proof["pubkey_b64"],
-            "hash_alg":        proof["hash_alg"],                # "SHA-256"
+            "hash_alg":        proof["hash_alg"],
+
+            # on-chain verification data
+            "msg_hash":        proof["msg_hash"],      # sha256(message_preimage)
+            "v":               proof["v"],             # uint8 (27 or 28)
+            "r":               proof["r"],             # 0x...
+            "s":               proof["s"],             # 0x...
+            "signer_addr":     proof["signer_addr"],   # 0x... Ethereum-style
+
             "pq_mode":         False
         }
 
-    # sig == "dilithium"
-    if not PQ_AVAILABLE:
-        # graceful fallback: PQ оголошена як фіча, але не зібрана тут
+    # Dilithium (post-quantum) path
+    if sig == "dilithium":
+        if not PQ_AVAILABLE:
+            return {
+                "error": "Dilithium3 signature not available on this build",
+                "pq_required": True,
+                "status": 501,
+                "hint": "Enterprise / FIPS 204 build required"
+            }
+
+        proof = dilithium_sign(payload)
         return {
-            "error": "Dilithium3 signature not available on this build",
-            "pq_required": True,
-            "status": 501,
-            "hint": "Enterprise / FIPS 204 build required"
+            "random":          payload["random"],
+            "timestamp":       payload["timestamp"],
+            "signature_type":  proof["signature_type"],
+            "sig_b64":         proof["sig_b64"],
+            "pubkey_b64":      proof["pubkey_b64"],
+            "hash_alg":        proof["hash_alg"],
+            "pq_mode":         True
         }
 
-    # Якщо PQ_AVAILABLE = True, генеруємо пост-квантовий підпис
-    proof = dilithium_sign(payload)
-    return {
-        "random":          payload["random"],
-        "timestamp":       payload["timestamp"],
-        "signature_type":  proof["signature_type"],              # "Dilithium3 (FIPS 204 ML-DSA)"
-        "sig_b64":         proof["sig_b64"],
-        "pubkey_b64":      proof["pubkey_b64"],
-        "hash_alg":        proof["hash_alg"],                    # "SHA-256"
-        "pq_mode":         True
-    }
+    # should never hit here
+    raise HTTPException(status_code=400, detail="unsupported sig type")
 
 
 class VerifyRequest(BaseModel):
@@ -189,22 +182,9 @@ class VerifyRequest(BaseModel):
     sig_b64: str
     pubkey_b64: str
 
-
 @app.post("/verify_pq")
 @limiter.limit("30/minute")
 def verify_pq(request: Request, body: VerifyRequest):
-    """
-    Аудитор / гравець / регулятор надсилає:
-      - random
-      - timestamp
-      - signature_type
-      - sig_b64
-      - pubkey_b64
-
-    Ми відповідаємо valid: true/false.
-    Підтримуємо обидва типи: ECDSA та Dilithium3.
-    """
-
     payload = {
         "random":    body.random,
         "timestamp": body.timestamp
@@ -213,8 +193,6 @@ def verify_pq(request: Request, body: VerifyRequest):
     if body.signature_type.startswith("ECDSA"):
         ok = ecdsa_verify(payload, body.sig_b64, body.pubkey_b64)
     elif "Dilithium" in body.signature_type:
-        # Якщо Dilithium недоступний у цій збірці, вважаймо невалідним,
-        # бо верифайер не може перевірити підпис.
         if not PQ_AVAILABLE:
             ok = False
         else:
@@ -227,14 +205,9 @@ def verify_pq(request: Request, body: VerifyRequest):
         "checked_at": _now_iso_utc()
     }
 
-
 @app.get("/metrics_pq")
 @limiter.limit("60/minute")
 def metrics_pq(request: Request):
-    """
-    PQ-facing метрики / маркетинг для ліцензіара казино.
-    Показуємо стан PQ-режиму чесно.
-    """
     uptime_s = int(time.time() - START_TIME)
     return {
         "service": "re4ctor-pq-api",
@@ -244,10 +217,7 @@ def metrics_pq(request: Request):
             "dilithium" if PQ_AVAILABLE else "dilithium(unavailable)"
         ],
         "fips_status": {
-            # rng_core - це твоя історія про те що ядро готується під FIPS 140-3
             "rng_core": "FIPS 140-3 ready",
-            # pq_signature - це наша маркетингова правда:
-            # якщо PQ_AVAILABLE == False -> ця конкретна збірка без liboqs
             "pq_signature": (
                 "FIPS 204 (Dilithium3 class)"
                 if PQ_AVAILABLE else
@@ -259,3 +229,4 @@ def metrics_pq(request: Request):
             "sig=dilithium requires enterprise PQ build."
         ),
     }
+
