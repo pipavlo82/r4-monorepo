@@ -17,7 +17,7 @@
 - [Python SDK](#-python-sdk)
 - [PQ/VRF Node](#-pqvrf-node-8081)
 - [On-Chain Verifier](#-on-chain-verifier)
-- [Security](#-security--proofs)
+- [Security](#security)
 - [Roadmap](#-roadmap-2025)
 - [Competitive Analysis](#-r4-vs-competitors)
 - [LotteryR4](#-lotteryr4--provably-fair-on-chain-lottery)
