@@ -154,6 +154,22 @@ Demonstrates:
 <a id="security"></a>
 ## 🛡️ Security & Proofs
 ...
+### FIPS 140-3 / FIPS 204 Path
+
+- The sealed entropy core ships with:
+  - Startup Known Answer Test (KAT)
+  - Integrity hash check vs signed manifest
+  - Fail-closed mode (`STRICT_FIPS=1`)
+  - SBOM (`SBOM.spdx.json`) for supply-chain traceability
+  - Statistical proof bundles (Dieharder, PractRand, BigCrush) under `packages/core/proof/`
+
+- This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared for independent lab submission under FIPS 140-3 and post-quantum profiles (FIPS 204 / ML-DSA and FIPS 203 / ML-KEM).
+
+- Target timeline:
+  - **Q1 2026:** submission to accredited lab for validation
+  - **2026:** certification decision window
+
+We describe the current status as **"FIPS 204 Ready"** because all PQ signing code paths (Dilithium3) and KEM (Kyber) are implemented and gated behind controlled builds, and the module enforces self-test + attestation on boot. This is not an issued certificate yet — certification review is in progress.
 
 **Statistical validation** (packages/core/proof/):
 - NIST SP 800-22: 15/15 ✅
@@ -181,12 +197,14 @@ Demonstrates:
 
 ## 📅 Roadmap 2025
 
-| Q | Milestone | Status |
-|---|-----------|--------|
-| Q1 | Dilithium3 (ML-DSA / FIPS 204) signing | ✅ Done |
-| Q2 | Kyber KEM integration | ✅ Done |
-| Q3 | Solidity audits + testnet | ✅ Done |
-| Q4 | FIPS 140-3 / 204 lab submission | 🚀 In progress |
+| Q        | Milestone                                                | Status            |
+|----------|----------------------------------------------------------|-------------------|
+| Q1 2025  | Dilithium3 (ML-DSA / FIPS 204) signing in PQ node        | ✅ Shipped        |
+| Q2 2025  | Kyber KEM integration for VRF key exchange               | ✅ Shipped        |
+| Q3 2025  | Solidity verifier audit + public testnet (Sepolia)       | ✅ Complete       |
+| Q4 2025  | Attestation + integrity self-test hardening              | ✅ Complete       |
+| Q1 2026  | Submit module package (sealed core + SBOM + KAT logs) to lab for FIPS 140-3 / FIPS 204 review | 🚀 In progress |
+| 2026     | FIPS 140-3 / FIPS 204 certification decision (lab)       | ⏳ Pending lab    |
 
 ---
 
