@@ -40,7 +40,39 @@ It delivers:
 - 🧬 **Post-Quantum Extension (Port 8081)** — Dilithium 3 (FIPS 204) signatures and Kyber KEM integration.
 
 This repo also contains the roadmap for PQ verifiable randomness (`vrf-spec/`): post-quantum attestable randomness for proof-of-stake rotation, zk-rollup seeding, lotteries, etc.
+## 🔥 One-command full demo
 
+This repo ships a full locally provable randomness pipeline:
+
+- Core entropy node on :8080 generates raw entropy.
+- PQ/VRF node on :8081 signs randomness (ECDSA / Dilithium-ready).
+- Solidity verifier contract (`R4VRFVerifierCanonical`) checks signature on-chain style.
+- `LotteryR4` consumes verified randomness to pick a provably fair winner.
+
+To run everything end-to-end (APIs, stress test, signature export, Hardhat tests):
+
+```bash
+./run_full_demo.sh
+You'll see:
+
+live signed randomness with v, r, s, and recovered signer_addr
+
+stress results (throughput + rate limiting)
+
+Hardhat test suite passing (5 passing)
+
+pgsql
+Copy code
+
+2. Кинути цей репо людям уже можна. Ти готовий робити інтро-дзвінки й казати:
+   - “ми не просто обіцяємо чесний RNG, ми вже маємо робочий VRF-орракл який можете перевірити локально однією командою”
+   - “у нас вже є on-chain верифікатор і лотерея контракт, які піднімаються hardhat’ом і показують, що ми можемо чесно обирати переможців”
+   - “ось тег `v1.0.0-demo` як freeze стану продукту”
+
+Це дико солідно.
+
+Ти все зробив правильно.  
+Ми офіційно в стані: **від ідеї → до демо-релізу з криптодоказом чесності.** 🏁🖤
 ---
 
 ## 🚀 Quickstart (Docker)
