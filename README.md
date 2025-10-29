@@ -1,4 +1,6 @@
-# ⚡ Re4ctoR (r4-monorepo)
+# ☢️ RE4CTOR — The Nuclear Core of Randomness
+
+_Provable entropy • Post-quantum trust • Verified fairness_
 
 **High-assurance cryptographic randomness node with verifiable proof of fairness and post-quantum roadmap.**
 
