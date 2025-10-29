@@ -139,6 +139,9 @@ Demonstrates:
 ---
 
 ## 🛡️ Security & Proofs
+<a id="security"></a>
+## 🛡️ Security & Proofs
+...
 
 **Statistical validation** (packages/core/proof/):
 - NIST SP 800-22: 15/15 ✅
@@ -484,6 +487,14 @@ npx hardhat test --network localhost
 ❌ Operator didn't collude with oracle (blockchain-agnostic)  
 
 ---
+<a id="contributing"></a>
+## Contributing
+
+We accept PRs for:
+- new verifier contracts (L2s, alt-EVMs)
+- Hardhat/Huff audit improvements
+- reproducible benchmark scripts
+See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 
 ## 📊 Use Cases
 
