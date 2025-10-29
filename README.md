@@ -144,7 +144,7 @@ Demonstrates:
 - ❌ Tampered randomness → reverted
 
 ---
-
+<a id="security"></a>
 ## 🛡️ Security & Proofs
 
 ### FIPS 140-3 / FIPS 204 Path
