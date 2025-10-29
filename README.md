@@ -192,6 +192,12 @@ We describe the current status as **"FIPS 204 Ready"** because all PQ signing co
 - re4_release.sha256
 - re4_release.tar.gz.asc (GPG)
 - SBOM.spdx.json
+---
+
+## 🔬 Entropy Source Validation (ESV)
+
+For entropy collection, statistical tests, and reproducible FIPS/NIST validation artifacts,  
+see the dedicated guide: [**ESV_README.md**](./ESV_README.md)
 
 ---
 
