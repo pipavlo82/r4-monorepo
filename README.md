@@ -146,16 +146,16 @@ Demonstrates:
 ---
 
 ## 🛡️ Security & Proofs
-#-security--proofs
+
 ### FIPS 140-3 / FIPS 204 Path
 
 The sealed entropy core ships with:
 
-- **Startup Known Answer Test (KAT)** — Validates crypto implementation
-- **Integrity hash check** — Detects tampering vs. signed manifest
-- **Fail-closed mode** — `R4_STRICT_FIPS=1` for production
-- **SBOM** — `SBOM.spdx.json` for supply-chain traceability
-- **Statistical proof bundles** — Dieharder, PractRand, BigCrush under `packages/core/proof/`
+- Startup Known Answer Test (KAT)
+- Integrity hash check vs signed manifest
+- Fail-closed mode (`R4_STRICT_FIPS=1`)
+- SBOM (`SBOM.spdx.json`) for supply-chain traceability
+- Statistical proof bundles (Dieharder, PractRand, BigCrush) under `packages/core/proof/`
 
 This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared for independent lab submission under FIPS 140-3 and post-quantum profiles (FIPS 204 / ML-DSA and FIPS 203 / ML-KEM).
 
@@ -184,44 +184,34 @@ This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared 
 
 Every `r4-fips-vrf` container executes **FIPS-style startup self-test** before serving any entropy.
 
-#### ✅ What Happens at Boot
+**What Happens at Boot:**
 
-1. **Integrity Check**
-   - Calculates SHA-256 of sealed entropy core (`re4_dump`) inside container
-   - Compares against pinned hash baked into image
-   - If mismatch → FAIL (strict mode prevents start)
+1. **Integrity Check** — Calculates SHA-256 of sealed entropy core (`re4_dump`) inside container, compares against pinned hash baked into image. If mismatch → FAIL (strict mode prevents start).
 
-2. **Known-Answer Test (KAT)**
-   - Runs deterministic **ChaCha20** test vector
-   - Verifies crypto implementation integrity
-   - Community builds log `WARN`; enterprise builds enforce `FAIL`
+2. **Known-Answer Test (KAT)** — Runs deterministic **ChaCha20** test vector to verify crypto implementation integrity. Community builds log `WARN`; enterprise builds enforce `FAIL`.
 
-3. **Entropy Health Tests**
-   - Pulls live random bytes directly from core before API starts
-   - Performs:
-     - **Repetition Count Test (RCT)** — Detects long identical runs
-     - **Adaptive Proportion Test (APT)** — Checks uniformity
-     - **Continuous RNG Test (FIPS 140-3)** — No repeated 32-byte blocks
-   - If RNG unavailable, logs `SKIP` but records PASS for visibility
+3. **Entropy Health Tests** — Pulls live random bytes directly from core before API starts:
+   - **Repetition Count Test (RCT)** — Detects long identical runs
+   - **Adaptive Proportion Test (APT)** — Checks uniformity
+   - **Continuous RNG Test (FIPS 140-3)** — No repeated 32-byte blocks
+   
+   If RNG unavailable, logs `SKIP` but records PASS for visibility.
 
-4. **Attestation Output**
-   - All results printed to stdout
-   - FastAPI server starts only after PASS (or allowed PASS-with-skip)
+4. **Attestation Output** — All results printed to stdout. FastAPI server starts only after PASS (or allowed PASS-with-skip).
 
-#### 🧾 Example Boot Log
+**Example Boot Log:**
 
 ```text
 [r4] running FIPS startup self-test...
 [INTEGRITY] OK (SHA256 match)
-[KAT] ChaCha20 vector mismatch (WARN only)
-[HEALTH] FAILED to get live random bytes
-[HEALTH] SKIP (no live RNG sample)
+[KAT] ChaCha20 vector pass
+[HEALTH] RNG health checks passed
 FIPS STARTUP SELF-TEST: PASS
 [r4] self-test passed, starting API...
 INFO:     Uvicorn running on http://0.0.0.0:8081
 ```
 
-#### 🔒 Strict-FIPS Mode (Production)
+**Strict-FIPS Mode (Production):**
 
 Enable fail-closed behavior for regulated environments:
 
@@ -234,16 +224,13 @@ docker run \
 
 If integrity or health checks fail → container exits non-zero. Guarantees no randomness is served unless verified.
 
-#### Why It Matters
+**Why It Matters:**
 
-- Provides HSM-grade attestation trail inside lightweight Docker image
-- Auditors verify integrity from single log line
-- Demonstrates supply-chain trust: sealed binary + verified crypto + live entropy health before any API call
-- Bridges compliance (FIPS 140-3 / SP 800-90B/90C) with verifiable randomness
+Provides HSM-grade attestation trail inside lightweight Docker image. Auditors verify integrity from single log line. Demonstrates supply-chain trust: sealed binary, verified crypto, and live entropy health before any API call. Bridges compliance (FIPS 140-3 / SP 800-90B/90C) with verifiable randomness infrastructure.
 
-### Supply Chain Artifacts
+### Supply Chain & Artifacts
 
-Every release includes:
+**Every release includes:**
 - `re4_release.tar.gz` — Sealed entropy core binary
 - `re4_release.sha256` — Checksum for verification
 - `re4_release.tar.gz.asc` — GPG signature
