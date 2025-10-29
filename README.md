@@ -23,7 +23,7 @@
 - [LotteryR4](#-lotteryr4--provably-fair-on-chain-lottery)
 - [Contributing](#contributing)
 - [Contact](#-contact)
-- [README.md](../README.md)
+
 ---
 
 ## 🧠 Overview
