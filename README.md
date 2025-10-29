@@ -23,7 +23,7 @@
 - [LotteryR4](#-lotteryr4--provably-fair-on-chain-lottery)
 - [Contributing](#contributing)
 - [Contact](#-contact)
-
+- [README.md](../README.md)
 ---
 
 ## 🧠 Overview
@@ -175,6 +175,10 @@ This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared 
 
 For entropy collection, statistical tests, and reproducible FIPS/NIST validation artifacts,  
 see the dedicated guide: [**ESV_README.md**](./ESV_README.md)
+For detailed testing procedures and artifact reproduction:
+→ [ESV Package Documentation](./ESV_README.md)
+All entropy source test artifacts, manifests, and statistical reports 
+are available under `esv_artifacts/` for regulatory audit.
 
 ### Statistical Validation
 
@@ -239,11 +243,6 @@ docker run \
 - re4_release.tar.gz.asc (GPG)
 - SBOM.spdx.json
 ---
-
-## 🔬 Entropy Source Validation (ESV)
-
-For entropy collection, statistical tests, and reproducible FIPS/NIST validation artifacts,  
-see the dedicated guide: [**ESV_README.md**](./ESV_README.md)
 
 ---
 
