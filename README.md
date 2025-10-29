@@ -740,7 +740,6 @@ Player 3 ──┘
 
 **Fairness you can prove. On-chain. Cryptographically.**
 
-[Main README](../README.md) • [Contributing](../CONTRIBUTING.md) • [Sponsors](../SPONSORS.md)
 
 </div>
 ## 🗺️ Repo Map
