@@ -5,22 +5,20 @@ This directory contains **raw generator test logs** for the sealed entropy core.
 These logs are produced by running the internal RNG output through standard statistical batteries under controlled conditions.  
 They are published so auditors, validators, regulators, and casino compliance teams can independently review output quality.
 
-## What's here
+### 1. BigCrush full output
+- [bigcrush_full_20251020_140456.txt.gz](https://github.com/pipavlo82/re4ctor-core/blob/main/artifacts/bigcrush_full_20251020_140456.txt.gz)
+- Full output from **TestU01 BigCrush**
+- Result: **PASS**
 
-### 1. `bigcrush_full_<timestamp>.txt.gz`
-- Full output from TestU01 BigCrush.
-- BigCrush is one of the strictest statistical batteries for RNG quality.
-- Our result: **PASS** (no catastrophic p-value anomalies).
+### 2. Dieharder full output
+- [dieharder_20251020_125859.txt.gz](https://github.com/pipavlo82/re4ctor-core/blob/main/artifacts/dieharder_20251020_125859.txt.gz)
+- Result: **PASS (31/31)**
 
-### 2. `dieharder_<timestamp>.txt.gz`
-- Full output from Dieharder.
-- Covers legacy Diehard + newer NIST-like tests.
-- Our result: **PASS (31/31)** in summaries.
+### 3. PractRand full output
+- [practrand_20251020_133922.txt.gz](https://github.com/pipavlo82/re4ctor-core/blob/main/artifacts/practrand_20251020_133922.txt.gz)
+- Run: ~8+ GB, **no anomalies**
 
-### 3. `practrand_<timestamp>.txt.gz`
-- PractRand continuous stream test.
-- Feeds many GB of RNG output across multiple analyzers.
-- Our run: **8+ GB**, no anomalies detected.
+
 
 ---
 
