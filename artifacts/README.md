@@ -7,20 +7,21 @@ They are published so auditors, validators, regulators, and casino compliance te
 
 ## What's here
 
-### 1. `bigcrush_full_<timestamp>.txt.gz`
-- Full output from TestU01 BigCrush.
-- BigCrush is one of the strictest statistical batteries for RNG quality.
-- Our result: **PASS** (no catastrophic p-value anomalies).
+### 1. [bigcrush_full_<timestamp>.txt.gz](./bigcrush_full_20251020_140456.txt.gz)
+- Full output from **TestU01 BigCrush**  
+- One of the strictest statistical batteries for RNG quality  
+- Result: **PASS** (no catastrophic p-value anomalies)
 
-### 2. `dieharder_<timestamp>.txt.gz`
-- Full output from Dieharder.
-- Covers legacy Diehard + newer NIST-like tests.
-- Our result: **PASS (31/31)** in summaries.
+### 2. [dieharder_<timestamp>.txt.gz](./dieharder_20251020_125859.txt.gz)
+- Full output from **Dieharder**  
+- Covers legacy Diehard + newer NIST-like tests  
+- Result: **PASS (31/31)** in summaries
 
-### 3. `practrand_<timestamp>.txt.gz`
-- PractRand continuous stream test.
-- Feeds many GB of RNG output across multiple analyzers.
-- Our run: **8+ GB**, no anomalies detected.
+### 3. [practrand_<timestamp>.txt.gz](./practrand_20251020_133922.txt.gz)
+- **PractRand** continuous stream test  
+- Feeds many GB of RNG output across multiple analyzers  
+- Run: **8 + GB**, no anomalies detected
+
 
 ---
 
