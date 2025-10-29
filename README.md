@@ -146,7 +146,7 @@ Demonstrates:
 ---
 
 ## 🛡️ Security & Proofs
-
+#-security--proofs
 ### FIPS 140-3 / FIPS 204 Path
 
 The sealed entropy core ships with:
