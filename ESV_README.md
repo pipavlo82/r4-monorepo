@@ -129,18 +129,7 @@ Creates consolidated summaries of all test runs directly inside the report.
 
 ---
 
-## 🔗 Integration with Main README
 
-Add this reference to the main [README.md](../README.md):
-
-```markdown
-### Entropy Source Validation
-
-For detailed testing procedures and artifact reproduction:
-→ [ESV Package Documentation](./ESV_README.md)
-
-All entropy source test artifacts, manifests, and statistical reports 
-are available under `esv_artifacts/` for regulatory audit.
 ```
 
 ---
