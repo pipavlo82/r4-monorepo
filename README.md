@@ -13,7 +13,19 @@
 
 ## 📋 Table of Contents
 
-[Overview](#-overview) • [One-Command Demo](#-one-command-demo) • [Docker Quickstart](#-docker-quickstart-8080) • [Python SDK](#-python-sdk) • [PQ/VRF Node](#-pqvrf-node-8081) • [On-Chain Verifier](#-on-chain-verifier) • [Security](#-security--proofs) • [Roadmap](#-roadmap-2025) • [Competition](#-r4-vs-competitors) • [Contributing](#contributing) • [Contact](#-contact)
+## 📋 Table of Contents
+
+[Overview](#-overview) •
+[One-Command Demo](#-one-command-demo) •
+[Docker Quickstart](#-docker-quickstart-8080) •
+[Python SDK](#-python-sdk) •
+[PQ/VRF Node](#-pqvrf-node-8081) •
+[On-Chain Verifier](#-on-chain-verifier) •
+[Security](#security) •
+[Roadmap](#-roadmap-2025) •
+[Competition](docs/COMPETITION.md) •
+[Contributing](#contributing) •
+[Contact](#-contact)
 
 </div>
 
