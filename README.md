@@ -23,7 +23,7 @@
 [On-Chain Verifier](#-on-chain-verifier) •
 [Security](#security) •
 [Roadmap](#-roadmap-2025) •
-[Competition](docs/COMPETITION.md) •
+[Competition](docs/COMPETITORS.md) •
 [Contributing](#contributing) •
 [Contact](#-contact)
 
