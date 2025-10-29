@@ -89,3 +89,12 @@ vrf-spec/node_modules/
 vrf-spec/artifacts/
 vrf-spec/cache/
 vrf-spec/coverage/
+# ESV artifacts (large)
+esv_artifacts/samples/
+esv_artifacts/rng_reports/
+esv_package_*.zip
+# STS build dir (if any)
+sts-2.1.2/
+# OS/editor
+.DS_Store
+*.swp

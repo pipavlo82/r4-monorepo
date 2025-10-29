@@ -233,21 +233,17 @@ docker run \
   r4-fips-vrf:latest
 ```
 
-If integrity or health checks fail → container exits non-zero. Guarantees no randomness is served unless verified.
+**Supply chain:**
+- re4_release.tar.gz
+- re4_release.sha256
+- re4_release.tar.gz.asc (GPG)
+- SBOM.spdx.json
+---
 
-**Why It Matters:**
+## 🔬 Entropy Source Validation (ESV)
 
-Provides HSM-grade attestation trail inside lightweight Docker image. Auditors verify integrity from single log line. Demonstrates supply-chain trust: sealed binary, verified crypto, and live entropy health before any API call. Bridges compliance (FIPS 140-3 / SP 800-90B/90C) with verifiable randomness infrastructure.
-
-### Supply Chain & Artifacts
-
-**Every release includes:**
-- `re4_release.tar.gz` — Sealed entropy core binary
-- `re4_release.sha256` — Checksum for verification
-- `re4_release.tar.gz.asc` — GPG signature
-- `SBOM.spdx.json` — Software Bill of Materials
-
-Full raw test logs (BigCrush/Dieharder/PractRand) published under [`artifacts/`](./artifacts/) for external review and regulatory audit.
+For entropy collection, statistical tests, and reproducible FIPS/NIST validation artifacts,  
+see the dedicated guide: [**ESV_README.md**](./ESV_README.md)
 
 ---
 

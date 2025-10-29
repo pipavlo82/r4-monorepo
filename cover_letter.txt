@@ -1,0 +1,9 @@
+To: FIPS Validation Laboratory / Recipient
+Subject: Submission for Entropy Source Validation (ESV) — RE4CTOR
+
+Attached: esv_artifacts/ (raw samples, test reports, logs, and ESV_REPORT.md)
+
+Summary:
+- Purpose: entropy source validation for RE4CTOR entropy core.
+- Recommended tests: NIST SP800-90B estimator, PractRand, dieharder, NIST STS.
+- Reproduction steps: run ./collect_samples.sh then ./reproduce_and_test.sh
