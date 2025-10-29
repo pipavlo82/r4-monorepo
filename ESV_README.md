@@ -190,7 +190,6 @@ Lab Submission: FIPS 140-3 / FIPS 204
 
 ---
 
-## 📞 Support
 
 **Questions about ESV package?**
 - 📧 Email: [shtomko@gmail.com](mailto:shtomko@gmail.com)
