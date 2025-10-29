@@ -2,15 +2,11 @@
 
 End-to-end view of how R4 stacks up against VRF oracles, public beacons, cloud HSMs, and casino RNG providers.
 
-<div align="center">
-
-[Quick Comparison](#-quick-head-to-head) • [VRF Providers](#-vrf-providers-on-chain-randomness) • [Entropy Services](#-entropy--rng-services) • [Beacons](#️-blockchain-randomness-beacons) • [Gaming RNG](#-gaming-rng-services) • [Enterprise HSM](#-enterprise-hsm--cloud-kms) • [Decision Tree](#-decision-tree) • [Positioning](#-r4-competitive-positioning)
-
-</div>
-
 ---
 
 ## ⚠️ Context for Readers
+...
+
 
 **R4 right now:**
 - Single-signer / self-hosted
