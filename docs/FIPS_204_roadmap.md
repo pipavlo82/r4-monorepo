@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Q4
-- ✅ ✅ ✅ **VRF PoC (Dilithium): готово.**
+- ✅ ✅ ✅ **VRF PoC (Dilithium):READY.**
 - IPC hardening: rate caps per connection, ops guide for key rotation.
 - CI polishing: tamper test, smoke build for clients.
 
