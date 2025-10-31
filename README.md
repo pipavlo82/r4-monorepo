@@ -1,5 +1,3 @@
-
----
 # ☢️ RE4CTOR — The Nuclear Core of Randomness
 
 > **Verifiable entropy • Post-quantum VRF • Attested boot • On-chain fairness you can prove**
@@ -28,6 +26,7 @@
 
 ---
 
+<a id="overview"></a>
 ## 🧠 Overview
 
 RE4CTOR is a **sealed entropy appliance + verifiable randomness pipeline**.
@@ -42,6 +41,7 @@ RE4CTOR is a **sealed entropy appliance + verifiable randomness pipeline**.
 
 ---
 
+<a id="demo"></a>
 ## 🚀 One-Command Demo
 
 ```bash
@@ -54,13 +54,14 @@ Boots both nodes, stress-tests them, exports signed randomness, runs Solidity ve
 - ✅ PQ/VRF API (:8081) returning ECDSA signatures
 - ✅ 100 req/sec to :8080, 0 errors
 - ✅ :8081 stress showing 200 OK vs 429 rate-limited
-- ✅ Hardhat: 5 tests passing
+- ✅ Hardhat: 6 tests passing
 - ✅ LotteryR4 picks winner on-chain
 
 If you see "5 passing", you've proven fairness locally. 🎉
 
 ---
 
+<a id="docker"></a>
 ## 🐳 Docker Quickstart (:8080)
 
 ```bash
@@ -82,6 +83,7 @@ curl -H "X-API-Key: demo" \
 
 ---
 
+<a id="python-sdk"></a>
 ## 🐍 Python SDK
 
 ```bash
@@ -100,9 +102,10 @@ print(f"🔐 Random: {random_bytes.hex()}")
 
 ---
 
+<a id="pq-vrf-node"></a>
 ## 🔐 PQ/VRF Node (:8081)
 
-Returns randomness + signature proof for on-chain verification.
+Returns randomness + signature proof for on-chain verification. The API supports dual-mode operation, returning both ECDSA (EIP-191) and optional post-quantum ML-DSA signatures.
 
 ```bash
 curl -H "X-API-Key: demo" \
@@ -127,6 +130,7 @@ Enterprise build (`?sig=dilithium`) returns Dilithium3/ML-DSA (FIPS 204) signatu
 
 ---
 
+<a id="onchain-verifier"></a>
 ## 🧱 On-Chain Verifier
 
 Solidity contracts under `vrf-spec/contracts/`:
@@ -146,6 +150,7 @@ Demonstrates:
 
 ---
 
+<a id="security"></a>
 ## 🛡️ Security & Proofs
 
 ### FIPS 140-3 / FIPS 204 Path
@@ -241,6 +246,7 @@ docker run \
 
 ---
 
+<a id="roadmap"></a>
 ## 📅 Roadmap 2025
 
 | Q | Milestone | Status |
@@ -254,6 +260,7 @@ docker run \
 
 ---
 
+<a id="competition"></a>
 ## 🥊 R4 vs Competitors
 
 Full breakdown: [docs/COMPETITION.md](docs/COMPETITION.md)
@@ -271,6 +278,7 @@ Full breakdown: [docs/COMPETITION.md](docs/COMPETITION.md)
 
 ---
 
+<a id="lottery"></a>
 ## 🎲 LotteryR4 — Provably Fair On-Chain Lottery
 
 **Solidity reference implementation for cryptographically fair lottery using RE4CTOR randomness.**
@@ -347,6 +355,8 @@ Response:
 
 #### **Step 3: Operator Calls drawWinner**
 
+> **Note:** API returns `random` as an integer. On-chain, we must cast it to `bytes32`.
+
 ```solidity
 function drawWinner(
     bytes32 randomness,
@@ -367,6 +377,17 @@ function drawWinner(
     // Emit for audit trail
     emit WinnerSelected(winner, winnerIndex, randomness);
 }
+```
+
+**In JavaScript:**
+
+```javascript
+const randomness = Number(data.random);
+const randomnessBytes32 = ethers.toBeHex(randomness, 32); // Cast to bytes32
+const tx = await lottery.drawWinner(randomnessBytes32, v, r, s);
+const rc = await tx.wait();
+const ev = rc.logs.find(l => l.fragment?.name === 'WinnerSelected');
+console.log('Winner:', ev?.args?.winner);
 ```
 
 #### **Step 4: Contract Verifies Signature**
@@ -427,7 +448,7 @@ require(winner == players[expectedIndex]);
 cd vrf-spec
 
 # Install dependencies
-npm install
+npm ci
 
 # Compile contracts
 npx hardhat compile
@@ -435,7 +456,7 @@ npx hardhat compile
 # Run tests
 npx hardhat test
 
-# Expected: ✔ 5 tests passing
+# Expected: ✔ 6 tests passing
 ```
 
 **Test Output:**
@@ -622,19 +643,26 @@ s = int(data["s"], 16)
 **Step 4: On-Chain: Call drawWinner**
 
 ```javascript
-const tx = await lottery.drawWinner(randomness, v, r, s);
-const receipt = await tx.wait();
-const event = receipt.events.find(e => e.event === 'WinnerSelected');
-console.log(`Winner: ${event.args.winner}`);
+const randomness = Number(data.random);
+const randomnessBytes32 = ethers.toBeHex(randomness, 32); // Cast to bytes32
+const tx = await lottery.drawWinner(randomnessBytes32, v, r, s);
+const rc = await tx.wait();
+const ev = rc.logs.find(l => l.fragment?.name === 'WinnerSelected');
+console.log(`Winner: ${ev?.args?.winner}`);
 ```
 
 **Step 5: Audit**
 
 ```javascript
-const winner = await lottery.drawWinner(randomness, v, r, s);
-const expectedIndex = randomness % (await lottery.playerCount());
+const tx = await lottery.drawWinner(randomnessBytes32, v, r, s);
+const rc = await tx.wait();
+const ev = rc.logs.find(l => l.fragment?.name === 'WinnerSelected');
+
+const winner = ev?.args?.winner;
+const expectedIndex = BigInt(randomness) % BigInt(await lottery.playerCount());
 const expectedWinner = await lottery.players(expectedIndex);
-assert(winner === expectedWinner);
+
+console.assert(winner === expectedWinner, 'Fairness check passed!');
 ```
 
 ### ❓ FAQ
@@ -661,6 +689,7 @@ assert(winner === expectedWinner);
 
 ---
 
+<a id="repository-structure"></a>
 ## 🗺️ Repository Structure
 
 ```
@@ -674,6 +703,7 @@ r4-monorepo/
 │
 ├── packages/core/
 │   ├── runtime/bin/re4_dump     (sealed entropy core)
+│   │                             (community images ship a tiny stub at docker/stubs/re4_dump for CI sanity checks)
 │   ├── proof/                   (Dieharder/PractRand/BigCrush results)
 │   └── manifest/                (sha256, GPG sig, SBOM)
 │
@@ -716,6 +746,7 @@ r4-monorepo/
 
 ---
 
+<a id="contributing"></a>
 ## Contributing
 
 We accept PRs for:
@@ -728,6 +759,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 
 ---
 
+<a id="support"></a>
 ## 📞 Support
 
 **Documentation:**
@@ -748,6 +780,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 
 ---
 
+<a id="contact"></a>
 ## 📬 Contact
 
 **Maintainer:** Pavlo Tvardovskyi
