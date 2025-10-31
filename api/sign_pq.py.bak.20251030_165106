@@ -1,0 +1,76 @@
+import os, json, base64, hashlib, time
+import oqs
+
+# Нормалізація назв → ML-DSA (NIST Dilithium)
+ALIASES = {
+    "dilithium2":"ML-DSA-44",
+    "dilithium3":"ML-DSA-65",
+    "dilithium5":"ML-DSA-87",
+    "ml-dsa-44":"ML-DSA-44",
+    "ml-dsa-65":"ML-DSA-65",
+    "ml-dsa-87":"ML-DSA-87",
+}
+def normalize(name: str) -> str:
+    return ALIASES.get(name.strip().lower(), name)
+
+SCHEME = normalize(os.environ.get("PQ_SCHEME","ML-DSA-65"))
+KEYDIR = os.path.expanduser("~/.re4ctor/keys")
+PK_PATH = os.path.join(KEYDIR, f"{SCHEME}.pk")
+SK_PATH = os.path.join(KEYDIR, f"{SCHEME}.sk")
+
+def _split_kp(kp):
+    # Повертає (pk, sk) з будь-якої форми, яку дає liboqs-python
+    if isinstance(kp, (bytes, bytearray)):              # рідко: лише pk
+        return bytes(kp), None
+    if isinstance(kp, (tuple, list)) and len(kp) >= 1:  # найчастіше: (pk, sk)
+        pk = kp[0]
+        sk = kp[1] if len(kp) > 1 else None
+        return pk, sk
+    if hasattr(kp, "public_key") and hasattr(kp, "secret_key"):
+        return kp.public_key, kp.secret_key
+    # Фолбек — спроба трактувати як buffer-протокол
+    try:
+        b = bytes(kp)
+        return b, None
+    except Exception:
+        raise TypeError(f"Unknown keypair type: {type(kp)}")
+
+def _atomic_write(path: str, data: bytes):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = f"{path}.tmp"
+    with open(tmp, "wb") as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+def _load_or_create_keys():
+    if os.path.exists(PK_PATH) and os.path.exists(SK_PATH):
+        pk = open(PK_PATH, "rb").read()
+        sk = open(SK_PATH, "rb").read()
+        return pk, sk
+    with oqs.Signature(SCHEME) as s:
+        kp = s.generate_keypair()
+        pk, sk = _split_kp(kp)
+        if pk is None or sk is None:
+            raise RuntimeError("liboqs returned incomplete keypair (pk or sk is None)")
+        _atomic_write(PK_PATH, pk)
+        _atomic_write(SK_PATH, sk)
+        return pk, sk
+
+def _payload_bytes(payload: dict) -> bytes:
+    # узгоджено з ECDSA: sha256(f"{random}|{timestamp}")
+    raw = f"{payload['random']}|{payload['timestamp']}".encode("utf-8")
+    return hashlib.sha256(raw).digest()
+
+def pq_sign(payload: dict) -> dict:
+    msg = _payload_bytes(payload)
+    with oqs.Signature(SCHEME) as s:
+        pk, sk = _load_or_create_keys()
+        sig = s.sign(msg, sk)  # у 0.14+ форма: sign(message, secret_key)
+        return {
+            "pq_scheme": SCHEME,
+            "pq_sig_b64": base64.b64encode(sig).decode(),
+            "pq_pubkey_b64": base64.b64encode(pk).decode(),
+            "msg_hash": "0x" + hashlib.sha256(f"{payload['random']}|{payload['timestamp']}".encode()).hexdigest(),
+        }

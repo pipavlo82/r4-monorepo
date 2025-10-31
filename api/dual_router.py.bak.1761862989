@@ -1,0 +1,50 @@
+from fastapi import APIRouter, Header, HTTPException
+from datetime import datetime, timezone
+import json, os, secrets
+from .sign_ecdsa import ecdsa_sign
+from .sign_pq import pq_sign
+
+router = APIRouter()
+
+def _now_iso():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+def _payload_bytes(payload: dict) -> bytes:
+    return json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+
+def _check_key(x_api_key: str|None):
+    exp = os.environ.get("API_KEY", "")
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="Missing X-API-Key")
+    if exp and x_api_key != exp:
+        raise HTTPException(status_code=401, detail="Invalid X-API-Key")
+
+@router.get("/random_dual")
+def random_dual(X_API_KEY: str | None = Header(default=None)):
+    _check_key(X_API_KEY)
+    rnd = secrets.randbits(32)
+    ts  = _now_iso()
+
+    base = {
+        "random": rnd,
+        "timestamp": ts,
+        "hash_alg": "SHA-256",
+        "signature_type": "ECDSA(secp256k1)",
+    }
+    pb = _payload_bytes(base)
+
+    e = ecdsa_sign(base)           # додає v,r,s,msg_hash,signer_addr,pubkey_b64
+    q = pq_sign(pb)                # додає sig_pq_b64, pubkey_b64, payload
+
+    out = dict(base)
+    out["signature_type"] = f"ECDSA(secp256k1) + {q.get('scheme','ML-DSA-65')}"
+    for k in ("v","r","s","msg_hash","signer_addr","pubkey_b64"):
+        if k in e: out[k] = e[k]
+    sig_pq = q.get("sig_b64") or q.get("pq_sig_b64") or q.get("sig_pq_b64")
+if not sig_pq:
+    raise KeyError("sig_b64 / pq_sig_b64 / sig_pq_b64")
+out["sig_pq_b64"] = sig_pq
+    out["pubkey_pq_b64"] = q["pubkey_b64"]
+    out["pq_scheme"]     = q.get("scheme","ML-DSA-65")
+    out["payload"]       = q["payload"]
+    return out

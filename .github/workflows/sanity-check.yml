@@ -1,0 +1,19 @@
+    - name: Install Python deps
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Import smoke test (modules must load)
+      run: |
+        python - <<'PY'
+        import sys
+        import fastapi
+        # oqs має стояти після pip install -r requirements.txt
+        try:
+            import oqs
+            print("oqs OK:", oqs.__name__)
+        except Exception as e:
+            print("WARN: oqs unavailable:", e, file=sys.stderr)
+        import api.app as app
+        print("OK: imports passed")
+        PY
