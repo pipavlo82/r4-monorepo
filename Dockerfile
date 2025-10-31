@@ -28,9 +28,10 @@ RUN pip install --no-cache-dir -r /app/api/requirements.txt
 # --- App code ---
 COPY api /app/api
 
-# --- Sealed core binary (community build ships it) ---
+# --- Sealed core binary (community build ships a stub) ---
 RUN mkdir -p /app/core/bin
-COPY core/bin/re4_dump /app/core/bin/re4_dump
+# У CI завжди копіюємо стаб, щоб не ламався білд, якщо реального бінарника нема
+COPY docker/stubs/re4_dump /app/core/bin/re4_dump
 RUN chmod +x /app/core/bin/re4_dump
 
 # --- Keys dir for ECDSA ---

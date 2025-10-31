@@ -1,0 +1,13 @@
+# Git та кеші
+.git
+**/__pycache__/
+*.pyc
+*.pyo
+*.pytest_cache/
+*.mypy_cache/
+
+# Node
+vrf-spec/node_modules
+
+# Локальні змінні
+.env
