@@ -17,7 +17,7 @@
 - [Python SDK](#-python-sdk)
 - [PQ/VRF Node](#-pqvrf-node-8081)
 - [On-Chain Verifier](#-on-chain-verifier)
-- [Security](#security)
+- [Security](#-security--proofs)
 - [Roadmap](#-roadmap-2025)
 - [Competitive Analysis](#-r4-vs-competitors)
 - [LotteryR4](#-lotteryr4--provably-fair-on-chain-lottery)
@@ -26,6 +26,7 @@
 
 ---
 
+<a id="overview"></a>
 ## 🧠 Overview
 
 RE4CTOR is a **sealed entropy appliance + verifiable randomness pipeline**.
@@ -40,6 +41,7 @@ RE4CTOR is a **sealed entropy appliance + verifiable randomness pipeline**.
 
 ---
 
+<a id="demo"></a>
 ## 🚀 One-Command Demo
 
 ```bash
@@ -48,19 +50,18 @@ RE4CTOR is a **sealed entropy appliance + verifiable randomness pipeline**.
 
 Boots both nodes, stress-tests them, exports signed randomness, runs Solidity verification. You'll see:
 
-```
-✅ Core entropy API (:8080) alive
-✅ PQ/VRF API (:8081) returning ECDSA signatures
-✅ 100 req/sec to :8080, 0 errors
-✅ :8081 stress showing 200 OK vs 429 rate-limited
-✅ Hardhat: 5 tests passing
-✅ LotteryR4 picks winner on-chain
-```
+- ✅ Core entropy API (:8080) alive
+- ✅ PQ/VRF API (:8081) returning ECDSA signatures
+- ✅ 100 req/sec to :8080, 0 errors
+- ✅ :8081 stress showing 200 OK vs 429 rate-limited
+- ✅ Hardhat: 6 tests passing
+- ✅ LotteryR4 picks winner on-chain
 
 If you see "6 passing", you've proven fairness locally. 🎉
 
 ---
 
+<a id="docker"></a>
 ## 🐳 Docker Quickstart (:8080)
 
 ```bash
@@ -82,6 +83,7 @@ curl -H "X-API-Key: demo" \
 
 ---
 
+<a id="python-sdk"></a>
 ## 🐍 Python SDK
 
 ```bash
@@ -100,9 +102,10 @@ print(f"🔐 Random: {random_bytes.hex()}")
 
 ---
 
+<a id="pq-vrf-node"></a>
 ## 🔐 PQ/VRF Node (:8081)
 
-Returns randomness + signature proof for on-chain verification.
+Returns randomness + signature proof for on-chain verification. The API supports dual-mode operation, returning both ECDSA (EIP-191) and optional post-quantum ML-DSA signatures.
 
 ```bash
 curl -H "X-API-Key: demo" \
@@ -110,6 +113,7 @@ curl -H "X-API-Key: demo" \
 ```
 
 **Response:**
+
 ```json
 {
   "random": 2689836398,
@@ -126,12 +130,13 @@ Enterprise build (`?sig=dilithium`) returns Dilithium3, FIPS 204/ML-DSA-65 (FIPS
 
 ---
 
+<a id="onchain-verifier"></a>
 ## 🧱 On-Chain Verifier
 
 Solidity contracts under `vrf-spec/contracts/`:
 
-**R4VRFVerifierCanonical.sol** — Verifies ECDSA signature + signer address  
-**LotteryR4.sol** — Fair lottery using verified randomness
+- **R4VRFVerifierCanonical.sol** — Verifies ECDSA signature + signer address
+- **LotteryR4.sol** — Fair lottery using verified randomness
 
 ```bash
 cd vrf-spec
@@ -144,6 +149,7 @@ Demonstrates:
 - ❌ Tampered randomness → reverted
 
 ---
+
 <a id="security"></a>
 ## 🛡️ Security & Proofs
 
@@ -154,7 +160,7 @@ The sealed entropy core ships with:
 - Startup Known Answer Test (KAT)
 - Integrity hash check vs signed manifest
 - Fail-closed mode (`R4_STRICT_FIPS=1`)
-- SBOM (`SBOM.spdx.json`) for supply-chain traceability
+- SBOM (SBOM.spdx.json) for supply-chain traceability
 - Statistical proof bundles (Dieharder, PractRand, BigCrush) under `packages/core/proof/`
 
 This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared for independent lab submission under FIPS 140-3 and post-quantum profiles (FIPS 204 / ML-DSA-65 and FIPS 203 / ML-KEM).
@@ -163,34 +169,37 @@ This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared 
 - **Q1 2026:** Submission to accredited lab for validation
 - **2026:** Certification decision window
 
-**Status:** ✅ **FIPS 204 Ready** — All PQ signing code paths (Dilithium3, FIPS 204) and KEM (Kyber) implemented and gated behind controlled builds.
+**Status:** ✅ **FIPS 204 Ready** — All PQ signing code paths (Dilithium3) and KEM (Kyber) implemented and gated behind controlled builds.
+
 **Supply chain:**
-- re4_release.tar.gz
-- re4_release.sha256
-- re4_release.tar.gz.asc (GPG)
-- SBOM.spdx.json
----
+- `re4_release.tar.gz`
+- `re4_release.sha256`
+- `re4_release.tar.gz.asc` (GPG)
+- `SBOM.spdx.json`
 
-## 🔬 Entropy Source Validation (ESV)
+### 🔬 Entropy Source Validation (ESV)
 
-For entropy collection, statistical tests, and reproducible FIPS/NIST validation artifacts,  
-see the dedicated guide: [**ESV_README.md**](./ESV_README.md)
-For detailed testing procedures and artifact reproduction:
-→ [ESV Package Documentation](./ESV_README.md)
-All entropy source test artifacts, manifests, and statistical reports 
-are available under `esv_artifacts/` for regulatory audit.
+For entropy collection, statistical tests, and reproducible FIPS/NIST validation artifacts, see the dedicated guide:
+
+[**ESV_README.md**](./ESV_README.md)
+
+All entropy source test artifacts, manifests, and statistical reports are available under `esv_artifacts/` for regulatory audit.
 
 ### Statistical Validation
 
 **packages/core/proof/**
-- NIST SP 800-22: 15/15 ✅
-- Dieharder: 31/31 ✅
-- PractRand: 8 GB analyzed ✅
-- TestU01 BigCrush: 160/160 ✅
+
+| Test Suite | Result |
+|-----------|--------|
+| NIST SP 800-22 | 15/15 ✅ |
+| Dieharder | 31/31 ✅ |
+| PractRand | 8 GB analyzed ✅ |
+| TestU01 BigCrush | 160/160 ✅ |
 
 ### Performance
 
 **docs/proof/benchmarks_summary.md**
+
 - Throughput: ~950,000 req/s
 - Latency p99: ~1.1 ms
 - Entropy bias: <10⁻⁶
@@ -201,22 +210,20 @@ Every `r4-fips-vrf` container executes **FIPS-style startup self-test** before s
 
 **What Happens at Boot:**
 
-1. **Integrity Check** — Calculates SHA-256 of sealed entropy core (`re4_dump`) inside container, compares against pinned hash baked into image. If mismatch → FAIL (strict mode prevents start).
+1. **Integrity Check** — Calculates SHA-256 of sealed entropy core (re4_dump) inside container, compares against pinned hash baked into image. If mismatch → FAIL (strict mode prevents start).
 
-2. **Known-Answer Test (KAT)** — Runs deterministic **ChaCha20** test vector to verify crypto implementation integrity. Community builds log `WARN`; enterprise builds enforce `FAIL`.
+2. **Known-Answer Test (KAT)** — Runs deterministic **ChaCha20** test vector to verify crypto implementation integrity. Community builds log WARN; enterprise builds enforce FAIL.
 
 3. **Entropy Health Tests** — Pulls live random bytes directly from core before API starts:
    - **Repetition Count Test (RCT)** — Detects long identical runs
    - **Adaptive Proportion Test (APT)** — Checks uniformity
    - **Continuous RNG Test (FIPS 140-3)** — No repeated 32-byte blocks
-   
-   If RNG unavailable, logs `SKIP` but records PASS for visibility.
 
 4. **Attestation Output** — All results printed to stdout. FastAPI server starts only after PASS (or allowed PASS-with-skip).
 
 **Example Boot Log:**
 
-```text
+```
 [r4] running FIPS startup self-test...
 [INTEGRITY] OK (SHA256 match)
 [KAT] ChaCha20 vector pass
@@ -237,15 +244,9 @@ docker run \
   r4-fips-vrf:latest
 ```
 
-**Supply chain:**
-- re4_release.tar.gz
-- re4_release.sha256
-- re4_release.tar.gz.asc (GPG)
-- SBOM.spdx.json
 ---
 
----
-
+<a id="roadmap"></a>
 ## 📅 Roadmap 2025
 
 | Q | Milestone | Status |
@@ -259,13 +260,14 @@ docker run \
 
 ---
 
+<a id="competition"></a>
 ## 🥊 R4 vs Competitors
 
 Full breakdown: [docs/COMPETITION.md](docs/COMPETITION.md)
 
 | Feature | R4 | Chainlink | drand | AWS HSM |
-|---------|----|---------|----|---------|
-| **Post-Quantum** | ✅ Dilithium3, FIPS 204 | ❌ | ❌ | ⚠️ |
+|---------|----|---------|----|----|
+| **Post-Quantum** | ✅ Dilithium3 | ❌ | ❌ | ⚠️ |
 | **Latency** | **<1ms** | 30-120s | 3-30s | 10-50ms |
 | **Cost** | self-hosted | pay-per-req | free | $$$$ |
 | **On-chain Verify** | ✅ | ✅ | ⚠️ | ❌ |
@@ -276,6 +278,7 @@ Full breakdown: [docs/COMPETITION.md](docs/COMPETITION.md)
 
 ---
 
+<a id="lottery"></a>
 ## 🎲 LotteryR4 — Provably Fair On-Chain Lottery
 
 **Solidity reference implementation for cryptographically fair lottery using RE4CTOR randomness.**
@@ -285,9 +288,10 @@ Full breakdown: [docs/COMPETITION.md](docs/COMPETITION.md)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 Demonstrates how to:
+
 1. ✅ Register players on-chain
 2. ✅ Accept signed randomness from RE4CTOR oracle
-3. ✅ Verify signature with `R4VRFVerifierCanonical.sol`
+3. ✅ Verify signature with R4VRFVerifierCanonical.sol
 4. ✅ Pick winner deterministically & transparently
 5. ✅ Emit audit trail for regulators/auditors
 
@@ -338,6 +342,7 @@ curl -H "X-API-Key: secret" \
 ```
 
 Response:
+
 ```json
 {
   "random": 2689836398,
@@ -349,6 +354,8 @@ Response:
 ```
 
 #### **Step 3: Operator Calls drawWinner**
+
+> **Note:** API returns `random` as an integer. On-chain, we must cast it to `bytes32`.
 
 ```solidity
 function drawWinner(
@@ -372,9 +379,20 @@ function drawWinner(
 }
 ```
 
+**In JavaScript:**
+
+```javascript
+const randomness = Number(data.random);
+const randomnessBytes32 = ethers.toBeHex(randomness, 32); // Cast to bytes32
+const tx = await lottery.drawWinner(randomnessBytes32, v, r, s);
+const rc = await tx.wait();
+const ev = rc.logs.find(l => l.fragment?.name === 'WinnerSelected');
+console.log('Winner:', ev?.args?.winner);
+```
+
 #### **Step 4: Contract Verifies Signature**
 
-`R4VRFVerifierCanonical.sol` does:
+R4VRFVerifierCanonical.sol does:
 
 ```solidity
 function verify(
@@ -430,7 +448,7 @@ require(winner == players[expectedIndex]);
 cd vrf-spec
 
 # Install dependencies
-npm install
+npm ci
 
 # Compile contracts
 npx hardhat compile
@@ -438,7 +456,7 @@ npx hardhat compile
 # Run tests
 npx hardhat test
 
-# Expected: ✔ 5 tests passing
+# Expected: ✔ 6 tests passing
 ```
 
 **Test Output:**
@@ -496,6 +514,7 @@ contract LotteryR4 {
 ### 🧪 Testing
 
 **Run All Tests:**
+
 ```bash
 npx hardhat test
 ```
@@ -508,6 +527,7 @@ npx hardhat test
 - ✅ Tampering is impossible
 
 **Manual Testing (Local):**
+
 ```bash
 # 1. Start local Hardhat network
 npx hardhat node
@@ -576,9 +596,9 @@ Player 3 ──┘
 
 ### 📊 Use Cases
 
-**1. Casino / Sportsbook** — Players enter, game round happens, at settlement call drawWinner() with RE4CTOR signature, winner determined on-chain, regulator audits transaction history.
+**1. Casino / Sportsbook** — Players enter, game round happens, at settlement call `drawWinner()` with RE4CTOR signature, winner determined on-chain, regulator audits transaction history.
 
-**2. NFT Raffle** — Users register for raffle, at deadline drawWinner() selects NFT winner, winner address gets transferred NFT, community verifies fairness.
+**2. NFT Raffle** — Users register for raffle, at deadline `drawWinner()` selects NFT winner, winner address gets transferred NFT, community verifies fairness.
 
 **3. DAO Treasury Distribution** — Community members enter for allocation round, randomness selects who gets funded first, provably fair allocation, governance token holders audit.
 
@@ -589,11 +609,13 @@ Player 3 ──┘
 ### 🛠️ Integration Guide
 
 **Step 1: Deploy Verifier**
+
 ```solidity
 R4VRFVerifierCanonical verifier = new R4VRFVerifierCanonical();
 ```
 
 **Step 2: Deploy Your Lottery**
+
 ```solidity
 LotteryR4 lottery = new LotteryR4(
     address(verifier),
@@ -602,6 +624,7 @@ LotteryR4 lottery = new LotteryR4(
 ```
 
 **Step 3: Off-Chain: Get Randomness**
+
 ```python
 import requests
 
@@ -618,40 +641,55 @@ s = int(data["s"], 16)
 ```
 
 **Step 4: On-Chain: Call drawWinner**
+
 ```javascript
-const tx = await lottery.drawWinner(randomness, v, r, s);
-const receipt = await tx.wait();
-const event = receipt.events.find(e => e.event === 'WinnerSelected');
-console.log(`Winner: ${event.args.winner}`);
+const randomness = Number(data.random);
+const randomnessBytes32 = ethers.toBeHex(randomness, 32); // Cast to bytes32
+const tx = await lottery.drawWinner(randomnessBytes32, v, r, s);
+const rc = await tx.wait();
+const ev = rc.logs.find(l => l.fragment?.name === 'WinnerSelected');
+console.log(`Winner: ${ev?.args?.winner}`);
 ```
 
 **Step 5: Audit**
+
 ```javascript
-const winner = await lottery.drawWinner(randomness, v, r, s);
-const expectedIndex = randomness % (await lottery.playerCount());
+const tx = await lottery.drawWinner(randomnessBytes32, v, r, s);
+const rc = await tx.wait();
+const ev = rc.logs.find(l => l.fragment?.name === 'WinnerSelected');
+
+const winner = ev?.args?.winner;
+const expectedIndex = BigInt(randomness) % BigInt(await lottery.playerCount());
 const expectedWinner = await lottery.players(expectedIndex);
-assert(winner === expectedWinner);
+
+console.assert(winner === expectedWinner, 'Fairness check passed!');
 ```
 
 ### ❓ FAQ
 
-**Q: Can I use this in production?**  
+**Q: Can I use this in production?**
+
 **A:** Yes. Contracts audited and tested. Recommended: redeploy + re-audit on mainnet, use trusted RE4CTOR oracle endpoint, legal review of on-chain terms.
 
-**Q: What if signature is invalid?**  
+**Q: What if signature is invalid?**
+
 **A:** Transaction reverts. No winner selected. Players remain registered for next round.
 
-**Q: Can players collude with operator?**  
+**Q: Can players collude with operator?**
+
 **A:** No. Even if operator & signer collude, they can't: retroactively change winner (modulo deterministic), forge signature (ECDSA secure), reroll without on-chain record.
 
-**Q: What if RE4CTOR oracle is compromised?**  
+**Q: What if RE4CTOR oracle is compromised?**
+
 **A:** Worst case: signature could be replayed. But: every draw is on-chain & auditable, regulator detects suspicious patterns, you can rotate to new signer/oracle.
 
-**Q: How do I integrate with my own game?**  
-**A:** Copy `R4VRFVerifierCanonical.sol`, inherit from `LotteryR4.sol`, extend for your use case.
+**Q: How do I integrate with my own game?**
+
+**A:** Copy R4VRFVerifierCanonical.sol, inherit from LotteryR4.sol, extend for your use case.
 
 ---
 
+<a id="repository-structure"></a>
 ## 🗺️ Repository Structure
 
 ```
@@ -665,6 +703,7 @@ r4-monorepo/
 │
 ├── packages/core/
 │   ├── runtime/bin/re4_dump     (sealed entropy core)
+│   │                             (community images ship a tiny stub at docker/stubs/re4_dump for CI sanity checks)
 │   ├── proof/                   (Dieharder/PractRand/BigCrush results)
 │   └── manifest/                (sha256, GPG sig, SBOM)
 │
@@ -676,27 +715,42 @@ r4-monorepo/
 │   │   ├── lottery.js
 │   │   ├── verify.js
 │   │   └── verify_r4_canonical.js
+│   ├── scripts/
+│   │   └── deploy.js
 │   ├── hardhat.config.js
 │   └── package.json
+│
+├── api/
+│   ├── app.py                   (core :8080)
+│   ├── app_dual.py              (PQ/VRF :8081)
+│   ├── dual_router.py
+│   ├── sign_ecdsa.py
+│   └── sign_pq.py
 │
 ├── sdk_py_r4/
 │   ├── r4sdk/                   (Python client)
 │   ├── test_r4sdk.py
 │   └── setup.py
 │
+├── tools/
+│   └── verify_vrf_msg_hash.py
+│
 └── docs/
     ├── USAGE.md
     ├── DEPLOYMENT.md
     ├── COMPETITION.md
     ├── FIPS_204_roadmap.md
+    ├── ESV_README.md
     └── proof/benchmarks_summary.md
 ```
 
 ---
 
+<a id="contributing"></a>
 ## Contributing
 
 We accept PRs for:
+
 - New verifier contracts (L2s, alt-EVMs)
 - Hardhat/Huff audit improvements
 - Reproducible benchmark scripts
@@ -705,6 +759,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 
 ---
 
+<a id="support"></a>
 ## 📞 Support
 
 **Documentation:**
@@ -713,6 +768,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 - [Performance Benchmarks](docs/proof/benchmarks_summary.md)
 - [FIPS 204 Roadmap](docs/FIPS_204_roadmap.md)
 - [Competitive Analysis](docs/COMPETITION.md)
+- [Entropy Source Validation](ESV_README.md)
 
 **Community:**
 - 💬 [GitHub Issues](https://github.com/pipavlo82/r4-monorepo/issues) — Bug reports & feature requests
@@ -724,12 +780,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 
 ---
 
+<a id="contact"></a>
 ## 📬 Contact
 
-**Maintainer:** Pavlo Tvardovskyi  
-📧 **Email:** [shtomko@gmail.com](mailto:shtomko@gmail.com)  
-🐙 **GitHub:** [@pipavlo82](https://github.com/pipavlo82)  
-🐳 **Docker Hub:** [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)  
+**Maintainer:** Pavlo Tvardovskyi
+
+📧 **Email:** [shtomko@gmail.com](mailto:shtomko@gmail.com)
+
+🐙 **GitHub:** [@pipavlo82](https://github.com/pipavlo82)
+
+🐳 **Docker Hub:** [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)
+
 📦 **PyPI:** [r4sdk](https://pypi.org/project/r4sdk/)
 
 ---
@@ -738,16 +799,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 
 - [Contributing Guide](CONTRIBUTING.md)
 - [Sponsorship Tiers](SPONSORS.md)
-- [Competitive Analysis](docs/COMPETITORS.md)
+- [Competitive Analysis](docs/COMPETITION.md)
 - [Deployment Guide](docs/DEPLOYMENT.md)
 - [API Usage](README_API.md)
 - [Performance Benchmarks](docs/proof/benchmarks_summary.md)
+- [Entropy Source Validation](ESV_README.md)
 
 ---
 
 <div align="center">
 
-**Fairness you can prove. On-chain. Cryptographically.**
+### Fairness you can prove. On-chain. Cryptographically.
 
 v1.0.0-demo | [GitHub](https://github.com/pipavlo82/r4-monorepo) | [PyPI](https://pypi.org/project/r4sdk/) | [Docker Hub](https://hub.docker.com/r/pipavlo/r4-local-test)
 
