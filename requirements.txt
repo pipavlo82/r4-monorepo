@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+eth-keys
+eth-utils
+liboqs-python==0.14.0
