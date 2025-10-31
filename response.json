@@ -1,0 +1,8 @@
+{
+  "random": 3727920637,
+  "timestamp": "2025-10-29T21:47:30Z",
+  "signature_type": "ECDSA(secp256k1)",
+  "sig_b64": "zHpyDw2wDv2ioz0LZv3eX/cIjkt5de6+r/OvjNPrOdkbhAV8RBcaIZGw+Lu7GsasB7dql6zxmAic7Mu7ylRZAg==",
+  "hash_alg": "SHA-256",
+  "pq_mode": false
+}

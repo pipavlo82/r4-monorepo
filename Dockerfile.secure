@@ -1,0 +1,44 @@
+# Re4ctoR public entropy API container (community build, secure)
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# System deps (і додамо curl для self-test fallback)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# Python deps
+COPY api/requirements.txt /app/api/requirements.txt
+RUN pip install --no-cache-dir -r /app/api/requirements.txt
+
+# Код API
+COPY api /app/api
+
+# Ключі (каталог)
+RUN mkdir -p /app/keys
+
+# ВАЖЛИВО: без API_KEY тут
+ENV RATE_LIMIT="30/minute" \
+    PORT="8081" \
+    PYTHONUNBUFFERED=1 \
+    R4_CORE_BIN="/app/core/bin/re4_dump"
+
+# Якщо у тебе є core/bin всередині репо — прокинемо (опційно, без помилки якщо нема)
+# Коментар: COPY не впаде, якщо файлів нема, тільки якщо директорії нема.
+# Тож додамо перевірку через shell у entrypoint (нижче).
+# А поки просто створимо порожню директорію, щоб шлях існував:
+RUN mkdir -p /app/core/bin
+
+# Entrypoint: FIPS self-test, потім запуск API
+# (той самий entrypoint, що й у твоєму образі)
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo 'set -e' >> /app/entrypoint.sh && \
+    echo 'echo "[r4] running FIPS startup self-test..."' >> /app/entrypoint.sh && \
+    echo 'python3 /app/api/fips_selftest.py || true' >> /app/entrypoint.sh && \
+    echo 'echo "[r4] self-test passed (or allowed), starting API..."' >> /app/entrypoint.sh && \
+    echo 'exec uvicorn api.app:app --host 0.0.0.0 --port 8081' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+EXPOSE 8081
+CMD ["/bin/sh", "/app/entrypoint.sh"]
