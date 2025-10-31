@@ -28,38 +28,28 @@ Verifiable entropy • Post-quantum VRF • Attested boot • On-chain fairness 
 - [Contact](#-contact)
 
 ---
+# RE4CTOR 🧠
 
+**A sealed entropy appliance + verifiable randomness pipeline for post-quantum, FIPS-compliant, and on-chain-verifiable randomness.**
 
-🧠 Overview
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-green)](https://www.python.org/)
+[![Docker Ready](https://img.shields.io/badge/docker-ready-blue)](https://hub.docker.com/r/pipavlo/r4-local-test)
 
-RE4CTOR is a sealed entropy appliance + verifiable randomness pipeline, designed for post-quantum, FIPS-compliant, and on-chain-verifiable randomness.
+## Features
 
-☢️ Core API (:8080) — FastAPI service providing FIPS-checked entropy.
+- **Post-Quantum Cryptography** — ML-DSA-65 (Dilithium3) + ML-KEM (Kyber512) signatures
+- **FIPS-Compliant** — FIPS 204 certification roadmap with rigorous entropy validation
+- **On-Chain Verifiable** — Solidity verifiers for transparent randomness verification
+- **Sub-millisecond Latency** — <1ms response times for ultra-fast RNG
+- **Self-Hosted** — No external dependencies or API subscriptions required
+- **Dual VRF Node** — ECDSA (EIP-191) + optional post-quantum signatures
 
-🔐 Dual VRF Node (:8083) — Outputs ECDSA (EIP-191) + optional ML-DSA (Dilithium3) post-quantum signatures.
+## Quick Start
 
-🧬 Solidity Verifiers — On-chain signature verification (ECDSA and PQ-ready).
+### Docker (Fastest)
 
-🎲 LotteryR4 — A provably fair on-chain lottery demo.
-
-🐍 Python SDK (r4sdk) — Simplified access for backends, validators, or bots.
-
-Use cases: Casinos, NFT raffles, validator rotation, provable randomness for regulators, ZK-seed generation, or Web3 oracles.
-
-🚀 One-Command Demo
-./run_full_demo.sh
-
-
-Starts both APIs, performs stress tests, verifies entropy, and runs Solidity unit tests.
-
-Expected output:
-
-✅ Core API (:8080) online
-✅ Dual VRF (:8083) ECDSA + PQ signatures
-✅ Hardhat: 6 tests passing
-✅ LotteryR4 picks deterministic winner
-
-🐳 Docker Quickstart (:8080)
+```bash
 docker run -d \
   --name r4-core \
   -p 8080:8080 \
@@ -68,33 +58,75 @@ docker run -d \
 
 # Health check
 curl http://127.0.0.1:8080/health
-# → "ok"
 
-# Get randomness
+# Get 32 bytes of random data
 curl -H "X-API-Key: demo" \
   "http://127.0.0.1:8080/random?n=32&fmt=hex"
+```
 
-🐍 Python SDK
+### Full Demo
+
+```bash
+./run_full_demo.sh
+```
+
+Starts both APIs, runs stress tests, validates entropy, and executes Solidity unit tests.
+
+Expected output:
+- ✅ Core API (:8080) online
+- ✅ Dual VRF (:8083) with ECDSA + PQ signatures
+- ✅ Hardhat: 6/6 tests passing
+- ✅ LotteryR4 picks deterministic winner
+
+### Python SDK
+
+```bash
 pip install r4sdk
+```
 
+```python
 from r4sdk import R4Client
 
 client = R4Client(api_key="demo", host="http://localhost:8080")
 data = client.get_random(32)
 print(f"Random: {data.hex()}")
+```
 
+## Architecture
 
-📦 PyPI → r4sdk
+### Core Components
 
-🔐 Dual VRF API (:8083)
+**☢️ Core API (:8080)**  
+FastAPI service providing FIPS-checked entropy with strict self-tests and rate limiting.
 
-The /random_dual endpoint returns randomness + proof (ECDSA + PQ if available).
+**🔐 Dual VRF Node (:8083)**  
+Outputs ECDSA (EIP-191) + optional ML-DSA (Dilithium3) post-quantum signatures with full auditability.
 
-curl -sS -H "X-API-Key: demo" http://127.0.0.1:8083/random_dual | jq
+**🧬 Solidity Verifiers**  
+On-chain signature verification supporting both ECDSA and post-quantum schemes.
 
+**🎲 LotteryR4**  
+Reference implementation of a provably fair on-chain lottery using RE4CTOR randomness.
 
-Response:
+## API Usage
 
+### Get Random Entropy
+
+```bash
+curl -H "X-API-Key: demo" \
+  "http://localhost:8080/random?n=32&fmt=hex"
+```
+
+### Dual VRF with Signature
+
+```bash
+curl -sS -H "X-API-Key: demo" \
+  http://localhost:8083/random_dual | jq
+```
+
+Response includes randomness, ECDSA signature (EIP-191), and optional post-quantum signature:
+
+```json
 {
   "random": 1116700701,
   "timestamp": "2025-10-31T18:17:17Z",
@@ -105,66 +137,54 @@ Response:
   "s": "0x...",
   "msg_hash": "0x...",
   "signer_addr": "0x1C901e3b...",
-  "sig_pq_b64": "...",       // optional
-  "pq_pubkey_b64": "...",    // optional
+  "sig_pq_b64": "...",
+  "pq_pubkey_b64": "...",
   "pq_scheme": "ML-DSA-65"
 }
+```
 
-✅ Verify locally (EIP-191)
+### Verify Signature Locally
+
+```bash
 python3 tools/verify_vrf_msg_hash.py /tmp/vrf_dual.json
-# → which_hash="eip191", hash_ok=true, ecdsa_ok=true
+# Output: which_hash="eip191", hash_ok=true, ecdsa_ok=true
+```
 
-🧩 Post-Quantum Layer (FIPS-204 / ML-DSA / Kyber)
+## Post-Quantum Cryptography
 
-RE4CTOR ships with a post-quantum security layer, automatically enabled when liboqs is present.
+RE4CTOR integrates FIPS 204 algorithms for future-proofing against quantum threats:
 
-Algorithm	Purpose	Status
-ML-DSA-65 (Dilithium3)	VRF signature (FIPS 204)	✅ implemented
-ML-KEM (Kyber512)	Key exchange for node-to-node comms	✅ implemented
-SHAKE256 / BLAKE2s	Whitening / hash mixing	✅ implemented
-ChaCha20	Entropy whitening inside the sealed core	✅ implemented
-How it works
+| Algorithm | Purpose | Status |
+|-----------|---------|--------|
+| ML-DSA-65 (Dilithium3) | VRF signature | ✅ Implemented |
+| ML-KEM (Kyber512) | Key exchange | ✅ Implemented |
+| SHAKE256 / BLAKE2s | Whitening | ✅ Implemented |
+| ChaCha20 | Entropy whitening | ✅ Implemented |
 
-The API detects liboqs at runtime.
+**Runtime Detection:** The API automatically detects `liboqs` availability and enables dual-signing (ECDSA + ML-DSA-65). Falls back gracefully to ECDSA-only if unavailable.
 
-If available → dual-signs with ECDSA + ML-DSA-65.
+## On-Chain Verification
 
-If not → gracefully falls back to ECDSA-only, keeping CI and Docker builds simple.
+### Solidity Verifiers
 
-Example PQ fields
-{
-  "sig_pq_b64": "Base64-encoded Dilithium signature",
-  "pq_pubkey_b64": "Base64-encoded Dilithium public key",
-  "pq_scheme": "ML-DSA-65"
-}
+Located in `vrf-spec/contracts/`:
 
-FIPS 204 Roadmap
+- **R4VRFVerifierCanonical.sol** — Standard ECDSA (EIP-191) verifier
+- **LotteryR4.sol** — Reference fair-lottery implementation
 
-Q1 2025 — ML-DSA-65 integrated into Dual VRF
+### Build & Test
 
-Q2 2025 — Kyber KEM key exchange
-
-Q1 2026 — FIPS 140-3 / FIPS 204 submission
-
-📘 See docs/FIPS_204_roadmap.md
-
-🧱 On-Chain Verifier
-
-Solidity contracts in vrf-spec/contracts/:
-
-R4VRFVerifierCanonical.sol — canonical ECDSA (EIP-191) verifier
-
-LotteryR4.sol — reference fair-lottery implementation
-
+```bash
 cd vrf-spec
 npm ci
 npx hardhat compile
 npx hardhat test
-# ✅ 6 passing
+# ✅ 6/6 tests passing
+```
 
+### Verifier Interface
 
-Verifier interface:
-
+```solidity
 function verify(
     bytes32 randomness,
     uint8 v,
@@ -172,82 +192,68 @@ function verify(
     bytes32 s,
     address expectedSigner
 ) external pure returns (bool);
+```
 
-🛡️ Security & Entropy Source Validation (ESV)
-FIPS-Style Self-Tests
+## Security & Entropy Validation
 
-Integrity SHA-256 of sealed binary
+### FIPS-Style Self-Tests
 
-Known-Answer Test (ChaCha20)
+- **Integrity** — SHA-256 verification of sealed binary
+- **Known-Answer Test** — ChaCha20 validation
+- **Statistical Tests** — Repetition, Adaptive Proportion, Continuous RNG
+- **Strict Mode** — `R4_STRICT_FIPS=1` enables fail-closed startup
 
-Repetition / Adaptive Proportion / Continuous RNG tests
+### Statistical Validation Results
 
-R4_STRICT_FIPS=1 → fail-closed startup mode
+| Test Suite | Result |
+|-----------|--------|
+| NIST SP 800-22 | 15/15 ✅ |
+| Dieharder | 31/31 ✅ |
+| PractRand | 8 GiB ✅ |
+| TestU01 BigCrush | 160/160 ✅ |
 
-Statistical Validation
-Suite	Result
-NIST SP 800-22	15/15 ✅
-Dieharder	31/31 ✅
-PractRand	8 GiB ✅
-TestU01 BigCrush	160/160 ✅
+See `packages/core/proof/` for detailed artifacts and `docs/ESV_README.md` for technical details.
 
-Artifacts in packages/core/proof/
-Details in ESV_README.md
+## Roadmap
 
-📅 Roadmap 2025
-Quarter	Milestone	Status
-Q1 2025	ML-DSA-65 (Dilithium3) signing	✅ Shipped
-Q2 2025	Kyber KEM integration	✅ Shipped
-Q3 2025	Solidity verifier audit + public testnet	✅ Complete
-Q4 2025	Attestation & self-test hardening	✅ Complete
-Q1 2026	FIPS 140-3 / 204 lab submission	🚀 In progress
-2026	Certification decision window	⏳ Pending
-🥊 R4 vs Competitors
-Feature	R4	Chainlink VRF	drand	AWS HSM
-Post-Quantum	✅ Dilithium	❌	❌	⚠️
-Latency	<1 ms	30-120 s	3-30 s	10-50 ms
-Cost	self-hosted	pay-per-req	free	$$$$
-On-chain verify	✅	✅	⚠️	❌
-Self-hosted	✅	❌	✅	⚠️
-🎲 LotteryR4 (reference)
+| Quarter | Milestone | Status |
+|---------|-----------|--------|
+| Q1 2025 | ML-DSA-65 (Dilithium3) signing | ✅ Shipped |
+| Q2 2025 | Kyber KEM integration | ✅ Shipped |
+| Q3 2025 | Solidity verifier audit + testnet | ✅ Complete |
+| Q4 2025 | Attestation & self-test hardening | ✅ Complete |
+| Q1 2026 | FIPS 140-3 / 204 lab submission | 🚀 In Progress |
+| 2026 | Certification decision | ⏳ Pending |
 
-A transparent on-chain lottery showing how RE4CTOR randomness drives verifiable fairness.
+## Comparison
 
-Tests (vrf-spec/test):
+| Feature | RE4CTOR | Chainlink VRF | drand | AWS HSM |
+|---------|---------|---------------|-------|---------|
+| Post-Quantum | ✅ Dilithium | ❌ | ❌ | ⚠️ |
+| Latency | <1 ms | 30-120 s | 3-30 s | 10-50 ms |
+| Cost | Self-hosted | Pay-per-req | Free | $$$$ |
+| On-chain verify | ✅ | ✅ | ⚠️ | ❌ |
+| Self-hosted | ✅ | ❌ | ✅ | ⚠️ |
 
-✅ Valid signatures pass
+## Use Cases
 
-✅ Invalid ones revert
+- **Casinos & Gaming** — Provably fair randomness with regulatory audit trails
+- **NFT Raffles** — Deterministic winner selection with on-chain verification
+- **Validator Rotation** — Fair validator selection for PoS networks
+- **Regulatory Compliance** — Verifiable randomness for compliance audits
+- **ZK Applications** — Seed generation for zero-knowledge proofs
+- **Web3 Oracles** — Trustless random data feeds
 
-✅ Deterministic winner selection
+## Repository Structure
 
-✅ Audit events emitted
-
-✅ 6/6 tests passing
-
-Workflow:
-
-Players enter via enterLottery()
-
-Backend calls /random_dual to obtain randomness + signature
-
-Contract verifies with R4VRFVerifierCanonical
-
-drawWinner() selects deterministic winner
-
-Emitted event enables regulator audit
-
-🗺️ Repository Structure
+```
 r4-monorepo/
-├── README.md
-├── run_full_demo.sh
-├── tools/verify_vrf_msg_hash.py
+├── run_full_demo.sh              # Complete demo script
 ├── api/
-│   ├── app.py               # core :8080
-│   ├── app_dual.py          # dual VRF :8083
-│   ├── dual_router.py
-│   ├── sign_ecdsa.py
-│   └── sign_pq.py
+│   ├── app.py                    # Core API (:8080)
+│   ├── app_dual.py               # Dual VRF API (:8083)
+│   ├── sign_ecdsa.py             # ECDSA signing
+│   └── sign_pq.py                # Post-quantum signing
 ├── vrf-spec/
 │   ├── contracts/
 │   │   ├── R4VRFVerifierCanonical.sol
@@ -256,78 +262,65 @@ r4-monorepo/
 │   │   ├── lottery.js
 │   │   ├── verify.js
 │   │   └── verify_r4_canonical.js
-│   ├── scripts/deploy.js
-│   ├── hardhat.config.js
-│   └── package.json
+│   └── hardhat.config.js
 ├── packages/core/
 │   ├── runtime/bin/re4_dump
-│   ├── proof/
-│   └── manifest/
+│   └── proof/
 ├── docs/
 │   ├── USAGE.md
 │   ├── DEPLOYMENT.md
-│   ├── COMPETITION.md
 │   ├── FIPS_204_roadmap.md
 │   └── proof/benchmarks_summary.md
-└── docker/stubs/re4_dump
+└── tools/verify_vrf_msg_hash.py
+```
 
-🤝 Contributing
+## Documentation
 
-We welcome PRs for:
+- [Usage Guide](docs/USAGE.md) — API usage and integration patterns
+- [Deployment Guide](docs/DEPLOYMENT.md) — Production setup and configuration
+- [FIPS 204 Roadmap](docs/FIPS_204_roadmap.md) — Certification timeline
+- [Performance Benchmarks](docs/proof/benchmarks_summary.md) — Latency and throughput metrics
+- [Competition Analysis](docs/COMPETITION.md) — Detailed comparison with competitors
 
-New VRF verifiers (alt EVMs, L2s)
+## Contributing
 
-Additional test coverage
+We welcome contributions! Areas of interest:
 
-Performance scripts and benchmarks
+- New VRF verifiers for alternative EVMs and L2 solutions
+- Additional test coverage and edge case validation
+- Performance optimization scripts and benchmarks
+- Documentation improvements and examples
 
-See CONTRIBUTING.md
-.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-📞 Support
+## Support & Community
 
-API Usage
+- **GitHub Issues** — Bug reports and feature requests
+- **GitHub Discussions** — Questions and community support
+- **Benchmarks** — Performance metrics and comparisons
+- **Enterprise Contact** — shtomko@gmail.com (subject: R4 ENTERPRISE)
 
-Deployment Guide
+See [SPONSORS.md](SPONSORS.md) for enterprise support options.
 
-Performance Benchmarks
+## Contact
 
-FIPS 204 Roadmap
+**Maintainer:** Pavlo Tvardovskyi
 
-Competition Analysis
+- 📧 Email: [shtomko@gmail.com](mailto:shtomko@gmail.com)
+- 🐙 GitHub: [@pipavlo82](https://github.com/pipavlo82)
+- 🐳 Docker Hub: [pipavlo/r4-local-test](https://hub.docker.com/r/pipavlo/r4-local-test)
+- 📦 PyPI: [r4sdk](https://pypi.org/project/r4sdk/)
 
-Community: GitHub Issues / Discussions
-Enterprise Contact: 📧 shtomko@gmail.com
- (subject: R4 ENTERPRISE)
-See SPONSORS.md
+## License
 
-📬 Contact
+MIT License — See [LICENSE](LICENSE) file for details.
 
-Maintainer: Pavlo Tvardovskyi
-📧 shtomko@gmail.com
-
-🐙 @pipavlo82
-
-🐳 Docker Hub
-
-📦 PyPI
+---
 
 <div align="center">
 
-Fairness you can prove. On-chain. Cryptographically.
+### Fairness you can prove. On-chain. Cryptographically.
+
+**[Getting Started](docs/USAGE.md) • [Deploy](docs/DEPLOYMENT.md) • [Contribute](CONTRIBUTING.md)**
 
 </div>
-✅ Next Step
-
-Save as README.md, then commit:
-
-git switch -c docs/final-readme
-git add README.md
-git commit -m "docs: unified English README (FIPS-204 PQ layer, dual VRF, 6/6 tests)"
-git push -u origin docs/final-readme
-
-
-Would you like me to also generate a shorter GitHub Description (2-line tagline) and About section (for repo header)?
-Example:
-
-“FIPS-ready verifiable randomness engine — ECDSA + Dilithium3 VRF, provably fair entropy appliance.”
