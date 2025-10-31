@@ -57,7 +57,7 @@ Boots both nodes, stress-tests them, exports signed randomness, runs Solidity ve
 - ✅ Hardhat: 6 tests passing
 - ✅ LotteryR4 picks winner on-chain
 
-If you see "5 passing", you've proven fairness locally. 🎉
+If you see "6 passing", you've proven fairness locally. 🎉
 
 ---
 
@@ -141,7 +141,7 @@ Solidity contracts under `vrf-spec/contracts/`:
 ```bash
 cd vrf-spec
 npx hardhat test
-# → 5 passing
+# → 6 passing
 ```
 
 Demonstrates:
