@@ -1,34 +1,30 @@
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI
+from .dual_router import router as dual_router, Header, HTTPException
 from fastapi.responses import JSONResponse
-import os, time
+import os, time, json, base64
 from typing import Optional
 
-# імпорт роутера і підписувачів
-from api.dual_router import router as dual_router
-from api.sign_ecdsa import ecdsa_sign
-from api.sign_pq import pq_sign
-
-# простий ключ-доступ
+# --- простий ключ-доступ ---
 API_KEY = os.getenv("API_KEY", "demo")
 
 def require_key(x_api_key: Optional[str]):
     if not x_api_key or x_api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-app = FastAPI(
-    title="R4 VRF API",
-    description=(
-        "Provides verifiable randomness: ECDSA(secp256k1) and PQ ML-DSA-65 (Dilithium3).\n"
+# --- імпорти підписувачів ---
+# ECDSA(secp256k1)
+from api.sign_ecdsa import ecdsa_sign
+# ML-DSA-65 (NIST Dilithium3 через liboqs-python)
+from api.sign_pq import pq_sign
+
+\1
+app.include_router(dual_router) and PQ ML-DSA-65 (Dilithium3).\n"
         "Endpoints:\n"
-        " - GET /health\n"
-        " - GET /random_pq?sig=ecdsa|pq         # single proof\n"
-        " - GET /random_dual                    # dual proof ECDSA + ML-DSA-65\n"
+        " - GET /random_pq?sig=ecdsa|pq         # один доказ\n"
+        " - GET /random_dual                    # подвійний доказ ECDSA + ML-DSA-65\n"
     ),
     version="1.0.0",
 )
-
-# підключаємо додаткові маршрути, якщо є
-app.include_router(dual_router)
 
 @app.get("/health")
 def health():
@@ -37,33 +33,41 @@ def health():
 @app.get("/random_pq")
 def random_pq(sig: str = "ecdsa", x_api_key: Optional[str] = Header(None)):
     require_key(x_api_key)
-    # демо-рандом (сюди ставиш свій генератор)
+    # простий random для демо (реально тут має бути твій генератор)
     rnd = int.from_bytes(os.urandom(4), "big")
     ts_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
     payload = {
         "random": rnd,
         "timestamp": ts_iso,
         "hash_alg": "SHA-256",
     }
+
     if sig.lower() == "ecdsa":
-        proof = ecdsa_sign(payload)
+        proof = ecdsa_sign(payload)  # повертає dict з v,r,s,msg_hash, signer_addr, sig_b64, pubkey_b64, signature_type
     elif sig.lower() in ("pq", "mldsa", "ml-dsa-65", "dilithium3"):
-        proof = pq_sign(payload)
+        proof = pq_sign(payload)     # повертає dict з pq_sig_b64, pq_pubkey_b64, pq_scheme, signer_addr, msg_hash
     else:
         raise HTTPException(status_code=400, detail="sig must be 'ecdsa' or 'pq'")
-    return JSONResponse({**payload, **proof})
+
+    out = {**payload, **proof}
+    return JSONResponse(out)
 
 @app.get("/random_dual")
 def random_dual(x_api_key: Optional[str] = Header(None)):
     require_key(x_api_key)
     rnd = int.from_bytes(os.urandom(4), "big")
     ts_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
     payload = {
         "random": rnd,
         "timestamp": ts_iso,
         "hash_alg": "SHA-256",
         "signature_type": "ECDSA(secp256k1) + ML-DSA-65",
     }
+
     proof_ecdsa = ecdsa_sign(payload)
     proof_pq    = pq_sign(payload)
-    return JSONResponse({**payload, **proof_ecdsa, **proof_pq})
+
+    out = {**payload, **proof_ecdsa, **proof_pq}
+    return JSONResponse(out)

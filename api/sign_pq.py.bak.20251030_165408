@@ -1,0 +1,77 @@
+import os, json, base64, hashlib
+import oqs
+
+ALIASES = {
+    "dilithium2":"ML-DSA-44",
+    "dilithium3":"ML-DSA-65",
+    "dilithium5":"ML-DSA-87",
+    "ml-dsa-44":"ML-DSA-44",
+    "ml-dsa-65":"ML-DSA-65",
+    "ml-dsa-87":"ML-DSA-87",
+}
+def normalize(name: str) -> str:
+    return ALIASES.get(name.strip().lower(), name)
+
+SCHEME = normalize(os.environ.get("PQ_SCHEME","ML-DSA-65"))
+KEYDIR = os.path.expanduser("~/.re4ctor/keys")
+PK_PATH = os.path.join(KEYDIR, f"{SCHEME}.pk")
+SK_PATH = os.path.join(KEYDIR, f"{SCHEME}.sk")
+
+def _split_kp(kp):
+    """Робимо все, щоб дістати (pk, sk) з будь-якого типу, який повертає liboqs-python."""
+    pk = sk = None
+    # 1) Спроба як iterable
+    try:
+        if not isinstance(kp, (bytes, bytearray)):
+            items = list(kp)
+        else:
+            items = [bytes(kp)]
+    except TypeError:
+        items = []
+    if items:
+        pk = items[0]
+        if len(items) >= 2:
+            sk = items[1]
+    # 2) Спроба як об'єкт із атрибутами
+    if pk is None:
+        pk = getattr(kp, "public_key", None)
+    if sk is None:
+        sk = getattr(kp, "secret_key", None)
+    # 3) Спроба як buffer-протокол
+    if pk is None and isinstance(kp, (bytes, bytearray)):
+        pk = bytes(kp)
+    return pk, sk
+
+def _atomic_write(path: str, data: bytes):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = f"{path}.tmp"
+    with open(tmp, "wb") as f:
+        f.write(data); f.flush(); os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+def _load_or_create_keys():
+    if os.path.exists(PK_PATH) and os.path.exists(SK_PATH):
+        return open(PK_PATH, "rb").read(), open(SK_PATH, "rb").read()
+    with oqs.Signature(SCHEME) as s:
+        kp = s.generate_keypair()
+        pk, sk = _split_kp(kp)
+        if pk is None or sk is None:
+            raise RuntimeError(f"liboqs returned incomplete keypair: type={type(kp)}, pk={pk is not None}, sk={sk is not None}")
+        _atomic_write(PK_PATH, pk); _atomic_write(SK_PATH, sk)
+        return pk, sk
+
+def _payload_bytes(payload: dict) -> bytes:
+    raw = f"{payload['random']}|{payload['timestamp']}".encode("utf-8")
+    return hashlib.sha256(raw).digest()
+
+def pq_sign(payload: dict) -> dict:
+    msg = _payload_bytes(payload)
+    with oqs.Signature(SCHEME) as s:
+        pk, sk = _load_or_create_keys()
+        sig = s.sign(msg, sk)  # API 0.14+: sign(message, secret_key)
+        return {
+            "pq_scheme": SCHEME,
+            "pq_sig_b64": base64.b64encode(sig).decode(),
+            "pq_pubkey_b64": base64.b64encode(pk).decode(),
+            "msg_hash": "0x" + hashlib.sha256(f"{payload['random']}|{payload['timestamp']}".encode()).hexdigest(),
+        }
