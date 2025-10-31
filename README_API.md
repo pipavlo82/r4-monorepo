@@ -40,121 +40,87 @@ Re4ctoR delivers **cryptographically secure randomness** through a simple HTTP A
 │  • Built-in rate limiting (slowapi)  │
 │  • Future: digital signatures        │
 └──────────────────────────────────────┘
-```
-
-## ✨ Features
+✨ Features
 ✅ Dual-mode randomness: classical (ECDSA) + post-quantum (Dilithium3)
-✅ 256-bit cryptographic randomness per request  
-✅ Per-IP rate limiting (default: 30 requests/minute)  
-✅ Docker deployment (single container, port 8081)  
-✅ Python SDK client with 3-line usage  
-✅ /metrics endpoint (Prometheus-ready placeholder)  
-✅ Simple .env config for API_KEY / RATE_LIMIT / PORT  
+✅ 256-bit cryptographic randomness per request
+✅ Per-IP rate limiting (default: 30 requests/minute)
+✅ Docker deployment (single container, port 8081)
+✅ Python SDK client with 3-line usage
+✅ /metrics endpoint (Prometheus-ready placeholder)
+✅ Simple .env config for API_KEY / RATE_LIMIT / PORT
 
----
-
-## 🚀 Quick Start
-
-### Option 1: Docker (recommended)
-
-```bash
-# Build the image from this repo
+🚀 Quick Start
+Option 1: Docker (recommended)
+bash
+Copy code
 docker build -t re4ctor-api:dev .
-
-# Run the container
 docker run -d \
   --name r4api \
   -p 8081:8081 \
   re4ctor-api:dev
 
-# Test the API
 curl http://localhost:8081/random
-```
-
 Example output:
 
-```json
+json
+Copy code
 {
   "random_hex": "b1c8e76e737fe93ba347e6850ee3fe6693fb1f87402c6af397f9b3fe29c5b2b5",
   "timestamp": "2025-10-26 20:27:26"
 }
-```
+Custom port:
 
-Custom port if 8081 is busy:
-
-```bash
-docker run -d \
-  --name r4api_alt \
-  -p 9090:8081 \
-  re4ctor-api:dev
-
+bash
+Copy code
+docker run -d -p 9090:8081 re4ctor-api:dev
 curl http://localhost:9090/random
-```
-
 Override runtime limits / API key:
 
-```bash
+bash
+Copy code
 docker run -d \
-  --name r4api_prod \
   -p 8081:8081 \
   -e RATE_LIMIT="60/minute" \
   -e API_KEY="your-secret-key" \
   re4ctor-api:dev
-```
-
-### Option 2: Local development (WSL / Linux)
-
-```bash
+Option 2: Local development
+bash
+Copy code
 python3 -m pip install --user -r api/requirements.txt
 python3 -m uvicorn api.app:app --host 0.0.0.0 --port 8081
-```
+Test:
 
-In another terminal:
-
-```bash
+bash
+Copy code
 curl http://localhost:8081/version
 curl http://localhost:8081/random
 curl http://localhost:8081/metrics
-```
+.env file:
 
-.env file (not committed, ignored by .gitignore):
-
-```bash
+bash
+Copy code
 API_KEY=demo
 RATE_LIMIT=30/minute
 PORT=8081
-```
+Option 3: Python SDK
+📦 PyPI: r4sdk
 
-### Option 3: Python SDK
-
-```python
+python
+Copy code
 from clients.python.re4ctor_client.api import Client
 
-# Connect to local node (default http://localhost:8081)
 client = Client()
-
 print(client.get_status())
 print(client.get_random())
 print(client.get_metrics())
+📘 API Reference
+GET /version
+Purpose: Health check and build metadata
+Auth: none
+Rate limit: 10/minute
 
-# Or point to a remote node (future public HTTPS endpoint)
-client_prod = Client(base_url="https://demo.re4ctor.net")
-print(client_prod.get_random())
-```
-
----
-
-## 📘 API Reference
-
-### GET /version
-
-**Purpose**: Health check and build metadata  
-**Auth**: none  
-**Rate limit**: 10/minute  
-
-Response:
-
-```json
+json
+Copy code
 {
   "version": "v1.0.0",
   "build": "r4-demo",
@@ -162,64 +128,52 @@ Response:
   "api_key": "demo",
   "timestamp": "2025-10-26 20:27:26"
 }
-```
+GET /random
+Purpose: 256-bit cryptographic randomness (hex-encoded)
+Rate limit: 30/minute per IP
 
-### GET /random
-
-**Purpose**: 256-bit cryptographic randomness (hex-encoded)  
-**Auth**: API key (planned)  
-**Rate limit**: default 30/minute per IP  
-
-Response:
-
-```json
+json
+Copy code
 {
   "random_hex": "b1c8e76e737fe93ba347e6850ee3fe6693fb1f87402c6af397f9b3fe29c5b2b5",
   "timestamp": "2025-10-26 20:27:26"
 }
-```
+Rate limit exceeded:
 
-If you exceed rate limit:
-
-```json
+json
+Copy code
 {"detail":"Rate limit exceeded: 30 per 1 minute"}
-```
+GET /metrics
+Purpose: Operational metrics (Prometheus-ready)
+Rate limit: 60/minute
 
-### GET /metrics
-
-**Purpose**: Operational metrics (Prometheus-ready in future)  
-**Auth**: none  
-**Rate limit**: 60/minute  
-
-Response:
-
-```json
+json
+Copy code
 {
   "service": "re4ctor-api",
   "uptime_stub": "ok",
   "requests_per_minute_allowed": "30/minute"
 }
-```
-🧩 Post-Quantum Mode (Dilithium 3)
+🧩 Post-Quantum Mode (Dilithium3)
+Re4ctoR API now supports optional post-quantum signatures via CRYSTALS-Dilithium3
+(FIPS 204 ML-DSA-ready).
 
-Re4ctoR API now supports optional post-quantum signatures via **CRYSTALS-Dilithium3**  
-(NIST-approved lattice-based signature scheme).
+Port 8081 provides classical entropy plus PQ-signed randomness:
 
-Port 8081 provides the classic entropy API plus PQ-signed randomness endpoint:
-
-```bash
+bash
+Copy code
 curl "http://localhost:8081/random_pq?n=32&fmt=hex" | jq
 Example response:
 
 json
 Copy code
 {
- "random": "6a1ef5b7...",
- "signature": "dilithium3:abf8...",
- "public_key": "R4PQ_pub_dilithium3",
- "verified": true,
- "algorithm": "Dilithium3",
- "timestamp": "2025-10-27T12:00:00Z"
+  "random": "6a1ef5b7...",
+  "signature": "dilithium3:abf8...",
+  "public_key": "R4PQ_pub_dilithium3",
+  "verified": true,
+  "algorithm": "Dilithium3",
+  "timestamp": "2025-10-27T12:00:00Z"
 }
 Verification:
 
@@ -228,116 +182,79 @@ Copy code
 curl -X POST http://localhost:8081/verify_pq \
   -H "Content-Type: application/json" \
   -d '{"random":"6a1ef5b7...","signature":"dilithium3:abf8..."}'
-→ Returns {"verified": true} if authentic.
-
-Latency: ≈1.5 ms per request
-Signature size: ≈2700 bytes
+# → {"verified": true}
+Latency: ~1.5 ms per request
+Signature size: ~2700 bytes
 Compliance: FIPS 204 ML-DSA (Dilithium3) ready
----
 
-## 🐍 Python SDK
+🐍 Python SDK
+File: clients/python/re4ctor_client/api.py
 
-File: `clients/python/re4ctor_client/api.py`
-
-```python
-import os
-import requests
+python
+Copy code
+import os, requests
 
 class Client:
-    """
-    Lightweight client for Re4ctoR API.
-    Default base_url = http://localhost:8081
-    """
-
+    """Lightweight client for Re4ctoR API."""
     def __init__(self, base_url=None):
-        self.base_url = (
-            base_url
-            or os.getenv("R4_BASE_URL")
-            or "http://localhost:8081"
-        )
+        self.base_url = base_url or os.getenv("R4_BASE_URL") or "http://localhost:8081"
 
-    def get_status(self):
-        r = requests.get(f"{self.base_url}/version", timeout=5)
-        r.raise_for_status()
-        return r.json()
-
-    def get_random(self):
-        r = requests.get(f"{self.base_url}/random", timeout=5)
-        r.raise_for_status()
-        return r.json()
-
-    def get_metrics(self):
-        r = requests.get(f"{self.base_url}/metrics", timeout=5)
-        r.raise_for_status()
-        return r.json()
-```
-
+    def get_status(self): return requests.get(f"{self.base_url}/version").json()
+    def get_random(self): return requests.get(f"{self.base_url}/random").json()
+    def get_metrics(self): return requests.get(f"{self.base_url}/metrics").json()
 Usage:
 
-```python
+python
+Copy code
 from clients.python.re4ctor_client.api import Client
-
 c = Client()
 print(c.get_status())
 print(c.get_random())
 print(c.get_metrics())
-```
+🔭 Roadmap
+Status	Milestone	Description
+✅	Entropy API Core	/random live and serving 256-bit entropy
+✅	Rate limiting	Per-IP throttle using slowapi
+✅	Python SDK	Minimal 3-line client
+✅	Docker deployment	Single-container on port 8081
+🔄	ECDSA signing	Signed randomness for VRF proof
+🔄	Solidity verifier	On-chain ECDSA + PQ validation
+🔄	Prometheus metrics	Operational counters in /metrics
+🔜	HTTPS public node	https://demo.re4ctor.net
+🔜	PQ VRF	Dilithium/Kyber-based VRF
 
----
+🔒 Security
+Current:
 
-## 🔭 Roadmap
+Python secrets for entropy
 
-| Status | Milestone | Description |
-|--------|-----------|-------------|
-| ✅ | Entropy API Core | /random live and serving 256-bit entropy |
-| ✅ | Rate limiting | Per-IP throttle using slowapi |
-| ✅ | Python SDK | Minimal client usable in 3 lines |
-| ✅ | Docker deployment | Single-container service on port 8081 |
-| 🔄 | ECDSA signing in /random | Signed randomness + public key for verification |
-| 🔄 | Smart contract R4VRFVerifier.sol | On-chain verification (ECDSA first, PQ after) |
-| 🔄 | Prometheus metrics | Real operational counters via /metrics |
-| 🔜 | HTTPS public node | https://demo.re4ctor.net behind nginx + rate limit |
-| 🔜 | PQ VRF | Dilithium/Kyber-backed post-quantum randomness |
+Per-IP rate limiting
 
-**Legend**: ✅ Done · 🔄 In progress · 🔜 Planned
+Hex-encoded 256-bit output
 
----
+Timestamped responses
 
-## 🔒 Security
+Planned:
 
-**Current**:
+ECDSA signatures for /random
 
-- Uses Python `secrets` (cryptographically strong)
-- Per-IP rate limiting
-- Hex output of 256-bit entropy
-- Timestamped responses
+API key authentication
 
-**Planned**:
+HTTPS (nginx proxy)
 
-- ECDSA signatures for `/random`
-- API key auth
-- HTTPS via nginx reverse proxy
-- Audit logging for compliance / fairness proofs
+Full audit logging
 
----
+📬 Contact & Support
+Maintainer: Pavlo Tvardovskyi
+Email: shtomko@gmail.com
+GitHub: @pipavlo82
 
-## 📬 Contact & Support
-
-**Maintainer**: Pavlo Tvardovskyi  
-**Email**: shtomko@gmail.com  
-**GitHub**: https://github.com/pipavlo82  
-
-For integration / infra / investor demos:  
-Email with subject **Re4ctoR**.
-
----
+For enterprise or investor demos — email with subject “Re4ctoR”.
 
 <div align="center">
+© 2025 Pavlo Tvardovskyi — Re4ctoR Project
+Built with ⚡ for secure randomness
 
-**© 2025 Pavlo Tvardovskyi — Re4ctoR Project**
+⬆ Back to top
 
-*Built with ⚡ for secure randomness*
-
-[⬆ Back to top](#-re4ctor-api)
-
-</div>
+</div> ```
