@@ -30,8 +30,8 @@
 
 RE4CTOR is a **sealed entropy appliance + verifiable randomness pipeline**.
 
-- ☢️ **Core entropy node (:8080)** — FIPS-verified sealed binary via FastAPI `/random`
-- 🔐 **PQ/VRF node (:8081)** — ECDSA + Dilithium3 signed randomness  
+- ☢️ **Core entropy node (:8080)** — FIPS-style startup self-tests; package prepared for FIPS 140-3 / FIPS 204 lab submission via FastAPI `/random`
+- 🔐 **PQ/VRF node (:8081)** — ECDSA + Dilithium3, FIPS 204 signed randomness  
 - 🧬 **Solidity verifiers** — `R4VRFVerifierCanonical.sol` proves origin on-chain
 - 🎲 **LotteryR4.sol** — Fair lottery reference implementation
 - 🐍 **Python SDK** — `pip install r4sdk` for backends/validators/bots
@@ -57,7 +57,7 @@ Boots both nodes, stress-tests them, exports signed randomness, runs Solidity ve
 ✅ LotteryR4 picks winner on-chain
 ```
 
-If you see "5 passing", you've proven fairness locally. 🎉
+If you see "6 passing", you've proven fairness locally. 🎉
 
 ---
 
@@ -122,7 +122,7 @@ curl -H "X-API-Key: demo" \
 }
 ```
 
-Enterprise build (`?sig=dilithium`) returns Dilithium3/ML-DSA (FIPS 204) signatures.
+Enterprise build (`?sig=dilithium`) returns Dilithium3, FIPS 204/ML-DSA-65 (FIPS 204) signatures.
 
 ---
 
@@ -136,7 +136,7 @@ Solidity contracts under `vrf-spec/contracts/`:
 ```bash
 cd vrf-spec
 npx hardhat test
-# → 5 passing
+# → 6 passing
 ```
 
 Demonstrates:
@@ -157,13 +157,13 @@ The sealed entropy core ships with:
 - SBOM (`SBOM.spdx.json`) for supply-chain traceability
 - Statistical proof bundles (Dieharder, PractRand, BigCrush) under `packages/core/proof/`
 
-This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared for independent lab submission under FIPS 140-3 and post-quantum profiles (FIPS 204 / ML-DSA and FIPS 203 / ML-KEM).
+This package (binary, manifest, SBOM, KAT logs, test vectors) is being prepared for independent lab submission under FIPS 140-3 and post-quantum profiles (FIPS 204 / ML-DSA-65 and FIPS 203 / ML-KEM).
 
 **Timeline:**
 - **Q1 2026:** Submission to accredited lab for validation
 - **2026:** Certification decision window
 
-**Status:** ✅ **FIPS 204 Ready** — All PQ signing code paths (Dilithium3) and KEM (Kyber) implemented and gated behind controlled builds.
+**Status:** ✅ **FIPS 204 Ready** — All PQ signing code paths (Dilithium3, FIPS 204) and KEM (Kyber) implemented and gated behind controlled builds.
 **Supply chain:**
 - re4_release.tar.gz
 - re4_release.sha256
@@ -250,7 +250,7 @@ docker run \
 
 | Q | Milestone | Status |
 |---|-----------|--------|
-| Q1 2025 | Dilithium3 (ML-DSA / FIPS 204) signing in PQ node | ✅ Shipped |
+| Q1 2025 | Dilithium3, FIPS 204 (ML-DSA-65 / FIPS 204) signing in PQ node | ✅ Shipped |
 | Q2 2025 | Kyber KEM integration for VRF key exchange | ✅ Shipped |
 | Q3 2025 | Solidity verifier audit + public testnet (Sepolia) | ✅ Complete |
 | Q4 2025 | Attestation + integrity self-test hardening | ✅ Complete |
@@ -265,7 +265,7 @@ Full breakdown: [docs/COMPETITION.md](docs/COMPETITION.md)
 
 | Feature | R4 | Chainlink | drand | AWS HSM |
 |---------|----|---------|----|---------|
-| **Post-Quantum** | ✅ Dilithium3 | ❌ | ❌ | ⚠️ |
+| **Post-Quantum** | ✅ Dilithium3, FIPS 204 | ❌ | ❌ | ⚠️ |
 | **Latency** | **<1ms** | 30-120s | 3-30s | 10-50ms |
 | **Cost** | self-hosted | pay-per-req | free | $$$$ |
 | **On-chain Verify** | ✅ | ✅ | ⚠️ | ❌ |
@@ -453,7 +453,7 @@ LotteryR4
 R4VRFVerifier
   ✔ verifies valid ECDSA signature (150ms)
 
-5 passing (1.2s)
+6 passing (1.2s)
 ```
 
 ### 📦 Smart Contracts
@@ -708,7 +708,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 ## 📞 Support
 
 **Documentation:**
-- [API Usage](docs/USAGE.md)
+- [API Usage](README_API.md)
 - [Deployment Guide](docs/DEPLOYMENT.md)
 - [Performance Benchmarks](docs/proof/benchmarks_summary.md)
 - [FIPS 204 Roadmap](docs/FIPS_204_roadmap.md)
@@ -740,7 +740,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for rules and disclosure policy.
 - [Sponsorship Tiers](SPONSORS.md)
 - [Competitive Analysis](docs/COMPETITORS.md)
 - [Deployment Guide](docs/DEPLOYMENT.md)
-- [API Usage](docs/USAGE.md)
+- [API Usage](README_API.md)
 - [Performance Benchmarks](docs/proof/benchmarks_summary.md)
 
 ---

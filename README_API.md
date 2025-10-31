@@ -43,7 +43,7 @@ Re4ctoR delivers **cryptographically secure randomness** through a simple HTTP A
 ```
 
 ## ✨ Features
-✅ Dual-mode randomness: classical (ECDSA) + post-quantum (Dilithium3)
+✅ Dual-mode randomness: classical (ECDSA) + post-quantum (Dilithium3, FIPS 204)
 ✅ 256-bit cryptographic randomness per request  
 ✅ Per-IP rate limiting (default: 30 requests/minute)  
 ✅ Docker deployment (single container, port 8081)  
@@ -202,7 +202,7 @@ Response:
 ```
 🧩 Post-Quantum Mode (Dilithium 3)
 
-Re4ctoR API now supports optional post-quantum signatures via **CRYSTALS-Dilithium3**  
+Re4ctoR API now supports optional post-quantum signatures via **CRYSTALS-Dilithium3, FIPS 204**  
 (NIST-approved lattice-based signature scheme).
 
 Port 8081 provides the classic entropy API plus PQ-signed randomness endpoint:
@@ -218,7 +218,7 @@ Copy code
  "signature": "dilithium3:abf8...",
  "public_key": "R4PQ_pub_dilithium3",
  "verified": true,
- "algorithm": "Dilithium3",
+ "algorithm": "Dilithium3, FIPS 204",
  "timestamp": "2025-10-27T12:00:00Z"
 }
 Verification:
@@ -232,7 +232,7 @@ curl -X POST http://localhost:8081/verify_pq \
 
 Latency: ≈1.5 ms per request
 Signature size: ≈2700 bytes
-Compliance: FIPS 204 ML-DSA (Dilithium3) ready
+Compliance: FIPS 204 ML-DSA-65 (Dilithium3, FIPS 204) ready
 ---
 
 ## 🐍 Python SDK
