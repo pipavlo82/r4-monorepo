@@ -39,17 +39,40 @@ jobs:
         run: |
           docker run -d \
             --name r4pq-ci-test \
-            -p 8081:8080 \                # контейнер слухає 8080 → віддаємо на хості 8081
-            -e API_KEY='ci-demo' \
-            -e RNG_BIN='/app/core/bin/re4_dump' \
+            -p 8081:8080 \
+            -e API_KEY=ci-demo \
+            -e RNG_BIN=/app/core/bin/re4_dump \
             r4pq-ci-test
-          # зачекати, поки uvicorn підніметься
-          for i in {1..20}; do curl -fsS http://127.0.0.1:8081/health && break || sleep 0.3; done
+          # дочекатися, поки API підніметься
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:8081/health && break || sleep 0.3
+          done
 
       - name: Hit /version
         run: |
           curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
           test -s /tmp/version.json
+
+      - name: Hit /random (with API key)
+        run: |
+          curl -s -H "X-API-Key: ci-demo" "http://127.0.0.1:8081/random?n=32&fmt=json" | tee /tmp/rand.json
+          test -s /tmp/rand.json
+
+      - name: Show outputs
+        run: |
+          echo "----- /version -----"
+          cat /tmp/version.json
+          echo
+          echo "----- /random -----"
+          cat /tmp/rand.json
+          echo
+
+      - name: Cleanup container
+        if: always()
+        run: |
+          docker logs r4pq-ci-test || true
+          docker stop r4pq-ci-test || true
+          docker rm r4pq-ci-test || true
 
       # У community API немає /random_pq — тестуємо /random з ключем
       - name: Hit /random (with API key)
