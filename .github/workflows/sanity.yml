@@ -2,14 +2,13 @@ name: sanity
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main", "fix/**", "feature/**", "ci/**"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   sanity-check:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -26,11 +25,10 @@ jobs:
       - name: Import smoke test (modules must load)
         run: |
           python -c "import fastapi"
-          python -c "from api import app as _app_check"
-          python -c "from api.sign_ecdsa import ecdsa_sign"
-          python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
+          python -c 'from api import app as _app_check'
+          python -c 'from api.sign_ecdsa import ecdsa_sign'
+          python -c 'from api.sign_dilithium import PQ_AVAILABLE; print("PQ_AVAILABLE=", PQ_AVAILABLE)'
 
-      # ВАЖЛИВО: збираємо саме community-стейдж, без sealed-real
       - name: Build Docker image (community)
         run: |
           docker build --target community -t r4pq-ci-test .
@@ -39,19 +37,28 @@ jobs:
         run: |
           docker run -d \
             --name r4pq-ci-test \
-            -p 8081:8080 \                # контейнер слухає 8080 → віддаємо на хості 8081
-            -e API_KEY='ci-demo' \
-            -e RNG_BIN='/app/core/bin/re4_dump' \
+            -p 8081:8081 \
+            -e API_KEY="ci-demo" \
+            -e RATE_LIMIT="800/second" \
             r4pq-ci-test
-          # зачекати, поки uvicorn підніметься
-          for i in {1..20}; do curl -fsS http://127.0.0.1:8081/health && break || sleep 0.3; done
+          echo "⏳ Waiting for API to start..."
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8081/version || true)
+            if [ "$code" = "200" ]; then
+              echo "✅ API ready after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "❌ API did not become ready" >&2
+          docker logs r4pq-ci-test || true
+          exit 1
 
       - name: Hit /version
         run: |
           curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
           test -s /tmp/version.json
 
-      # У community API немає /random_pq — тестуємо /random з ключем
       - name: Hit /random (with API key)
         run: |
           curl -s -H "X-API-Key: ci-demo" "http://127.0.0.1:8081/random?n=16&fmt=hex" | tee /tmp/rand.txt
@@ -62,7 +69,7 @@ jobs:
           echo "----- /version -----"
           cat /tmp/version.json || true
           echo
-          echo "----- /random (hex) -----"
+          echo "----- /random -----"
           cat /tmp/rand.txt || true
           echo
 
