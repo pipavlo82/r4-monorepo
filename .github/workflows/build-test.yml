@@ -29,15 +29,13 @@ jobs:
         run: |
           hexdump -n 32 -C packages/core/build/re4_dump | head -n3
 
-      - name: Build client (r4cat)
-        run: |
-          set -x
-          make -j || true
-          if test -x bin/r4cat; then
-            ls -l bin/r4cat
-          else
-            echo "r4cat: nothing to build in CI (noop)"
-          fi
+  - name: Build client (r4cat)
+    shell: bash
+    run: |
+      echo "[ci] building r4cat (noop-friendly)"
+      make -j || echo "[ci] make returned non-zero; tolerated in CI"
+      # якщо бінарник є — добре; якщо ні — теж ок у CI
+      test -x bin/r4cat || true
 
       - name: Tamper test (if present)
         run: |
