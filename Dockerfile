@@ -1,7 +1,7 @@
-# syntax=docker/dockerfile:1.6
+# syntax=docker/dockerfile:1
 
 ############################
-# Base stage
+# Base
 ############################
 FROM python:3.10-slim AS base
 WORKDIR /app
@@ -16,36 +16,30 @@ RUN pip install --no-cache-dir -r /app/api/requirements.txt
 # API source
 COPY api/ /app/api/
 
-# place for core binary (both community/sealed will use this path)
+# place for core binary
 RUN mkdir -p /app/core/bin
 
-# sane defaults for demo (НЕ зберігаємо API_KEY в образі)
-ENV RNG_BIN=/app/core/bin/re4_dump \
+# defaults
+ENV API_KEY=demo \
+    RNG_BIN=/app/core/bin/re4_dump \
     RATE_LIMIT=10/second \
     MAX_BYTES=1000000
 
-# за замовчуванням запускаємо проста API (api.main) на 8080
-CMD ["python","-m","uvicorn","api.main:app","--host","0.0.0.0","--port","8080"]
-
 ############################
-# Community stage (uses stub)
+# Community (завжди доступний у CI)
 ############################
 FROM base AS community
-# stub RNG binary (завжди є у репо для CI/ком’юніті)
+# завжди кладемо стаб-двійковий файл
 COPY docker/stubs/re4_dump /app/core/bin/re4_dump
 RUN chmod +x /app/core/bin/re4_dump
 
+CMD ["python","-m","uvicorn","api.main:app","--host","0.0.0.0","--port","8080"]
+
 ############################
-# Sealed stage (external build-context)
+# Sealed (локально, якщо є реальний бінарник)
 ############################
-# Щоб не комітити приватний re4_dump у репо:
-# Будуємо з зовнішнього каталогу:
-#   DOCKER_BUILDKIT=1 docker build \
-#     --target sealed-real \
-#     --build-context realbin=/ABS/PATH/TO/DIR_WITH_RE4_DUMP \
-#     -t r4-ci-sealed:latest .
-#
 FROM base AS sealed-real
-COPY --from=realbin re4_dump /app/core/bin/re4_dump
+# копіюється ТІЛЬКИ коли збираєш цей таргет локально
+COPY core/bin/re4_dump /app/core/bin/re4_dump
 RUN chmod +x /app/core/bin/re4_dump
-ENV RNG_BIN=/app/core/bin/re4_dump
+CMD ["python","-m","uvicorn","api.main:app","--host","0.0.0.0","--port","8080"]

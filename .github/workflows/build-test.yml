@@ -1,0 +1,32 @@
+name: build-test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  sanity-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Build Docker image (community)
+        run: |
+          docker build --target community -t r4-ci-stub:latest .
+
+      - name: Run container
+        run: |
+          docker run -d --name r4test -p 8080:8080 --entrypoint "" r4-ci-stub:latest \
+            sh -lc 'exec python -m uvicorn api.main:app --host 0.0.0.0 --port 8080'
+          for i in $(seq 1 25); do curl -fsS http://127.0.0.1:8080/health && echo && break || sleep 0.2; done
+
+      - name: Hit /version
+        run: curl -fsS http://127.0.0.1:8080/version
+
+      - name: Hit /random (header)
+        run: curl -fsS -H 'X-API-Key: demo' 'http://127.0.0.1:8080/random?n=16&fmt=hex'
