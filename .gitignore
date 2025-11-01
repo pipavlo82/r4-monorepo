@@ -101,3 +101,5 @@ sts-2.1.2/
 core/bin/re4_dump
 packages/core/runtime/bin/re4_dump
 .env.ci
+/out_*.json
+/.env*
