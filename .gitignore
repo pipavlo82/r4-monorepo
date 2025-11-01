@@ -108,3 +108,7 @@ docker-compose.yml
 
 # local CI runner env
 .env.ci
+
+# local backups
+Dockerfile.bak.*
+Makefile.bak
