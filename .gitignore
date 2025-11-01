@@ -103,3 +103,5 @@ packages/core/runtime/bin/re4_dump
 .env.ci
 /out_*.json
 /.env*
+
+docker-compose.yml
