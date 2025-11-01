@@ -43,3 +43,8 @@ dev-up:
 
 dev-down:
 	@if [ -n "$$CI" ]; then echo "CI detected → skip"; else docker compose down; fi
+
+# --- CI override: r4cat завжди noop і exit 0 ---
+.PHONY: r4cat
+r4cat:
+	@echo "CI detected -> r4cat noop (skip docker compose)"; exit 0
