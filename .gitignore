@@ -119,3 +119,7 @@ Makefile.bak
 out_*.json
 examples/out_*.json
 docker-compose.override.yml
+
+# demo outputs
+examples/out_*.json
+out_*.json
