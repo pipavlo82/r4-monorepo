@@ -105,3 +105,6 @@ packages/core/runtime/bin/re4_dump
 /.env*
 
 docker-compose.yml
+
+# local CI runner env
+.env.ci
