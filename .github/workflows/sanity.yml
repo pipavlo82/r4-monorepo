@@ -43,10 +43,14 @@ jobs:
             -e API_KEY=ci-demo \
             -e RNG_BIN=/app/core/bin/re4_dump \
             r4pq-ci-test
-          # дочекатися, поки API підніметься
-          for i in $(seq 1 20); do
-            curl -fsS http://127.0.0.1:8081/health && break || sleep 0.3
+
+          # чекаємо саме /version (бо /health у демо може бути відсутній)
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8081/version || true)
+            [ "$code" = "200" ] && echo "API ready" && break
+            sleep 0.3
           done
+          test "$code" = "200"
 
       - name: Hit /version
         run: |
