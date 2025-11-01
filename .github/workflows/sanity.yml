@@ -30,38 +30,40 @@ jobs:
           python -c "from api.sign_ecdsa import ecdsa_sign"
           python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
 
-      - name: Build Docker image (r4pq test)
+      # ВАЖЛИВО: збираємо саме community-стейдж, без sealed-real
+      - name: Build Docker image (community)
         run: |
-          docker build -t r4pq-ci-test .
+          docker build --target community -t r4pq-ci-test .
 
       - name: Run container
         run: |
           docker run -d \
             --name r4pq-ci-test \
-            -p 8081:8081 \
+            -p 8081:8080 \                # контейнер слухає 8080 → віддаємо на хості 8081
             -e API_KEY='ci-demo' \
-            -e RATE_LIMIT='30/minute' \
+            -e RNG_BIN='/app/core/bin/re4_dump' \
             r4pq-ci-test
-          # give uvicorn a moment to boot
-          sleep 2
+          # зачекати, поки uvicorn підніметься
+          for i in {1..20}; do curl -fsS http://127.0.0.1:8081/health && break || sleep 0.3; done
 
       - name: Hit /version
         run: |
           curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
           test -s /tmp/version.json
 
-      - name: Hit /random_pq?sig=ecdsa
+      # У community API немає /random_pq — тестуємо /random з ключем
+      - name: Hit /random (with API key)
         run: |
-          curl -s "http://127.0.0.1:8081/random_pq?sig=ecdsa" | tee /tmp/rand.json
-          test -s /tmp/rand.json
+          curl -s -H "X-API-Key: ci-demo" "http://127.0.0.1:8081/random?n=16&fmt=hex" | tee /tmp/rand.txt
+          test -s /tmp/rand.txt
 
       - name: Show outputs
         run: |
           echo "----- /version -----"
-          cat /tmp/version.json
+          cat /tmp/version.json || true
           echo
-          echo "----- /random_pq?sig=ecdsa -----"
-          cat /tmp/rand.json
+          echo "----- /random (hex) -----"
+          cat /tmp/rand.txt || true
           echo
 
       - name: Cleanup container
