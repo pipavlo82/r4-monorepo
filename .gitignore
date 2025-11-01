@@ -100,3 +100,4 @@ sts-2.1.2/
 *.swp
 core/bin/re4_dump
 packages/core/runtime/bin/re4_dump
+.env.ci

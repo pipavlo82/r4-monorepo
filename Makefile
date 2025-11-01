@@ -1,29 +1,18 @@
-CC      := gcc
-CFLAGS  := -O2 -Wall -Wextra -std=c11
-INCLUDES:= -Ipackages/core/examples_vrf/src -Ipackages/core/examples_vrf/src/ref
-LDFLAGS := 
+PORT ?= 18080
 
-SRC_DIR := packages/core/examples_vrf/src
-BIN_DIR := bin
+run:
+	docker rm -f r4test 2>/dev/null || true
+	printf "API_KEY=demo\nRNG_BIN=/app/core/bin/re4_dump\n" > .env.ci
+	docker run -d --name r4test -p $(PORT):8080 --entrypoint "" --env-file ./.env.ci \
+	  r4-ci-stub:latest sh -lc 'exec python -m uvicorn api.main:app --host 0.0.0.0 --port 8080'
 
-# minimal smoke client for CI
-SRCS    := $(SRC_DIR)/r4cat_light.c
-OBJS    := $(SRCS:.c=.o)
+probe:
+	curl -s "http://127.0.0.1:$(PORT)/version" && echo
+	curl -s "http://127.0.0.1:$(PORT)/random?n=16&fmt=hex&key=demo" && echo
+	curl -s -H "X-API-Key: demo" "http://127.0.0.1:$(PORT)/random?n=16&fmt=hex" && echo
 
-TARGET  := $(BIN_DIR)/r4cat
+logs:
+	docker logs --tail=100 r4test
 
-.PHONY: all clean dirs
-
-all: dirs $(TARGET)
-
-dirs:
-	mkdir -p $(BIN_DIR)
-
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $(OBJS) $(LDFLAGS)
-
-%.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-
-clean:
-	rm -rf $(OBJS) $(TARGET)
+down:
+	docker rm -f r4test 2>/dev/null || true
