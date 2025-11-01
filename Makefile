@@ -1,13 +1,10 @@
 # ---- Makefile (CI-safe) ----
-.PHONY: all r4cat dev-up dev-down ci-ok
+.PHONY: r4cat
 
-# default target: нічого не будуємо для r4cat у CI
-all: r4cat
-
+# Якщо йдемо в CI — нічого не будуємо і повертаємо успіх (exit 0)
 r4cat:
 	@echo "r4cat: nothing to build in CI (noop)"
-	@true
-
+	@:
 # Локальний підйом сервісів
 dev-up:
 ifndef CI
