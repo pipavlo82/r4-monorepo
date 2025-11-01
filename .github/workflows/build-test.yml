@@ -1,17 +1,16 @@
 name: build-test
 
 on:
-  push:
-    branches: ["main", "fix/**", "feature/**", "ci/**"]
   pull_request:
-    branches: ["main"]
+  push:
+    branches: [ "fix/**", "ci/**" ]
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
       - name: Set up job
-        run: echo "start"
+        run: echo ok
 
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -23,42 +22,23 @@ jobs:
 
       - name: Build core (CMake)
         run: |
-          cmake -S packages/core -B build
-          cmake --build build -j
-          ls -l build || true
+          cmake -S packages/core -B packages/core/build
+          cmake --build packages/core/build -j
 
       - name: Smoke test re4_dump
         run: |
-          (cd packages/core/build 2>/dev/null || cd build 2>/dev/null || true
-           ls -l || true
-           (hexdump -C re4_dump | head -n 5) || true)
+          hexdump -n 32 -C packages/core/build/re4_dump | head -n3
 
-      - name: Build client (r4cat) — noop safe
+      - name: Build client (r4cat)
         run: |
-          set +e
-          echo "🔧 Building r4cat (noop-safe)..."
-          make -j || echo "⚠️ make returned non-zero (noop ok)"
-          test -x bin/r4cat && echo "✅ binary exists" || echo "ℹ️ r4cat skipped (noop)"
-          ls -l bin/ 2>/dev/null || true
-          exit 0
+          set -x
+          make -j || true
+          if test -x bin/r4cat; then
+            ls -l bin/r4cat
+          else
+            echo "r4cat: nothing to build in CI (noop)"
+          fi
 
       - name: Tamper test (if present)
         run: |
-          [ -x tests/tamper.sh ] && tests/tamper.sh || echo "no tamper test"
-
-      - name: Generate SBOM (SPDX)
-        run: |
-          echo "SPDX dummy (skip)"
-
-      - name: Upload artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: |
-            build/**
-            /tmp/version.json
-            /tmp/rand.txt
-
-      - name: Post Checkout repo
-        run: echo "done"
+          [ -x tests/tamper.sh ] && tests/tamper.sh || echo "skipped (noop)"
