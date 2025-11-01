@@ -1,0 +1,12 @@
+.git
+.gitignore
+**/__pycache__/
+**/*.pyc
+node_modules
+vrf-spec/node_modules
+esv_artifacts
+packages/core/proof
+packages/core/runtime/bin/re4_dump_real
+*.bin
+*.zip
+*.tar.gz

@@ -2,9 +2,9 @@ name: sanity
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   sanity-check:
@@ -25,14 +25,18 @@ jobs:
 
       - name: Import smoke test (modules must load)
         run: |
-          python -c "import fastapi"
-          python -c "from api import app as _app_check"
-          python -c "from api.sign_ecdsa import ecdsa_sign"
-          python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
+          python - <<'PY'
+          import fastapi
+          from api import app as _app_check
+          from api.sign_ecdsa import ecdsa_sign
+          from api.sign_dilithium import PQ_AVAILABLE
+          print("PQ_AVAILABLE=", PQ_AVAILABLE)
+          PY
 
-      - name: Build Docker image (r4pq test)
+      # Будуємо community-стадію (вона є завжди)
+      - name: Build Docker image (community)
         run: |
-          docker build -t r4pq-ci-test .
+          docker build --target community -t r4pq-ci-test .
 
       - name: Run container
         run: |
@@ -40,33 +44,49 @@ jobs:
             --name r4pq-ci-test \
             -p 8081:8081 \
             -e API_KEY='ci-demo' \
-            -e RATE_LIMIT='30/minute' \
+            -e RATE_LIMIT='800/second' \
             r4pq-ci-test
-          # give uvicorn a moment to boot
-          sleep 2
+
+      - name: Wait for /version (HTTP 200)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..40}; do
+            if curl -fsS "http://127.0.0.1:8081/version" -o /tmp/version.json; then
+              jq -r . /tmp/version.json || true
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "API did not become ready" >&2
+          exit 1
 
       - name: Hit /version
         run: |
-          curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
-          test -s /tmp/version.json
+          curl -fsS "http://127.0.0.1:8081/version" | tee /tmp/version.json >/dev/null
 
-      - name: Hit /random_pq?sig=ecdsa
+      # Деякі окруження інколи чутливі до формату ключа.
+      # Дамо і заголовок, і query-параметр одночасно.
+      - name: Hit /random (with API key)
+        shell: bash
         run: |
-          curl -s "http://127.0.0.1:8081/random_pq?sig=ecdsa" | tee /tmp/rand.json
-          test -s /tmp/rand.json
+          set -euo pipefail
+          curl --fail-with-body -sS \
+               -H "X-API-Key: ci-demo" \
+               "http://127.0.0.1:8081/random?n=16&fmt=hex&key=ci-demo" \
+            | tee /tmp/rand.txt >/dev/null
 
       - name: Show outputs
         run: |
           echo "----- /version -----"
-          cat /tmp/version.json
+          cat /tmp/version.json || true
           echo
-          echo "----- /random_pq?sig=ecdsa -----"
-          cat /tmp/rand.json
+          echo "----- /random -----"
+          cat /tmp/rand.txt || true
           echo
 
       - name: Cleanup container
         if: always()
         run: |
           docker logs r4pq-ci-test || true
-          docker stop r4pq-ci-test || true
-          docker rm r4pq-ci-test || true
+          docker rm -f r4pq-ci-test || true

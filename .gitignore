@@ -98,3 +98,34 @@ sts-2.1.2/
 # OS/editor
 .DS_Store
 *.swp
+core/bin/re4_dump
+packages/core/runtime/bin/re4_dump
+.env.ci
+/out_*.json
+/.env*
+
+docker-compose.yml
+
+# local CI runner env
+.env.ci
+
+# local backups
+Dockerfile.bak.*
+Makefile.bak
+
+# local dev
+.env.ci
+.env.r4demo
+out_*.json
+examples/out_*.json
+docker-compose.override.yml
+
+# demo outputs
+examples/out_*.json
+out_*.json
+# local dev envs & outputs
+.env.ci
+.env.r4demo
+docker-compose.yml
+out_*.json
+examples/out_*.json
