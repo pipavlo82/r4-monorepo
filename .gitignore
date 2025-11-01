@@ -123,3 +123,9 @@ docker-compose.override.yml
 # demo outputs
 examples/out_*.json
 out_*.json
+# local dev envs & outputs
+.env.ci
+.env.r4demo
+docker-compose.yml
+out_*.json
+examples/out_*.json

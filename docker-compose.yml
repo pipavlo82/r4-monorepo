@@ -19,7 +19,6 @@ services:
       sh -lc 'exec python -m uvicorn api.app:app --host 0.0.0.0 --port 8084'
     env_file:
       - .env.r4demo
-    # УВАГА: використовуємо 18084 на хості, щоб не конфліктувати з r4demo8084
     ports:
       - "18084:8084"
     restart: unless-stopped
