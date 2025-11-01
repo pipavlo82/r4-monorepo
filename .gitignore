@@ -112,3 +112,10 @@ docker-compose.yml
 # local backups
 Dockerfile.bak.*
 Makefile.bak
+
+# local dev
+.env.ci
+.env.r4demo
+out_*.json
+examples/out_*.json
+docker-compose.override.yml

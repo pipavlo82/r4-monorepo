@@ -1,24 +1,16 @@
-.PHONY: run stop logs clean test-api
+.PHONY: dev-up dev-down dual-json vrf-test
 
-run:
-	docker rm -f r4test 2>/dev/null || true
-	printf "API_KEY=demo\nRNG_BIN=/app/core/bin/re4_dump\n" > .env.ci
-	# 1) Зібрати community-стадію (в ній покладено stub-бінарник)
-	docker build --target community -t r4-ci-stub:latest .
-	# 2) Запустити
-	docker run -d --name r4test -p 18080:8080 --entrypoint "" --env-file ./.env.ci \
-	  r4-ci-stub:latest \
-	  sh -lc 'exec python -m uvicorn api.main:app --host 0.0.0.0 --port 8080'
+dev-up:
+	docker compose up -d
+	@for i in $$(seq 1 20); do curl -fsS http://127.0.0.1:18080/health && echo && break || sleep 0.2; done
+	@for i in $$(seq 1 20); do curl -fsS http://127.0.0.1:18084/health && echo && break || sleep 0.2; done
 
-test-api:
-	curl -s http://127.0.0.1:18080/version && echo
-	curl -s "http://127.0.0.1:18080/random?n=16&fmt=hex&key=demo" && echo
+dev-down:
+	docker compose down
 
-stop:
-	docker rm -f r4test 2>/dev/null || true
+dual-json:
+	curl -s -H "X-API-Key: demo" "http://127.0.0.1:18084/random_dual?sig=ecdsa&n=32&fmt=json" > examples/out_dual_ecdsa.json
+	jq -r 'keys[]' examples/out_dual_ecdsa.json >/dev/null
 
-logs:
-	docker logs --tail=200 -f r4test || true
-
-clean: stop
-	rm -f .env.ci
+vrf-test: dual-json
+	cd examples/vrf-hardhat && npm ci && npx hardhat test
