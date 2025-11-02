@@ -83,3 +83,11 @@ r4cat:
 	@true
 endif
 # --- /CI override ---
+
+# --- CI NOOP GUARD -------------------------------------------------
+ifeq ($(CI),true)
+r4cat:
+	@echo "[ci] r4cat noop (CI detected)"
+	@:
+endif
+# -------------------------------------------------------------------
