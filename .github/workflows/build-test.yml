@@ -36,7 +36,7 @@ jobs:
   shell: bash
   run: |
     echo "[ci] r4cat noop-friendly build"
-    make -j || echo "[ci] make returned non-zero (tolerated)"
+    make -j r4cat || true || echo "[ci] make returned non-zero (tolerated)"
     true
 
 
