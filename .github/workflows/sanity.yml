@@ -2,9 +2,9 @@ name: sanity
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   sanity-check:
@@ -25,10 +25,13 @@ jobs:
 
       - name: Import smoke test (modules must load)
         run: |
-          python -c "import fastapi"
-          python -c "from api import app as _app_check"
-          python -c "from api.sign_ecdsa import ecdsa_sign"
-          python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
+          python - <<'PY'
+          import fastapi
+          from api import app as _app_check
+          from api.sign_ecdsa import ecdsa_sign
+          from api.sign_dilithium import PQ_AVAILABLE
+          print("PQ_AVAILABLE=", PQ_AVAILABLE)
+          PY
 
       - name: Build Docker image (r4pq test)
         run: |
@@ -36,33 +39,39 @@ jobs:
 
       - name: Run container
         run: |
+          set -euo pipefail
           docker run -d \
             --name r4pq-ci-test \
             -p 8081:8081 \
             -e API_KEY='ci-demo' \
             -e RATE_LIMIT='30/minute' \
             r4pq-ci-test
-          # give uvicorn a moment to boot
-          sleep 2
+          # даємо uvicorn стартанути
+          sleep 1
+
+      - name: Wait until service is ready
+        run: |
+          set -euo pipefail
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8081/version -o /tmp/version.json; then
+              echo "service is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "service did not become ready in time" >&2
+          exit 1
 
       - name: Hit /version
         run: |
-          curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
           test -s /tmp/version.json
+          cat /tmp/version.json
 
       - name: Hit /random_pq?sig=ecdsa
         run: |
-          curl -s "http://127.0.0.1:8081/random_pq?sig=ecdsa" | tee /tmp/rand.json
+          curl -fsS "http://127.0.0.1:8081/random_pq?sig=ecdsa" -o /tmp/rand.json
           test -s /tmp/rand.json
-
-      - name: Show outputs
-        run: |
-          echo "----- /version -----"
-          cat /tmp/version.json
-          echo
-          echo "----- /random_pq?sig=ecdsa -----"
           cat /tmp/rand.json
-          echo
 
       - name: Cleanup container
         if: always()
