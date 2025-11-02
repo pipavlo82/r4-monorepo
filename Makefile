@@ -55,3 +55,15 @@ ifeq ($(CI),true)
 r4cat:
 	@echo "CI detected -> r4cat noop (skip docker compose)"; true
 endif
+
+# --- CI-safe override ---
+.PHONY: r4cat
+r4cat:
+	@echo "== r4cat =="
+	@if [ -n "$$CI" ]; then \
+		echo "CI detected → skip docker compose (noop)"; \
+		true; \
+	else \
+		echo "Local build → docker compose up"; \
+		docker compose up -d; \
+	fi
