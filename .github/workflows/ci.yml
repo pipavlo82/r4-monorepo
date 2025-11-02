@@ -2,8 +2,8 @@ name: re4ctor-ci
 
 on:
   push:
-    branches: [ main ]
-    tags: [ "v*" ]
+    branches: [main]
+    tags: ["v*"]
   pull_request:
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       # --- optional tamper test (won't fail CI if missing) ---
       - name: Tamper test (if present)
         run: |
-          if [ -x tests/tamper.sh ]; then
+          if [-x tests/tamper.sh]; then
             bash -x tests/tamper.sh
           else
             echo "no tamper.sh -> skipping"

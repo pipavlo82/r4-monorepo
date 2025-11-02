@@ -2,13 +2,14 @@ name: sanity
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   sanity-check:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -19,52 +20,58 @@ jobs:
           python-version: "3.10"
 
       - name: Install Python deps
-        run: pip install --no-cache-dir -r api/requirements.txt
+        run: |
+          pip install --no-cache-dir -r api/requirements.txt
 
       - name: Import smoke test (modules must load)
         run: |
-          python - <<'PY'
-          import fastapi
-          from api import main as _app_check
-          from api.sign_ecdsa import ecdsa_sign
-          from api.sign_dilithium import PQ_AVAILABLE
-          print("PQ_AVAILABLE=", PQ_AVAILABLE)
-          PY
+          python -c "import fastapi"
+          python -c "from api import app as _app_check"
+          python -c "from api.sign_ecdsa import ecdsa_sign"
+          python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
 
       - name: Build Docker image (community)
-        run: docker build --target community -t r4-ci-stub:latest .
+        run: |
+          docker build --target community -t r4-ci-stub:latest .
 
       - name: Run container
         run: |
           docker run -d \
-            --name r4pq-ci-test \
-            -p 8081:8080 \                 # <— контейнер 8080 → хост 8081
+            --name r4-ci-stub \
+            -p 8081:8081 \
             -e API_KEY='ci-demo' \
             -e RATE_LIMIT='30/minute' \
             r4-ci-stub:latest
 
-          echo "⏳ Waiting for API..."
-          for i in $(seq 1 40); do
+          # чекаємо готовність API
+          for i in {1..30}; do
             if curl -fsS http://127.0.0.1:8081/version >/dev/null; then
-              echo "ok"; break
+              echo "API ready"; break
             fi
-            sleep 0.5
-            if [ "$i" = 40 ]; then echo "API did not become ready"; docker logs r4pq-ci-test; exit 1; fi
+            sleep 1
           done
 
       - name: Hit /version
-        run: curl -fsS http://127.0.0.1:8081/version | tee /tmp/version.json
+        run: |
+          curl -fsS http://127.0.0.1:8081/version | tee /tmp/version.json
 
       - name: Hit /random (with API key)
-        run: curl -fsS -H "X-API-Key: ci-demo" "http://127.0.0.1:8081/random?n=16&fmt=hex" | tee /tmp/rand.txt
+        run: |
+          curl -fsS -H "X-API-Key: ci-demo" \
+            "http://127.0.0.1:8081/random?n=16&fmt=hex" | tee /tmp/rand.txt
 
       - name: Show outputs
         run: |
-          echo "----- /version -----"; cat /tmp/version.json; echo
-          echo "----- /random -----";  cat /tmp/rand.txt;     echo
+          echo "----- /version -----"
+          cat /tmp/version.json
+          echo
+          echo "----- /random -----"
+          cat /tmp/rand.txt
+          echo
 
       - name: Cleanup container
         if: always()
         run: |
-          docker logs r4pq-ci-test || true
-          docker rm -f r4pq-ci-test || true
+          docker logs r4-ci-stub || true
+          docker stop r4-ci-stub || true
+          docker rm r4-ci-stub || true
