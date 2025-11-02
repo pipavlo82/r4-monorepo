@@ -2,9 +2,9 @@ name: sanity
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
   sanity-check:
@@ -30,43 +30,48 @@ jobs:
           python -c "from api.sign_ecdsa import ecdsa_sign"
           python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
 
-      - name: Build Docker image (r4pq test)
+      - name: Build Docker image (community)
         run: |
-          docker build -t r4pq-ci-test .
+          docker build --target community -t r4-ci-stub:latest .
 
       - name: Run container
         run: |
           docker run -d \
-            --name r4pq-ci-test \
+            --name r4-ci-stub \
             -p 8081:8081 \
             -e API_KEY='ci-demo' \
             -e RATE_LIMIT='30/minute' \
-            r4pq-ci-test
-          # give uvicorn a moment to boot
-          sleep 2
+            r4-ci-stub:latest
+
+          # чекаємо готовність API
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8081/version >/dev/null; then
+              echo "API ready"; break
+            fi
+            sleep 1
+          done
 
       - name: Hit /version
         run: |
-          curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
-          test -s /tmp/version.json
+          curl -fsS http://127.0.0.1:8081/version | tee /tmp/version.json
 
-      - name: Hit /random_pq?sig=ecdsa
+      - name: Hit /random (with API key)
         run: |
-          curl -s "http://127.0.0.1:8081/random_pq?sig=ecdsa" | tee /tmp/rand.json
-          test -s /tmp/rand.json
+          curl -fsS -H "X-API-Key: ci-demo" \
+            "http://127.0.0.1:8081/random?n=16&fmt=hex" | tee /tmp/rand.txt
 
       - name: Show outputs
         run: |
           echo "----- /version -----"
           cat /tmp/version.json
           echo
-          echo "----- /random_pq?sig=ecdsa -----"
-          cat /tmp/rand.json
+          echo "----- /random -----"
+          cat /tmp/rand.txt
           echo
 
       - name: Cleanup container
         if: always()
         run: |
-          docker logs r4pq-ci-test || true
-          docker stop r4pq-ci-test || true
-          docker rm r4pq-ci-test || true
+          docker logs r4-ci-stub || true
+          docker stop r4-ci-stub || true
+          docker rm r4-ci-stub || true

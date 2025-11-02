@@ -2,12 +2,12 @@ name: VRF Contract Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - 'vrf-spec/**'
       - '.github/workflows/vrf-tests.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - 'vrf-spec/**'
 
