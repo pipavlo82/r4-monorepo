@@ -1,0 +1,24 @@
+services:
+  r4api:
+    image: r4-ci-stub:latest
+    container_name: r4api
+    entrypoint: ""
+    command: >
+      sh -lc 'exec python -m uvicorn api.main:app --host 0.0.0.0 --port 8080'
+    env_file:
+      - .env.ci
+    ports:
+      - "18080:8080"
+    restart: unless-stopped
+
+  r4dual:
+    image: r4-ci-stub:latest
+    container_name: r4dual
+    entrypoint: ""
+    command: >
+      sh -lc 'exec python -m uvicorn api.app:app --host 0.0.0.0 --port 8084'
+    env_file:
+      - .env.r4demo
+    ports:
+      - "18084:8084"
+    restart: unless-stopped

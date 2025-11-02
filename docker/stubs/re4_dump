@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Stub re4_dump: генерує 32 байти у hex (64 символи)
+bytes=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
+printf "%s\n" "${bytes}"

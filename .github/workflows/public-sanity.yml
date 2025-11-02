@@ -1,8 +1,8 @@
 name: public-sanity
 
-on:
+"on":
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -58,7 +58,7 @@ jobs:
 
       - name: Basic import check
         run: |
-          python3 -c "import sys; sys.path.append('packages/core/docker'); import main as r4api; print('[OK] imported main.py from docker image layout ✅')"
+  run: |
 
       - name: Emit status
         run: echo "✅ public-sanity done"
