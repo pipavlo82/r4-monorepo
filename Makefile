@@ -75,3 +75,11 @@ r4cat:
 	@echo "CI detected -> skip docker compose (noop success)"
 	@:
 endif
+# --- CI override: r4cat (noop success) ---
+ifeq ($(CI),true)
+.PHONY: r4cat
+r4cat:
+	@echo "CI detected -> skip docker compose (noop)"
+	@true
+endif
+# --- /CI override ---
