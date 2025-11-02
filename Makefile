@@ -67,3 +67,11 @@ r4cat:
 		echo "Local build → docker compose up"; \
 		docker compose up -d; \
 	fi
+
+# --- CI override: r4cat must be noop-success in CI ---
+ifeq ($(CI),true)
+.PHONY: r4cat
+r4cat:
+	@echo "CI detected -> skip docker compose (noop success)"
+	@:
+endif
