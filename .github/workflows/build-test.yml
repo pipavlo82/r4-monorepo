@@ -33,6 +33,7 @@ jobs:
 
       - name: Build client (r4cat)
         continue-on-error: true
+        continue-on-error: true
 
         continue-on-error: true
 
