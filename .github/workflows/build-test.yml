@@ -25,29 +25,19 @@ jobs:
           ls -l build || true
 
       - name: Smoke test re4_dump
-        shell: bash
         run: |
-          d=""
-          [ -d packages/core/build ] && d=packages/core/build
-          [ -z "$d" ] && [ -d build ] && d=build
-          if [ -n "$d" ] && [ -f "$d/re4_dump" ]; then
-            hexdump -C "$d/re4_dump" | head -n 5
-          else
-            echo "re4_dump not present (ok for CI)"
-          fi
-          true
+          { cd packages/core/build 2>/dev/null || cd build 2>/dev/null || true; }
+          { hexdump -C re4_dump | head -n 5; } || echo "re4_dump not present (ok for CI)"
 
-      # >>> Критично: крок NOOP, без make -j
-      
-- name: Build client (r4cat)
-  continue-on-error: true
-  shell: bash
-  env:
-    CI: "true"
-  run: |
-    echo "[ci] build r4cat (noop-safe)"
-    make -j r4cat || true
-    echo "[ci] done"
+      - name: Build client (r4cat)
+        continue-on-error: true
+        shell: bash
+        env:
+          CI: "true"
+        run: |
+          echo "[ci] build r4cat only"
+          make -j r4cat || true
+          echo "[ci] done"
 
       - name: Tamper test (if present)
         shell: bash

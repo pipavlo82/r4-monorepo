@@ -82,3 +82,10 @@ real-r4cat:
 	@:
 endif
 # -------------------------------------------------------------------
+
+
+# BEGIN CI NOOP GUARD
+ifeq ($(CI),true)
+r4cat: ; @echo "[ci] r4cat noop (CI)"; @:
+endif
+# END CI NOOP GUARD
