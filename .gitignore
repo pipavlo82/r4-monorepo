@@ -129,3 +129,6 @@ out_*.json
 docker-compose.yml
 out_*.json
 examples/out_*.json
+
+# local
+.yamllint
