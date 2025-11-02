@@ -1,3 +1,4 @@
+include ci_noop_guard.mk
 #!CI_NOOP_GUARD_BEGIN
 ifeq ($(CI),true)
 .PHONY: all r4cat dev-up dev-down build client
