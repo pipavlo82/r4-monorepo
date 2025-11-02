@@ -33,18 +33,11 @@ jobs:
 
       # ⬇⬇⬇ ГОЛОВНЕ: r4cat — noop і не валить джобу
       - name: Build client (r4cat)
-    continue-on-error: true
-    run: |
-      echo "[ci] build r4cat"
-      make -j r4cat || true
+  continue-on-error: true
+  run: |
+    echo "[ci] build r4cat"
+    make -j r4cat || true
 
-        continue-on-error: true
-        shell: bash
-        run: |
-          echo "[ci] build r4cat (noop-friendly)"
-          make -j || echo "[ci] make returned non-zero; tolerated"
-          echo "[ci] r4cat step done (noop)"
-          true
 
       - name: Tamper test (if present)
         shell: bash
