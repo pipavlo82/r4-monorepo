@@ -1,3 +1,4 @@
+.PHONY: r4cat real-r4cat
 include ci_noop_guard.mk
 #!CI_NOOP_GUARD_BEGIN
 ifeq ($(CI),true)
@@ -54,47 +55,29 @@ dev-down:
 
 # --- CI override: r4cat завжди noop і exit 0 ---
 .PHONY: r4cat
-r4cat:
-	@echo "CI detected -> r4cat noop (skip docker compose)"; exit 0
+r4cat: real-r4cat
 
 # --- CI override: r4cat is NOOP (always success) ---
 ifeq ($(CI),true)
 .PHONY: r4cat
-r4cat:
-	@echo "CI detected -> r4cat noop (skip docker compose)"; true
 endif
 
 # --- CI-safe override ---
 .PHONY: r4cat
-r4cat:
-	@echo "== r4cat =="
-	@if [ -n "$$CI" ]; then \
-		echo "CI detected → skip docker compose (noop)"; \
-		true; \
-	else \
-		echo "Local build → docker compose up"; \
-		docker compose up -d; \
-	fi
 
 # --- CI override: r4cat must be noop-success in CI ---
 ifeq ($(CI),true)
 .PHONY: r4cat
-r4cat:
-	@echo "CI detected -> skip docker compose (noop success)"
-	@:
 endif
 # --- CI override: r4cat (noop success) ---
 ifeq ($(CI),true)
 .PHONY: r4cat
-r4cat:
-	@echo "CI detected -> skip docker compose (noop)"
-	@true
 endif
 # --- /CI override ---
 
 # --- CI NOOP GUARD -------------------------------------------------
 ifeq ($(CI),true)
-r4cat:
+real-r4cat:
 	@echo "[ci] r4cat noop (CI detected)"
 	@:
 endif
