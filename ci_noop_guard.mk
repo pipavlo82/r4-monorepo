@@ -1,15 +1,16 @@
-# --- CI NOOP guard ---
+# --- CI NOOP guard (bottom include) ---
 ifeq ($(CI),true)
-override .DEFAULT_GOAL := ci-noop
 
-.PHONY: ci-noop r4cat all dev-up dev-down build client
+.PHONY: ci-noop all r4cat dev-up dev-down build client
 
 ci-noop:
 	@echo "[ci] NOOP (CI)"
 	@:
 
-# Якщо викличуть будь-яку з цих цілей — теж NOOP
-r4cat all dev-up dev-down build client:
-	@$(MAKE) ci-noop
+# override: перезаписуємо рецепти основних цілей у CI
+all r4cat dev-up dev-down build client:
+	@echo "[ci] forced NOOP target $@ (CI)"
+	@:
+
 endif
 # --- end CI NOOP guard ---
