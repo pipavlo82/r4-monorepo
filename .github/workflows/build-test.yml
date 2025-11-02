@@ -29,11 +29,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dir=""
-          if [ -d packages/core/build ]; then dir="packages/core/build"; fi
-          if [ -z "$dir" ] && [ -d build ]; then dir="build"; fi
-          if [ -n "$dir" ] && [ -f "$dir/re4_dump" ]; then
-            hexdump -C "$dir/re4_dump" | head -n 5
+          d=""
+          [ -d packages/core/build ] && d=packages/core/build
+          [ -z "$d" ] && [ -d build ] && d=build
+          if [ -n "$d" ] && [ -f "$d/re4_dump" ]; then
+            hexdump -C "$d/re4_dump" | head -n 5
           else
             echo "re4_dump not present (ok for CI)"
           fi
