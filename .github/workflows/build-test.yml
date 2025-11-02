@@ -26,10 +26,18 @@ jobs:
           ls -l build || true
 
       - name: Smoke test re4_dump
+        shell: bash
         run: |
-          { cd packages/core/build 2>/dev/null || cd build 2>/dev/null || true; }
-          { hexdump -C re4_dump | head -n 5; } || echo "re4_dump not present (ok for CI)"
-
+          set -euo pipefail
+          dir=""
+          if [ -d packages/core/build ]; then dir="packages/core/build"; fi
+          if [ -z "$dir" ] && [ -d build ]; then dir="build"; fi
+          if [ -n "$dir" ] && [ -f "$dir/re4_dump" ]; then
+            hexdump -C "$dir/re4_dump" | head -n 5
+          else
+            echo "re4_dump not present (ok for CI)"
+          fi
+          true
 
       - name: Build client (r4cat)
         continue-on-error: true
@@ -40,6 +48,7 @@ jobs:
           echo "[ci] build r4cat (noop-safe)"
           make -j r4cat || true
           echo "[ci] done"
+
       - name: Tamper test (if present)
         shell: bash
         run: |
