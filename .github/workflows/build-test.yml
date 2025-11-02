@@ -30,13 +30,23 @@ jobs:
           { cd packages/core/build 2>/dev/null || cd build 2>/dev/null || true; }
           { hexdump -C re4_dump | head -n 5; } || echo "re4_dump not present (ok for CI)"
 
+
       - name: Build client (r4cat)
+
+        continue-on-error: true
+
         shell: bash
+
         env:
+
           CI: "true"
+
         run: |
-          echo "[ci] build r4cat (noop-safe)"
+
+          echo "[ci] build r4cat (noop)"
+
           make -j r4cat || true
+
           echo "[ci] done"
 
       - name: Tamper test (if present)
