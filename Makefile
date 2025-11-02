@@ -48,3 +48,10 @@ dev-down:
 .PHONY: r4cat
 r4cat:
 	@echo "CI detected -> r4cat noop (skip docker compose)"; exit 0
+
+# --- CI override: r4cat is NOOP (always success) ---
+ifeq ($(CI),true)
+.PHONY: r4cat
+r4cat:
+	@echo "CI detected -> r4cat noop (skip docker compose)"; true
+endif
