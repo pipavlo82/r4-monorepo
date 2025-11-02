@@ -132,3 +132,7 @@ examples/out_*.json
 
 # local
 .yamllint
+
+# local backups
+.github/workflows/*.bak.*
+Makefile.bak.*
