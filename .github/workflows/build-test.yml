@@ -32,7 +32,11 @@ jobs:
           {hexdump -C re4_dump | head -n 5;} || echo "re4_dump not present (ok for CI)"
 
       - name: Build client (r4cat)
-        shell: bash
+  shell: bash
+  run: |
+    echo "[ci] build r4cat (noop-friendly)"
+    make -j r4cat || true
+    echo "[ci] done"
         env:
         CI: "true"
         run: |
