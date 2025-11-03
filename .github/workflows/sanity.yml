@@ -2,9 +2,9 @@ name: sanity
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   sanity-check:
@@ -23,12 +23,32 @@ jobs:
         run: |
           pip install --no-cache-dir -r api/requirements.txt
 
+      # Уникаємо проблем з лапками: чистий heredoc
       - name: Import smoke test (modules must load)
         run: |
-          python -c "import fastapi"
-          python -c "from api import app as _app_check"
-          python -c "from api.sign_ecdsa import ecdsa_sign"
-          python -c "from api.sign_dilithium import PQ_AVAILABLE; print('PQ_AVAILABLE=', PQ_AVAILABLE)"
+          python - <<'PY'
+          import fastapi
+          from api import app as _app_check
+          from api.sign_ecdsa import ecdsa_sign
+          from api.sign_dilithium import PQ_AVAILABLE
+          print("PQ_AVAILABLE=", PQ_AVAILABLE)
+          PY
+
+      # Якщо sealed core відсутній у цій гілці — підкласти заглушку,
+      # щоб Dockerfile міг зробити COPY.
+      - name: Prepare sealed-core stub for CI (if missing)
+        run: |
+          set -euo pipefail
+          mkdir -p core/bin
+          if [ ! -x core/bin/re4_dump ]; then
+            echo "[ci] re4_dump not found → creating stub"
+            cat > core/bin/re4_dump <<'SH'
+#!/usr/bin/env sh
+# CI/community stub for sealed core
+printf '00000000\n'
+SH
+            chmod +x core/bin/re4_dump
+          fi
 
       - name: Build Docker image (r4pq test)
         run: |
@@ -36,33 +56,37 @@ jobs:
 
       - name: Run container
         run: |
+          set -euo pipefail
           docker run -d \
             --name r4pq-ci-test \
             -p 8081:8081 \
             -e API_KEY='ci-demo' \
             -e RATE_LIMIT='30/minute' \
             r4pq-ci-test
-          # give uvicorn a moment to boot
-          sleep 2
+
+      - name: Wait until service is ready
+        run: |
+          set -euo pipefail
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8081/version -o /tmp/version.json; then
+              echo "service is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "service did not become ready in time" >&2
+          exit 1
 
       - name: Hit /version
         run: |
-          curl -s http://127.0.0.1:8081/version | tee /tmp/version.json
           test -s /tmp/version.json
+          cat /tmp/version.json
 
       - name: Hit /random_pq?sig=ecdsa
         run: |
-          curl -s "http://127.0.0.1:8081/random_pq?sig=ecdsa" | tee /tmp/rand.json
+          curl -fsS "http://127.0.0.1:8081/random_pq?sig=ecdsa" -o /tmp/rand.json
           test -s /tmp/rand.json
-
-      - name: Show outputs
-        run: |
-          echo "----- /version -----"
-          cat /tmp/version.json
-          echo
-          echo "----- /random_pq?sig=ecdsa -----"
           cat /tmp/rand.json
-          echo
 
       - name: Cleanup container
         if: always()
