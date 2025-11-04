@@ -30,7 +30,7 @@ COPY api /app/api
 
 # --- Sealed core binary (community build ships it) ---
 RUN mkdir -p /app/core/bin
-COPY core/bin/re4_dump /app/core/bin/re4_dump
+COPY core/bin/re4_dump.stub /app/core/bin/re4_dump
 RUN chmod +x /app/core/bin/re4_dump
 
 # --- Keys dir for ECDSA ---
