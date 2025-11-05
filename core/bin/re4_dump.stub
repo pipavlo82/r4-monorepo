@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "stub re4_dump (not included in CI build)"

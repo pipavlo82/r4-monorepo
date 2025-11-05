@@ -98,3 +98,14 @@ sts-2.1.2/
 # OS/editor
 .DS_Store
 *.swp
+*.bak
+*.bak.*
+*package.json.broken.*
+*package.json.pre-merge.bak
+*package.json.before-clean.*
+*package.json.fix-bad-keys.bak
+*.env.*
+vrf-spec/npm-*.txt
+vrf-spec/npm-licenses.json
+out_*.json
+examples/out_*.json

@@ -1,3 +1,4 @@
+> Licensing: Apache 2.0 for API/VRF; proprietary for sealed entropy core (see LICENSE).
 # ☢️ RE4CTOR — The Nuclear Core of Randomness
 
 > **Verifiable entropy • Post-quantum VRF • Attested boot • On-chain fairness you can prove**

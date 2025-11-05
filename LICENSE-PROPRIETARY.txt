@@ -1,0 +1,10 @@
+# RE4CTOR Proprietary License
+
+The sealed entropy core and compiled binaries are proprietary and confidential.
+Unauthorized copying, distribution, modification, or reverse engineering is
+strictly prohibited.
+
+Use of these components requires explicit written permission from
+Pavlo Tvardovskyi or an authorized distributor.
+
+(c) 2025 Pavlo Tvardovskyi. All rights reserved.

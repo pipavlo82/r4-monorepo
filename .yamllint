@@ -1,0 +1,9 @@
+extends: default
+rules:
+  document-start: disable
+  truthy:
+    check-keys: false
+  indentation: disable           # відключаємо строгі відступи (GHA часто відрізняється)
+  line-length:
+    max: 140
+    level: warning
