@@ -63,7 +63,7 @@ If you see "6 passing", you've proven fairness locally. 🎉
 ---
 
 <a id="docker"></a>
-## 🐳 Docker Quickstart (:8080)
+## 🐳 Docker Quickstart 
 
 Request signed randomness (ECDSA):
 
