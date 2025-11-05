@@ -65,22 +65,40 @@ If you see "6 passing", you've proven fairness locally. 🎉
 <a id="docker"></a>
 ## 🐳 Docker Quickstart (:8080)
 
-```bash
-docker run -d \
-  --name r4-core \
-  -p 8080:8080 \
-  -e API_KEY=demo \
-  pipavlo/r4-local-test:latest
+Request signed randomness (ECDSA):
 
-# Health check
-curl http://127.0.0.1:8080/health
-# → "ok"
-
-# Get randomness
 curl -H "X-API-Key: demo" \
-  "http://127.0.0.1:8080/random?n=32&fmt=hex"
-# → "a359b9dd843294e415ac0e41eb49ef90..."
-```
+  "http://127.0.0.1:8081/random_pq?sig=ecdsa" | jq
+
+
+Expected response:
+
+{
+  "random": 2689836398,
+  "timestamp": "2025-10-28T23:46:03Z",
+  "v": 27,
+  "r": "0x4fe30113...",
+  "s": "0xce79a501...",
+  "signer_addr": "0xC61b94A8e6aDf598c8a04737192F1591cC37Db1A",
+  "pq_mode": false
+}
+
+
+Request Dilithium (Enterprise only):
+
+curl -H "X-API-Key: demo" \
+  "http://127.0.0.1:8081/random_pq?sig=dilithium" | jq
+
+
+ℹ️ The public image (pipavlo/r4-local-test:latest) includes ECDSA only.
+The ?sig=dilithium endpoint is available in the Enterprise / FIPS-204 build, and will return:
+
+{
+  "error": "Dilithium3 signature not available on this build",
+  "pq_required": true,
+  "status": 501,
+  "hint": "Enterprise / FIPS 204 build required"
+}
 
 ---
 
