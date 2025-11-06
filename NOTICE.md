@@ -1,4 +1,8 @@
-This repository contains:
-- Open-source wrapper code (API/SDK/contracts) under Apache-2.0 (see LICENSE).
-- A sealed entropy core ("re4_dump") which is PROPRIETARY (see LICENSE-CORE.md).
-Binary redistributions of the core are not permitted without a separate license.
+NOTICE — RE4CTOR Licensing Overview
+
+This repository contains both open and proprietary components:
+
+• API / SDK / smart contracts / tooling → Apache-2.0 (see LICENSE)
+• Sealed entropy binary “re4_dump” and CORE artifacts → Proprietary (see LICENSE-CORE.md)
+
+Redistribution, reverse engineering, or extraction of CORE without a written agreement is prohibited.

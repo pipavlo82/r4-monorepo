@@ -1,16 +1,16 @@
 RE4CTOR Core Binary — Proprietary License
 Copyright (c) 2025 Pavlo Tvardovskyi. All rights reserved.
 
-1) Scope. This license applies only to the sealed entropy binary ("re4_dump")
-   and any accompanying manifests and test artifacts explicitly marked as CORE.
-2) Rights. Non-exclusive, non-transferable right to use the CORE solely to run
-   RE4CTOR services. No distribution, no sublicensing.
-3) Restrictions. No reverse engineering, decompilation, or modification.
-   No public redistribution of the CORE or derivative binaries.
-4) Ownership. All rights, title and interest remain with the Licensor.
-5) Warranty. Provided “AS IS”. No warranty; no liability for damages.
-6) Evaluation. Community images grant an evaluation right for testing only.
-7) Enterprise. Production and FIPS profiles require a separate written license.
-8) Termination. Any breach terminates this license immediately.
+1. Scope. Applies only to the sealed entropy binary (“re4_dump”) and any files
+   explicitly marked as CORE (e.g., manifests, SBOM for CORE).
+2. Rights. Non-exclusive right to run CORE solely to operate RE4CTOR services.
+   No redistribution, sublicensing, hosting for third parties, or resale.
+3. Restrictions. No reverse engineering, decompilation, modification, or
+   derivative works. No public posting of CORE artifacts or images that contain it.
+4. Ownership. Licensor retains all rights, title, and interest in CORE.
+5. Warranty. CORE is provided “AS IS”, without warranties. No liability for damages.
+6. Evaluation. Community images are for evaluation/testing only.
+7. Enterprise. Production/commercial use requires a separate written license.
+8. Termination. Any breach terminates this license immediately.
 
-For enterprise licensing, contact: shtomko@gmail.com
+Contact: shtomko@gmail.com
