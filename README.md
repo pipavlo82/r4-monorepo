@@ -284,7 +284,9 @@ docker run -e R4_STRICT_FIPS=1 -p 8081:8081 r4-fips-vrf:latest
 | **Throughput** | ~950k/s | limited | limited | ~50k/s |
 
 **Decision:** need speed + verifiable proof → **R4**. Need decentralization → **Chainlink/drand**.
-docs/COMPETITION.md
+[docs/COMPETITION.md](docs/COMPETITION.md)
+
+
 ---
 
 ## 🎲 LotteryR4 — Provably Fair On-Chain Lottery
