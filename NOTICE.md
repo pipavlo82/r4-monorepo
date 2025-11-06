@@ -1,20 +1,8 @@
-# NOTICE — RE4CTOR Intellectual Property
+NOTICE — RE4CTOR Licensing Overview
 
-This repository includes both open and proprietary components.
+This repository contains both open and proprietary components:
 
-PROPRIETARY:
-- Entropy core (re4_dump)
-- DRBG/entropy logic
-- Related methodology
+• API / SDK / smart contracts / tooling → Apache-2.0 (see LICENSE)
+• Sealed entropy binary “re4_dump” and CORE artifacts → Proprietary (see LICENSE-CORE.md)
 
-OPEN SOURCE:
-- API (FastAPI)
-- Solidity verifier
-- SDK and tools
-
-The proprietary binaries are **not redistributable** and may not be copied,
-extracted, reverse engineered, or redistributed.
-
-Violations will be treated as copyright infringement.
-
-(c) 2025 Pavlo Tvardovskyi. All rights reserved.
+Redistribution, reverse engineering, or extraction of CORE without a written agreement is prohibited.
