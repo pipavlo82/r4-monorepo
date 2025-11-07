@@ -10,3 +10,4 @@ eth-keys==0.4.0
 cryptography
 eth-hash[pysha3]==0.6.0
 eth-utils
+pqcrypto==0.3.4

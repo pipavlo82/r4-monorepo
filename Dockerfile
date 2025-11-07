@@ -55,6 +55,7 @@ RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
     echo '    python3 /app/api/fips_selftest.py || echo "[r4] WARNING: self-test failed (non-strict mode), continuing..."' >> /app/entrypoint.sh && \
     echo 'fi' >> /app/entrypoint.sh && \
     echo 'echo "[r4] self-test passed (or allowed), starting API..."' >> /app/entrypoint.sh && \
+    echo 'PORT=${PORT:-8081}' >> /app/entrypoint.sh && \
     echo 'exec uvicorn api.app:app --host 0.0.0.0 --port ${PORT}' >> /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
 

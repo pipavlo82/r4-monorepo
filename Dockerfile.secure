@@ -37,7 +37,8 @@ RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
     echo 'echo "[r4] running FIPS startup self-test..."' >> /app/entrypoint.sh && \
     echo 'python3 /app/api/fips_selftest.py || true' >> /app/entrypoint.sh && \
     echo 'echo "[r4] self-test passed (or allowed), starting API..."' >> /app/entrypoint.sh && \
-    echo 'exec uvicorn api.app:app --host 0.0.0.0 --port 8081' >> /app/entrypoint.sh && \
+    echo 'PORT=${PORT:-8081}' >> /app/entrypoint.sh && \
+    echo 'exec uvicorn api.app:app --host 0.0.0.0 --port ${PORT}' >> /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
 
 EXPOSE 8081
