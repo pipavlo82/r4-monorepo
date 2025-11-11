@@ -48,6 +48,9 @@ RE4CTOR is a **sealed entropy appliance + verifiable randomness pipeline**.
 
 **Typical use cases:** casinos & sportsbooks, NFT raffles, validator rotation, ZK-rollup seeding, "prove to regulators we didn't rig this."
 
+> 💡 **Need a hosted HTTPS API instead of running the full stack?**  
+> Check out **R4 SaaS API Gateway** → [github.com/pipavlo82/r4-saas-api](https://github.com/pipavlo82/r4-saas-api)
+
 ---
 
 ## 🚀 One-Command Demo
