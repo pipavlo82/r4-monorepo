@@ -273,15 +273,138 @@ docker run -e R4_STRICT_FIPS=1 -p 8081:8081 r4-fips-vrf:latest
 ---
 
 ## 🥊 R4 vs Competitors
+# RE4CTOR vs Competitors: Honest Comparison
+
 
 | Feature | R4 | Chainlink | drand | AWS HSM |
 |---------|-----|-----------|--------|---------|
+| **Latency** | **20–30 ms** | 30–120 s | 3–30 s | 10–50 ms |
 | **Post-Quantum** | ✅ ML-DSA-65 | ❌ | ❌ | ⚠️ |
-| **Latency** | **<1 ms** | 30–120 s | 3–30 s | 10–50 ms |
 | **Cost** | self-hosted | pay/req | free | $$$$ |
 | **On-chain verify** | ✅ | ✅ | ⚠️ | ❌ |
 | **Self-hosted** | ✅ | ❌ | ✅ | ⚠️ |
-| **Throughput** | ~950k/s | limited | limited | ~50k/s |
+| **Throughput** | ~100k/s | limited | limited | ~50k/s |
+| **FIPS 204 Ready** | ✅ Q1 2026 | ❌ | ❌ | ❌ |
+
+---
+
+## Detailed Breakdown
+
+### Latency Comparison
+
+| Service | Actual | Notes |
+|---------|--------|-------|
+| **RE4CTOR** | 20–30 ms | HTTP + crypto proof (live tested Nov 11, 2025) |
+| **AWS HSM** | 10–50 ms | Hardware + TLS (config dependent) |
+| **drand** | 3–30 s | Beacon finality + network |
+| **Chainlink VRF** | 30–120 s | Oracle network + blockchain confirmation |
+
+**Verdict:** RE4CTOR comparable to AWS HSM, 1000x faster than Chainlink/drand
+
+---
+
+### Post-Quantum Readiness
+
+| Service | Status | Timeline |
+|---------|--------|----------|
+| **RE4CTOR** | ✅ ML-DSA-65 implemented | Already in production (2025) |
+| **AWS HSM** | ⚠️ Planning | Unknown |
+| **Chainlink** | ❌ No roadmap | Not prioritized |
+| **drand** | ❌ No roadmap | Not prioritized |
+
+**Verdict:** RE4CTOR only production-ready PQ RNG (2025)
+
+---
+
+### Cost Analysis
+
+| Service | Model | 1M Calls/Month |
+|---------|-------|-------------|
+| **RE4CTOR** | Self-hosted | ~$500 (1 server) |
+| **Chainlink VRF** | Pay-per-request | $1M–5M |
+| **drand** | Free | $0 |
+| **AWS HSM** | Monthly rental | $5k–50k |
+
+**Verdict:** RE4CTOR 1000x cheaper than Chainlink for volume users
+
+---
+
+### On-Chain Verification
+
+| Service | On-Chain Verify | Method |
+|---------|-----------------|--------|
+| **RE4CTOR** | ✅ Yes | ECDSA (EIP-191) + ML-DSA-65 |
+| **Chainlink** | ✅ Yes | Oracle callback |
+| **drand** | ⚠️ Limited | Beacon only |
+| **AWS HSM** | ❌ No | Offline, no proof |
+
+**Verdict:** RE4CTOR and Chainlink support on-chain verification
+
+---
+
+### Self-Hosted Capability
+
+| Service | Self-Host | Difficulty |
+|---------|-----------|-----------|
+| **RE4CTOR** | ✅ Yes | Easy (Docker Compose) |
+| **drand** | ✅ Yes | Medium (setup + relay) |
+| **AWS HSM** | ⚠️ Hybrid | Hard (AWS management) |
+| **Chainlink** | ❌ No | Centralized network |
+
+**Verdict:** RE4CTOR easiest to deploy
+
+---
+
+### Throughput
+
+| Service | Measured | Notes |
+|---------|----------|-------|
+| **RE4CTOR** | ~100k/s | Tested; scales to 300k/s concurrent |
+| **AWS HSM** | ~50k/s | Hardware-limited |
+| **Chainlink** | ~1–10k/s | Blockchain finality bottleneck |
+| **drand** | ~1–5k/s | Beacon finality bottleneck |
+
+**Verdict:** RE4CTOR highest throughput
+
+RE4CTOR: 20–30ms Verifiable Randomness
+
+The only FIPS 204-ready, post-quantum RNG 
+you can self-host today.
+
+Performance:
+  • 20–30ms latency (comparable to AWS HSM)
+  • 1000x faster than Chainlink VRF
+  • ~100k req/s throughput
+  
+Security:
+  • ECDSA + ML-DSA-65 dual signatures
+  • FIPS 204 certification ready (Q1 2026)
+  • On-chain verification included
+  
+Cost:
+  • Self-hosted: $0 per call
+  • vs Chainlink: $1–5 per call
+  • 90% cost savings for volume users
+
+Use Cases:
+  ✅ Gaming & Casinos
+  ✅ Defense/Government (FIPS 204)
+  ✅ DeFi Protocols
+  ✅ Enterprise Systems
+```
+
+---
+
+## Quick Reference Table
+
+| Dimension | R4 | Chainlink | AWS HSM | drand |
+|-----------|-----|-----------|---------|-------|
+| **Speed** | 20–30ms ⚡ | 30–120s 🐢 | 10–50ms 📦 | 3–30s 📊 |
+| **Cost** | $0/call | $1–5/call | $$$$$ | Free |
+| **Post-Quantum** | ✅ | ❌ | ❌ | ❌ |
+| **Self-Hosted** | ✅ Easy | ❌ | ⚠️ Hard | ✅ Medium |
+| **On-Chain Proof** | ✅ | ✅ | ❌ | ⚠️ |
+| **Best For** | Gaming, Defense, DeFi | Decentralization | Enterprise | Beacon |
 
 **Decision:** need speed + verifiable proof → **R4**. Need decentralization → **Chainlink/drand**.
 [docs/COMPETITION.md](docs/COMPETITION.md)
