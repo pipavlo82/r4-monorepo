@@ -1,9 +1,12 @@
-🔐 R4 VRF — Verifiable Random Function (ECDSA)
+# 🔐 R4 VRF — Verifiable Random Function (ECDSA)
 
-On-chain verification for RE4CTOR randomness.
-This package provides Solidity contracts, tests, and tooling that allow any EVM-based blockchain to verify randomness produced by a trusted RE4CTOR node.
+On-chain verification for RE4CTOR randomness. This package provides Solidity contracts, tests, and tooling that allow any EVM-based blockchain to verify randomness produced by a trusted RE4CTOR node.
 
-📦 Directory Structure
+---
+
+## 📦 Directory Structure
+
+```
 vrf-spec/
 ├── contracts/
 │   ├── R4VRFVerifierCanonical.sol   # Canonical ECDSA verifier (main)
@@ -20,74 +23,90 @@ vrf-spec/
 ├── hardhat.config.js
 ├── package.json
 └── SBOM.vrf-spec.cdx.json          # CycloneDX SBOM (security)
-
+```
 
 Everything in this package is tested and known to work with:
 
-6 passing (722ms)
+```
+✅ 6 passing (722ms)
+```
 
-🎯 Overview
-1) R4VRFVerifierCanonical.sol
+---
+
+## 🎯 Overview
+
+### **1. R4VRFVerifierCanonical.sol**
 
 Canonical verifier used by all protocols.
 
-Function: verify(bytes32 randomness, bytes sig, address signer)
+**Function: `verify(bytes32 randomness, bytes sig, address signer)`**
 
-Verifies that randomness was produced and signed by the authorized RE4CTOR node.
+Verifies that `randomness` was produced and signed by the authorized RE4CTOR node.
 
-Process:
+**Process:**
+1. Computes Ethereum Signed Message Hash (EIP-191)
+2. Recovers signer via `ECDSA.recover`
+3. Compares recovered address with `signer`
 
-Computes Ethereum Signed Message Hash (EIP-191)
+**Returns:** `bool` → `true` if signature valid.
 
-Recovers signer via ECDSA.recover
+**Function: `submitRandom(bytes32 randomness, bytes signature)`**
 
-Compares recovered address with signer
+- Calls `verify()` internally
+- Emits event: `RandomnessVerified(address submitter, bytes32 randomness, uint256 timestamp)`
 
-Returns: bool → true if signature valid.
-
-Function: submitRandom(bytes32 randomness, bytes signature)
-
-Calls verify() internally
-
-Emits event:
-RandomnessVerified(address submitter, bytes32 randomness, uint256 timestamp)
-
-2) LotteryR4.sol
+### **2. LotteryR4.sol**
 
 A minimal, production-ready example of provably fair randomness for lotteries, raffles, mints, or gaming.
 
-Key features:
+**Key features:**
+- Uses verified randomness only
+- Automatically selects winner
+- Demonstrates recommended pattern for dApps
 
-Uses verified randomness only
+---
 
-Automatically selects winner
+## 🚀 Quick Start
 
-Demonstrates recommended pattern for dApps
+### Install
 
-🚀 Quick Start
-Install
+```bash
 cd vrf-spec
 npm install
+```
 
-Compile
+### Compile
+
+```bash
 npx hardhat compile
+```
 
-Run Tests
+### Run Tests
+
+```bash
 npx hardhat test
+```
 
+**Expected:**
 
-Expected:
+```
+✅ 6 passing
+```
 
-6 passing
+---
 
-🔗 End-to-End Integration Flow
-Step 1 — RE4CTOR provides randomness
+## 🔗 End-to-End Integration Flow
+
+### **Step 1 — RE4CTOR provides randomness**
+
+```bash
 curl -H "X-API-Key: demo" \
   "http://localhost:8081/random_dual?sig=ecdsa"
+```
 
+**Example response:**
 
-Example response:
-
+```json
 {
   "random": 3727920637,
   "signature_type": "ECDSA(secp256k1)",
@@ -95,66 +114,80 @@ Example response:
   "pubkey_b64": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZ...",
   "signer_addr": "0x5D57D912E1c4FcBA23b208Fe1df3D5306bf644aC"
 }
+```
 
-Step 2 — dApp verifies signature (Solidity)
+### **Step 2 — dApp verifies signature (Solidity)**
+
+```solidity
 bool ok = verifier.verify(
     randomBytes32,
     signature,
     r4Signer
 );
 require(ok, "Invalid randomness");
+```
 
-Step 3 — Use randomness
+### **Step 3 — Use randomness**
+
+```solidity
 uint256 winner = uint256(randomBytes32) % totalPlayers;
+```
 
-📊 Gas Stats
-Function	Gas
-verify()	~25k
-submitRandom()	~28k
+---
 
-(Estimate depends on chain; stable across EVM networks.)
+## 📊 Gas Stats
 
-🔒 Security
-Current:
+| Function | Gas |
+|----------|-----|
+| `verify()` | ~25k |
+| `submitRandom()` | ~28k |
 
-ECDSA(secp256k1)
+(Estimates depend on chain; stable across EVM networks.)
 
-Ethereum Signed Message Hash (EIP-191)
+---
 
-Full SBOM (CycloneDX)
+## 🔒 Security
 
-Hardhat tests for all flows
+### **Current**
+- ECDSA(secp256k1)
+- Ethereum Signed Message Hash (EIP-191)
+- Full SBOM (CycloneDX)
+- Hardhat tests for all flows
 
-Roadmap (Q1 2026):
+### **Roadmap (Q1 2026)**
+- ML-DSA-65 (FIPS-204) PQ verifier
+- Dual-mode randomness (ECDSA + PQ)
+- Attested entropy proofs
 
-ML-DSA-65 (FIPS-204) PQ verifier
+---
 
-Dual-mode randomness (ECDSA + PQ)
+## 🌐 Networks
 
-Attested entropy proofs
+| Network | Status |
+|---------|--------|
+| Sepolia | ✅ Ready |
+| Polygon | ✅ Ready |
+| Arbitrum | ✅ Recommended |
+| Mainnet | ⏳ Pending audit |
 
-🌐 Networks
-Network	Status
-Sepolia	Ready
-Polygon	Ready
-Arbitrum	Recommended
-Mainnet	Pending audit
+### Deployment
 
-Deployment script:
-
+```bash
 npx hardhat run scripts/deploy.js --network <network>
+```
 
-📚 Useful Links
+---
 
-Core README: ../README.md
+## 📚 Useful Links
 
-RE4CTOR API: /random, /random_dual, /random_pq
+- **Core README:** [`../README.md`](../README.md)
+- **RE4CTOR API:** `/random`, `/random_dual`, `/random_pq`
+- **Hardhat Docs:** https://hardhat.org/docs
 
-Hardhat Docs: https://hardhat.org/docs
+---
 
-👤 Maintainer
+## 👤 Maintainer
 
-Pavlo Tvardovskyi
-Email: shtomko@gmail.com
-
-GitHub: https://github.com/pipavlo82
+**Pavlo Tvardovskyi**
+- Email: shtomko@gmail.com
+- GitHub: https://github.com/pipavlo82
