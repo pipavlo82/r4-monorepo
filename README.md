@@ -5,7 +5,7 @@
 > **The fastest self-hosted verifiable randomness engine (20–30 ms).**  
 > **The only 2025 solution with ECDSA + ML-DSA-65 dual signatures and a sealed FIPS-grade entropy core.**
 
-[![Proofs: 2025Q4](https://img.shields.io/badge/proofs-2025Q4-blue)](proofs/re4ctor_proofs_2025Q4.tar.gz)
+[![Proofs: 2025Q4](https://img.shields.io/badge/proofs-2025Q4-blue)](https://github.com/pipavlo82/r4-monorepo/releases/download/v2025.4-proofs/re4ctor_proofs_2025Q4.tar.gz)
 [![Status: Q4 2025](https://img.shields.io/badge/status-Q4_2025-blue?style=for-the-badge)](#-roadmap--current-status)
 [![FIPS 204 Ready](https://img.shields.io/badge/FIPS_204-ready-brightgreen?style=for-the-badge)](docs/FIPS_204_roadmap.md)
 [![PyPI](https://img.shields.io/pypi/v/r4sdk?label=r4sdk&style=for-the-badge)](https://pypi.org/project/r4sdk/)
