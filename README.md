@@ -288,6 +288,74 @@ docker run \
 | Dieharder | 31/31 ✅ |
 | PractRand | 8 GB ✅ |
 | TestU01 BigCrush | 160/160 ✅ |
+## 📊 Statistical Validation & Proof Bundle
+
+Re4ctoR’s core entropy stream (re4_dump) and the VRF-side stream (r4-cs) have successfully passed the full suite of heavy statistical test batteries.
+A consolidated proof bundle is provided for auditors, integrators, and security teams.
+
+### Included test suites
+
+**Core (re4_dump):**
+
+- **TestU01 BigCrush (v1.2.3)**  
+  - Generator: `re4_stream_le32`  
+  - Result: **160 / 160 tests PASSED**  
+  - No suspicious or catastrophic p-values  
+  - Artifacts:
+    - `packages/core/proof/bigcrush_summary.txt`
+    - `packages/core/artifacts/bigcrush_full_20251020_140456.txt.gz`
+
+- **Dieharder 3.31.1**  
+  - Mode: `stdin_input_raw`  
+  - Tests: **114**  
+  - Result: **114 PASSED, 0 WEAK, 0 FAILED**  
+  - Artifacts:
+    - `packages/core/proof/dieharder_summary.txt`
+    - `packages/core/artifacts/dieharder_20251020_125859.txt.gz`
+
+- **PractRand v0.95 (`RNG_test`)**  
+  - RNG: `RNG_stdin64`  
+  - Test set: `core`, folding = `standard (64 bit)`  
+  - Length: up to **2^32 bytes (4 GiB)**  
+  - Result: **"no anomalies"** at all tested lengths  
+  - Artifacts:
+    - `packages/core/proof/practrand_summary.txt`
+    - `packages/core/artifacts/practrand_20251020_133922.txt.gz`
+
+**VRF-side / r4-cs:**
+
+- **NIST SP 800-22 (STS)**  
+  - Final report:
+    - `packages/vrf-spec/components/r4-cs/rng_reports/nist_sts_finalAnalysisReport.txt`
+- **Dieharder targeted re-tests**  
+  - `diehard_2dsphere`, `sts_serial`, `rgb_lagged_sum`  
+  - All **PASSED** after retest  
+  - Reports:
+    - `packages/vrf-spec/components/r4-cs/rng_reports/r4cs_dieharder*.txt`
+- **TestU01 SmallCrush / Crush / BigCrush (r4-cs stream)**  
+  - Summaries:
+    - `packages/vrf-spec/components/r4-cs/rng_reports/testu01/smallcrush_summary.txt`
+    - `packages/vrf-spec/components/r4-cs/rng_reports/testu01/crush_summary.txt`
+    - `packages/vrf-spec/components/r4-cs/rng_reports/testu01/bigcrush_summary.txt`
+
+### 📦 Proof bundle (auditor-friendly)
+
+A complete archive containing all statistical artifacts is available:
+
+- Local path:  
+  `proofs/re4ctor_proofs_2025Q4.tar.gz`
+
+The archive contains:
+
+- `packages/core/proof/` (README + BigCrush/Dieharder/PractRand summaries + self-tests)
+- `packages/core/artifacts/` (повні логи BigCrush, Dieharder, PractRand)
+- `packages/vrf-spec/components/r4-cs/rng_reports/` (NIST STS, Dieharder ретести, TestU01 SmallCrush/Crush/BigCrush)
+
+To reproduce the bundle locally:
+
+```bash
+cd ~/r4-monorepo
+PROOF_TAG=2025Q4 ./scripts/make_proof_bundle.sh
 
 ### Performance Metrics
 
@@ -379,3 +447,38 @@ r4-monorepo/
 [GitHub](https://github.com/pipavlo82/r4-monorepo) • [Docker](https://hub.docker.com/r/pipavlo/r4-local-test) • [PyPI](https://pypi.org/project/r4sdk/) • [r4-prod](https://github.com/pipavlo82/r4-prod)
 
 </div>
+
+---
+
+
+---
+
+## 🌐 RE4CTOR SaaS API Gateway
+
+**Hosted gateway in front of RE4CTOR Core RNG and VRF.**
+If you don’t want to run the full monorepo stack locally, you can use the hosted SaaS endpoint.
+
+- 🔗 GitHub: https://github.com/pipavlo82/r4-saas-api
+- 🌍 Endpoint: `https://api.re4ctor.xyz` (dev: `http://localhost:8082`)
+- 🔑 Auth: `X-API-Key: demo` (dev)
+
+### Quickstart (local dev)
+
+```bash
+git clone https://github.com/pipavlo82/r4-saas-api.git
+cd r4-saas-api
+cp .env.example .env
+docker compose up -d --build
+
+curl -s http://127.0.0.1:8082/v1/health
+curl -s -H "X-API-Key: demo" "http://127.0.0.1:8082/v1/random?n=16&fmt=hex"
+curl -s -H "X-API-Key: demo" "http://127.0.0.1:8082/v1/vrf?sig=ecdsa" | jq .
+The SaaS gateway exposes:
+
+GET /v1/health
+
+GET /v1/random
+
+GET /v1/vrf?sig=ecdsa
+
+POST /v1/verify (ECDSA signature verification helper)
