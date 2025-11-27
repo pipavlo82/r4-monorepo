@@ -50,6 +50,19 @@ RE4CTOR is a **sealed entropy appliance + fully verifiable randomness pipeline**
   [r4-prod](https://github.com/pipavlo82/r4-prod) for hardened deployments
 
 ---
+## Statistical Validation (2025Q4)
+
+Re4ctoR Core (`re4_dump`) successfully passed:
+
+- **TestU01 BigCrush** — 160/160 passed  
+- **Dieharder 3.31.1** — 114/114 passed, 0 weak  
+- **PractRand 0.95** — up to 2^32 bytes, no anomalies  
+- **NIST STS** — all tests in acceptable range  
+- **TestU01 Crush / SmallCrush** (VRF-side) — full pass  
+
+Proof bundle:
+[Download Proof Bundle (2025Q4)](proofs/re4ctor_proofs_2025Q4.tar.gz)
+
 
 ## 🎯 Strategic Focus: Defense + Crypto
 
