@@ -1,7 +1,7 @@
 import os, json, base64, hashlib, time
 import oqs
 
-# Нормалізація назв → ML-DSA (NIST Dilithium)
+#  → ML-DSA (NIST Dilithium)
 ALIASES = {
     "dilithium2":"ML-DSA-44",
     "dilithium3":"ML-DSA-65",
@@ -19,16 +19,15 @@ PK_PATH = os.path.join(KEYDIR, f"{SCHEME}.pk")
 SK_PATH = os.path.join(KEYDIR, f"{SCHEME}.sk")
 
 def _split_kp(kp):
-    # Повертає (pk, sk) з будь-якої форми, яку дає liboqs-python
-    if isinstance(kp, (bytes, bytearray)):              # рідко: лише pk
+    if isinstance(kp, (bytes, bytearray)):             
         return bytes(kp), None
-    if isinstance(kp, (tuple, list)) and len(kp) >= 1:  # найчастіше: (pk, sk)
+    if isinstance(kp, (tuple, list)) and len(kp) >= 1:  
         pk = kp[0]
         sk = kp[1] if len(kp) > 1 else None
         return pk, sk
     if hasattr(kp, "public_key") and hasattr(kp, "secret_key"):
         return kp.public_key, kp.secret_key
-    # Фолбек — спроба трактувати як buffer-протокол
+   
     try:
         b = bytes(kp)
         return b, None
@@ -67,7 +66,7 @@ def pq_sign(payload: dict) -> dict:
     msg = _payload_bytes(payload)
     with oqs.Signature(SCHEME) as s:
         pk, sk = _load_or_create_keys()
-        sig = s.sign(msg, sk)  # у 0.14+ форма: sign(message, secret_key)
+        sig = s.sign(msg, sk)  # у 0.14+ : sign(message, secret_key)
         return {
             "pq_scheme": SCHEME,
             "pq_sig_b64": base64.b64encode(sig).decode(),
