@@ -50,6 +50,7 @@ RE4CTOR is a **sealed entropy appliance + fully verifiable randomness pipeline**
   [r4-prod](https://github.com/pipavlo82/r4-prod) for hardened deployments
 
 ---
+
 ## Statistical Validation (2025Q4)
 
 Re4ctoR Core (`re4_dump`) successfully passed:
@@ -63,6 +64,7 @@ Re4ctoR Core (`re4_dump`) successfully passed:
 Proof bundle:
 [Download Proof Bundle (2025Q4)](proofs/re4ctor_proofs_2025Q4.tar.gz)
 
+---
 
 ## 🎯 Strategic Focus: Defense + Crypto
 
@@ -120,18 +122,54 @@ Blockchain requires:
 
 ---
 
-## ☁️ SaaS Gateway (Demo)
+## 🌐 RE4CTOR Hosted API Gateway
 
-🔗 **Live:** https://re4ctor.com/api/
-📦 **Source:** https://github.com/pipavlo82/r4-saas-api
+**Hosted gateway in front of RE4CTOR Core RNG and VRF.**
 
-### ⚠️ Latency Notice
+- **API Base URL:** `https://api.re4ctor.com`
+- **Docs (Swagger):** `https://api.re4ctor.com/docs`
+- **OpenAPI:** `https://api.re4ctor.com/openapi.json`
 
-- Demo (free-tier hosting): **~1481 ms**
-- Real VPS: **20–30 ms p99**
+### Authentication
 
-> **Demo slow ≠ product slow.**  
-> Production is **50–70× faster**.
+Requests require `X-API-Key`.
+
+- **Public playground key (temporary):** `demo`  
+  Intended for the website playground only. It will be disabled once pricing + key issuance are live.
+
+### Quickstart (hosted)
+
+```bash
+# health
+curl -sS "https://api.re4ctor.com/v1/health"
+
+# core RNG
+curl -sS -H "X-API-Key: demo" \
+  "https://api.re4ctor.com/v1/random?n=16&fmt=hex"
+
+# VRF (dual-signed mode depends on deployment build)
+curl -sS -H "X-API-Key: demo" \
+  "https://api.re4ctor.com/v1/vrf?sig=ecdsa" | jq .
+```
+
+### Local dev (docker compose)
+
+When running the production-style stack locally, the services are typically:
+- `r4-core` on `127.0.0.1:8080`
+- `r4-vrf` on `127.0.0.1:8081`
+- `r4-gateway` on `127.0.0.1:8082`
+- `caddy` on `:80/:443`
+
+```bash
+curl -sS -H "X-API-Key: demo" \
+  "http://127.0.0.1:8082/v1/random?n=16&fmt=hex"
+```
+
+### Security posture (production)
+
+- Core/VRF/Gateway ports are bound to localhost; only HTTPS via Caddy is public.
+- Debug endpoints are blocked at the edge.
+- Public/demo keys are temporary and will be removed once billing + key issuance are deployed.
 
 ---
 
@@ -294,17 +332,9 @@ docker run \
 
 ---
 
-## 📊 Statistical Validation
-
-| Suite | Result |
-|-------|--------|
-| NIST SP 800-22 | 15/15 ✅ |
-| Dieharder | 31/31 ✅ |
-| PractRand | 8 GB ✅ |
-| TestU01 BigCrush | 160/160 ✅ |
 ## 📊 Statistical Validation & Proof Bundle
 
-Re4ctoR’s core entropy stream (re4_dump) and the VRF-side stream (r4-cs) have successfully passed the full suite of heavy statistical test batteries.
+Re4ctoR's core entropy stream (re4_dump) and the VRF-side stream (r4-cs) have successfully passed the full suite of heavy statistical test batteries.
 A consolidated proof bundle is provided for auditors, integrators, and security teams.
 
 ### Included test suites
@@ -370,6 +400,7 @@ To reproduce the bundle locally:
 ```bash
 cd ~/r4-monorepo
 PROOF_TAG=2025Q4 ./scripts/make_proof_bundle.sh
+```
 
 ### Performance Metrics
 
@@ -461,38 +492,3 @@ r4-monorepo/
 [GitHub](https://github.com/pipavlo82/r4-monorepo) • [Docker](https://hub.docker.com/r/pipavlo/r4-local-test) • [PyPI](https://pypi.org/project/r4sdk/) • [r4-prod](https://github.com/pipavlo82/r4-prod)
 
 </div>
-
----
-
-
----
-
-## 🌐 RE4CTOR SaaS API Gateway
-
-**Hosted gateway in front of RE4CTOR Core RNG and VRF.**
-If you don’t want to run the full monorepo stack locally, you can use the hosted SaaS endpoint.
-
-- 🔗 GitHub: https://github.com/pipavlo82/r4-saas-api
-- 🌍 Endpoint: `https://api.re4ctor.xyz` (dev: `http://localhost:8082`)
-- 🔑 Auth: `X-API-Key: demo` (dev)
-
-### Quickstart (local dev)
-
-```bash
-git clone https://github.com/pipavlo82/r4-saas-api.git
-cd r4-saas-api
-cp .env.example .env
-docker compose up -d --build
-
-curl -s http://127.0.0.1:8082/v1/health
-curl -s -H "X-API-Key: demo" "http://127.0.0.1:8082/v1/random?n=16&fmt=hex"
-curl -s -H "X-API-Key: demo" "http://127.0.0.1:8082/v1/vrf?sig=ecdsa" | jq .
-The SaaS gateway exposes:
-
-GET /v1/health
-
-GET /v1/random
-
-GET /v1/vrf?sig=ecdsa
-
-POST /v1/verify (ECDSA signature verification helper)
