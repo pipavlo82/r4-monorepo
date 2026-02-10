@@ -62,7 +62,7 @@ Re4ctoR Core (`re4_dump`) successfully passed:
 - **TestU01 Crush / SmallCrush** (VRF-side) — full pass  
 
 Proof bundle:
-[Download Proof Bundle (2025Q4)](proofs/re4ctor_proofs_2025Q4.tar.gz)
+[Download Proof Bundle (2025Q4)](https://github.com/pipavlo82/r4-monorepo/releases/download/v2025.4-proofs/re4ctor_proofs_2025Q4.tar.gz)
 
 ---
 
