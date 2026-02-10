@@ -107,8 +107,6 @@ Blockchain requires:
 - ZK-rollup entropy seeding
 - DAO random governance
 
-> **Impact:** ~1000× faster than Chainlink VRF.  
-> The only PQ-ready randomness pipeline in production (2025).
 
 ---
 
