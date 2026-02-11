@@ -1,14 +1,13 @@
 # ☢️ RE4CTOR — The Nuclear Core of Randomness
 
-### **FIPS-204 Ready • Post-Quantum VRF • Cryptographically Verifiable Fairness**
+### **FIPS-204 Aligned • Post-Quantum VRF • Cryptographically Verifiable Fairness**
 
-> **The fastest self-hosted verifiable randomness engine (20–30 ms).**  
-> **The only 2025 solution with ECDSA + ML-DSA-65 dual signatures and a sealed FIPS-grade entropy core.**
+> **Low-latency self-hosted verifiable randomness engine (tens of ms in typical setups).**  
+> **One of the few self-hosted stacks combining ECDSA + ML-DSA-65 dual-signing and a sealed entropy core.**
 
 [![Proofs: 2025Q4](https://img.shields.io/badge/proofs-2025Q4-blue)](https://github.com/pipavlo82/r4-monorepo/releases/download/v2025.4-proofs/re4ctor_proofs_2025Q4.tar.gz)
 [![Status: Q4 2025](https://img.shields.io/badge/status-Q4_2025-blue?style=for-the-badge)](#-roadmap--current-status)
-[![FIPS 204 Ready](https://img.shields.io/badge/FIPS_204-ready-brightgreen?style=for-the-badge)](docs/FIPS_204_roadmap.md)
-[![PyPI](https://img.shields.io/pypi/v/r4sdk?label=r4sdk&style=for-the-badge)](https://pypi.org/project/r4sdk/)
+[![FIPS 204 Aligned](https://img.shields.io/badge/FIPS_204-aligned-brightgreen?style=for-the-badge)](docs/FIPS_204_roadmap.md)
 [![Docker Pulls](https://img.shields.io/docker/pulls/pipavlo/r4-local-test?style=for-the-badge)](https://hub.docker.com/r/pipavlo/r4-local-test)
 [![CI](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml/badge.svg?style=for-the-badge)](https://github.com/pipavlo82/r4-monorepo/actions/workflows/ci.yml)
 
@@ -30,10 +29,10 @@ RE4CTOR is a **sealed entropy appliance + fully verifiable randomness pipeline**
 
 ### Core Components
 
-- **☢️ Entropy Core (port 8080)**  
-  Sealed FIPS-grade binary → `/random` endpoint
+- **☢️ Entropy Core (default 8080)**  
+  Sealed compliance-oriented binary → `/random` endpoint
 
-- **🔐 PQ/VRF Node (port 8081)**  
+- **🔐 PQ/VRF Node (default 8081)**  
   - Public build: ECDSA signatures
   - Enterprise build: ECDSA + ML-DSA-65 (FIPS-204 post-quantum)
 
@@ -43,11 +42,12 @@ RE4CTOR is a **sealed entropy appliance + fully verifiable randomness pipeline**
 - **🎲 LotteryR4**  
   Provably fair on-chain lottery reference implementation
 
-- **🐍 Python SDK**  
-  Available via `pip install r4sdk`
-
 - **🌐 Production Stack**  
   [r4-prod](https://github.com/pipavlo82/r4-prod) for hardened deployments
+
+**Port notes (WSL/Windows):**  
+Default local ports: core 8080, vrf 8081, gateway 8082  
+WSL/Windows note: if 8080 is busy (often wslrelay.exe), run core on 8089 and update CORE_BASE.
 
 ---
 
@@ -74,9 +74,9 @@ RE4CTOR is engineered for two of the most demanding sectors in the world.
 
 Defense demands:
 
-- Predictable **20–30 ms** latency
+- Predictable low-latency operation
 - Attested boot + integrity manifest
-- FIPS-grade entropy core
+- Compliance-oriented entropy core
 - ML-DSA-65 (PQ, FIPS-204 profile)
 - SBOM + KAT startup tests
 - Zero-trust RNG monitoring (RCT/APT)
@@ -88,17 +88,17 @@ Defense demands:
 - Zero-trust distributed systems
 - Classified systems requiring sealed entropy
 
-> **Goal:** Become the first fully self-hosted FIPS-204 entropy appliance.
+> **Goal:** Become a leading self-hosted FIPS-204 aligned entropy appliance.
 
 ### 2️⃣ Crypto & Web3 Infrastructure
 
 Blockchain requires:
 
-- ⚡ **20–30 ms verifiable randomness**
+- ⚡ Low-latency verifiable randomness
 - 🔐 Dual signatures (ECDSA + ML-DSA-65)
 - 🧩 Solidity verification on-chain
 - 🎲 Deterministic fair selection
-- 🚀 100k–300k req/s throughput
+- 🚀 High-throughput design
 
 **Use cases:**
 - L2 sequencer fairness
@@ -107,7 +107,6 @@ Blockchain requires:
 - ZK-rollup entropy seeding
 - DAO random governance
 
-
 ---
 
 ## 🚀 Unified 2025–2026 Strategy
@@ -115,7 +114,7 @@ Blockchain requires:
 | Phase | Target | Description |
 |-------|--------|-------------|
 | **Phase 1 — Crypto** | 10 protocols | L2s, casinos, NFT platforms |
-| **Phase 2 — Defense Prep** | FIPS-ready | Full compliance package |
+| **Phase 2 — Defense Prep** | FIPS-aligned | Full compliance package |
 | **Phase 3 — Defense Launch** | 3–5 contracts | Post-certification rollout |
 
 ---
@@ -150,7 +149,7 @@ curl -sS -H "X-API-Key: demo" \
   "https://api.re4ctor.com/v1/vrf?sig=ecdsa" | jq .
 ```
 
-### Local dev (docker compose)
+### Local dev
 
 When running the production-style stack locally, the services are typically:
 - `r4-core` on `127.0.0.1:8080`
@@ -201,14 +200,18 @@ Brings up:
 - `r4-vrf` (8081) — verifiable randomness
 - `r4-gateway` (443, TLS) — HTTPS API gateway
 
-**Production latency: 20–30 ms p99**
-
 ---
 
 ## 🚀 One-Command Local Demo
 
 ```bash
 ./run_full_demo.sh
+```
+
+**Custom ports (WSL/Windows):**
+```bash
+CORE_BASE=http://127.0.0.1:8089 VRF_BASE=http://127.0.0.1:8081 \
+CORE_KEY=demo VRF_KEY=demo MODE=local ./run_full_demo.sh
 ```
 
 Expected output:
@@ -242,36 +245,21 @@ curl -H "X-API-Key: demo" \
 
 ---
 
-## 🐍 Python SDK
+## 🔐 PQ/VRF Node (Default 8081)
+
+### Canonical VRF endpoint
 
 ```bash
-pip install r4sdk
-```
-
-```python
-from r4sdk import R4Client
-
-client = R4Client(api_key="demo", host="http://localhost:8080")
-random_bytes = client.get_random(32)
-print(random_bytes.hex())
-```
-
----
-
-## 🔐 PQ/VRF Node (Port 8081)
-
-### Public Build (ECDSA)
-
-```bash
+# ECDSA signature (public build)
 curl -H "X-API-Key: demo" \
   "http://localhost:8081/random_dual?sig=ecdsa"
+
+# ML-DSA-65 signature (enterprise build)
+curl -H "X-API-Key: demo" \
+  "http://localhost:8081/random_dual?sig=dilithium"
 ```
 
-### Enterprise Build (ML-DSA-65)
-
-```bash
-curl "http://localhost:8081/random_dual?sig=dilithium"
-```
+**Legacy endpoint:** `/random_pq` (compatibility)
 
 ### Public Build Output (requesting PQ)
 
@@ -308,7 +296,7 @@ Features:
 
 ---
 
-## 🛡️ Security, Proofs & FIPS
+## 🛡️ Security, Proofs & Compliance
 
 ### Included
 
@@ -319,14 +307,16 @@ Features:
 - GPG-signed release archives
 - Dieharder / PractRand / BigCrush logs
 
-### Strict FIPS Mode
+### Compliance Mode
 
 ```bash
 docker run \
-  -e R4_STRICT_FIPS=1 \
+  -e R4_COMPLIANCE_MODE=1 \
   -p 8081:8081 \
-  r4-fips-vrf:latest
+  r4-compliance-vrf:latest
 ```
+
+**Note:** Compliance mode enables startup KATs, manifests, and continuous tests. Not FIPS 140-3 certified.
 
 ---
 
@@ -390,8 +380,8 @@ A complete archive containing all statistical artifacts is available:
 The archive contains:
 
 - `packages/core/proof/` (README + BigCrush/Dieharder/PractRand summaries + self-tests)
-- `packages/core/artifacts/` (повні логи BigCrush, Dieharder, PractRand)
-- `packages/vrf-spec/components/r4-cs/rng_reports/` (NIST STS, Dieharder ретести, TestU01 SmallCrush/Crush/BigCrush)
+- `packages/core/artifacts/` (full logs BigCrush, Dieharder, PractRand)
+- `packages/vrf-spec/components/r4-cs/rng_reports/` (NIST STS, Dieharder retests, TestU01 SmallCrush/Crush/BigCrush)
 
 To reproduce the bundle locally:
 
@@ -399,25 +389,6 @@ To reproduce the bundle locally:
 cd ~/r4-monorepo
 PROOF_TAG=2025Q4 ./scripts/make_proof_bundle.sh
 ```
-
-### Performance Metrics
-
-- **Latency:** 20–30 ms (p99)
-- **Throughput:** 950k req/s
-- **Entropy bias:** < 1e-6
-
----
-
-## 🥊 R4 vs Competitors
-
-| Feature | R4 | Chainlink VRF | drand | AWS HSM |
-|---------|----|----|----|----|
-| Latency | 20–30 ms | 30–120 s | 3–30 s | 10–50 ms |
-| PQ Ready | Yes (ML-DSA-65) | No | No | Partial |
-| Cost | $0/call | $1–3M / 1M calls | Free | $$$$ |
-| On-Chain Proof | Yes | Yes | Limited | No |
-| Self-hosted | Easy | No | Medium | Hard |
-| Throughput | 100k/s | 1–10k/s | 1–5k/s | 50k/s |
 
 ---
 
@@ -456,10 +427,6 @@ r4-monorepo/
 │   ├── app_dual.py (8081)
 │   ├── Dockerfile
 │
-├── sdk_py_r4/
-│   ├── r4sdk/
-│   └── PyPI packaging
-│
 └── docs/
     ├── USAGE.md
     ├── DEPLOYMENT.md
@@ -473,10 +440,8 @@ r4-monorepo/
 ## 📞 Contact
 
 - **Maintainer:** Pavlo Tvardovskyi
-- **Email:** shtomko@gmail.com
 - **GitHub:** https://github.com/pipavlo82
 - **Docker Hub:** https://hub.docker.com/r/pipavlo/r4-local-test
-- **PyPI:** https://pypi.org/project/r4sdk/
 - **Production:** https://github.com/pipavlo82/r4-prod
 
 ---
@@ -487,6 +452,6 @@ r4-monorepo/
 
 **Fairness you can prove. On-chain. Cryptographically.**
 
-[GitHub](https://github.com/pipavlo82/r4-monorepo) • [Docker](https://hub.docker.com/r/pipavlo/r4-local-test) • [PyPI](https://pypi.org/project/r4sdk/) • [r4-prod](https://github.com/pipavlo82/r4-prod)
+[GitHub](https://github.com/pipavlo82/r4-monorepo) • [Docker](https://hub.docker.com/r/pipavlo/r4-local-test) • [r4-prod](https://github.com/pipavlo82/r4-prod)
 
 </div>
