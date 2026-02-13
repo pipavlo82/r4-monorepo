@@ -45,3 +45,5 @@ attic/
 reports/
 *.pyc
 deploy/**/*.bak*
+.git.NESTED_BACKUP.*/
+.git.NESTED_BACKUP*
