@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>About — Re4ctoR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #020617;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    nav a {
+      color: #9ca3af;
+      text-decoration: none;
+      margin-left: 14px;
+      font-size: 0.9rem;
+    }
+    nav a:hover {
+      color: #e5e7eb;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+    h1 {
+      font-size: 2.1rem;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      margin-top: 2.1rem;
+      font-size: 1.4rem;
+      color: #93c5fd;
+    }
+    p {
+      max-width: 780px;
+      color: #cbd5f5;
+    }
+    ul {
+      margin: 0.25rem 0 0.9rem 1.1rem;
+      padding: 0;
+    }
+    li {
+      margin: 0.15rem 0;
+      color: #cbd5f5;
+    }
+    .muted {
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+</head>
+<body>
+  <header>
+    <div class="logo">RE4CTOR</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/product">Product</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/docs">Docs</a>
+      <a href="/about">About</a>
+      <a href="/api">API</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <h1>About Re4ctoR</h1>
+    <p>
+      Re4ctoR was born from a simple constraint: <strong>some systems cannot afford weak randomness</strong>.
+      Blockchains, financial systems and critical infrastructure all depend on entropy that must be not only
+      strong, but <em>provably</em> strong and auditable.
+    </p>
+
+    <h2>Mission</h2>
+    <p>
+      Our mission is to provide a <strong>high-assurance randomness and VRF layer</strong> that can stand up to
+      cryptographic scrutiny, regulatory audits and real-world attacks — including those coming from a
+      post-quantum future.
+    </p>
+
+    <h2>Design Principles</h2>
+    <ul>
+      <li><strong>Security first</strong> — fail-closed behaviour, continuous self-tests, strong crypto defaults.</li>
+      <li><strong>Transparency</strong> — public test reports, SBOM, and reproducible builds wherever possible.</li>
+      <li><strong>Verifiability</strong> — signed outputs and on-chain verification options via Solidity contracts.</li>
+      <li><strong>Post-quantum readiness</strong> — support for Dilithium-3 signatures in enterprise builds.</li>
+    </ul>
+
+    <h2>Roadmap & Compliance</h2>
+    <p>
+      Re4ctoR is designed to align with FIPS-style entropy requirements and the FIPS 204 (post-quantum signatures)
+      in mind. While formal certification is a separate process, the architecture, documentation and
+      test harnesses are built to align with those standards from day one.
+    </p>
+    <ul>
+      <li>Entropy Source Validation (ESV) packages and health tests.</li>
+      <li>BigCrush, Dieharder, PractRand and NIST STS-style batteries.</li>
+      <li>SBOM and dependency transparency for supply-chain security.</li>
+    </ul>
+
+    <h2>Who Uses Re4ctoR?</h2>
+    <p>
+      Re4ctoR is targeting teams that need more than a generic RNG:
+    </p>
+    <ul>
+      <li>Blockchain rollups and L2 sequencers.</li>
+      <li>DeFi protocols and on-chain games that demand provable fairness.</li>
+      <li>Financial institutions running sensitive key management and simulations.</li>
+      <li>Organizations in defense and critical infrastructure preparing for post-quantum threats.</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <p>
+      To discuss enterprise deployments, compliance requirements or joint research,
+      please reach out:
+    </p>
+    <p class="muted">
+      (You can plug a contact form or email here later — for now, your existing channels are enough.)
+    </p>
+  </main>
+</body>
+</html>

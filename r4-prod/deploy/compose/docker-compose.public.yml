@@ -1,0 +1,59 @@
+name: re4ctor-public
+
+services:
+  r4-core:
+    image: pipavlo/r4-core:latest
+    container_name: r4-core
+    restart: unless-stopped
+    environment:
+      API_KEY: ${R4_CORE_API_KEY:-demo}
+      RNG_BIN: /app/core/bin/re4_dump
+    volumes:
+      - ./deploy/compose/core/bin/re4_dump:/app/core/bin/re4_dump:ro
+    command: >
+      uvicorn api.main:app --host 0.0.0.0 --port 8081
+    ports:
+      - "8081:8081"
+
+  r4-vrf:
+    image: pipavlo/r4-vrf:latest
+    container_name: r4-vrf
+    restart: unless-stopped
+    environment:
+      API_KEY: ${R4_VRF_API_KEY:-demo}
+    command: >
+      uvicorn api.main:app --host 0.0.0.0 --port 8081
+    ports:
+      - "8083:8081"
+
+  r4-gateway:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: re4ctor-local/r4-gateway:v0.1.7-redis
+    container_name: r4-gateway
+    restart: unless-stopped
+    depends_on:
+      - r4-core
+      - r4-vrf
+    environment:
+      CORE_URL: http://r4-core:8081
+      VRF_URL: http://r4-vrf:8081
+      PUBLIC_API_KEY: ${R4_PUBLIC_API_KEY:-demo}
+      INTERNAL_R4_API_KEY: ${R4_INTERNAL_API_KEY:-demo}
+      R4_BILLING_URL: ${R4_BILLING_URL:-}
+      R4_UPSTREAM_API_KEY: ${R4_UPSTREAM_API_KEY:-demo}
+    volumes:
+      - ./gateway_override/main.py:/app/app/main.py:ro
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8082
+    ports:
+      - "8082:8082"
+
+  redis:
+    image: redis:7-alpine
+    container_name: r4-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Public stub RNG backend (NOT cryptographically guaranteed).
+# Emits N bytes as hex via /dev/urandom. Default N=32.
+N="${1:-32}"
+head -c "$N" /dev/urandom | od -An -tx1 | tr -d ' \n'

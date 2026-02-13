@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RE4CTOR API — Live playground & VRF docs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #0f172a 0, #020617 55%, #000 100%);
+      color: #e5e7eb;
+    }
+    a {
+      color: inherit;
+    }
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(10px);
+      background: rgba(15,23,42,0.85);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+    nav a {
+      color: #9ca3af;
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-left: 14px;
+    }
+    nav a:hover {
+      color: #e5e7eb;
+    }
+    main {
+      max-width: 1120px;
+      margin: 32px auto 48px;
+      padding: 0 16px 40px;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #22c55e33;
+      background: #022c22;
+      color: #bbf7d0;
+    }
+    .badge-secondary {
+      border-color: #38bdf833;
+      background: #0b1120;
+      color: #bfdbfe;
+    }
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 10px;
+    }
+    p {
+      margin: 0 0 10px;
+    }
+    .muted {
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .card {
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.04), rgba(15,23,42,1));
+      border-radius: 18px;
+      border: 1px solid #1f2937;
+      padding: 18px 18px 20px;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.7);
+      margin-bottom: 18px;
+    }
+    .card h2 {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+    }
+    .card h3 {
+      margin: 0 0 4px;
+      font-size: 0.95rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      color: #9ca3af;
+    }
+    input, select {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.4);
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: minmax(0, 2.4fr) minmax(0, 1.2fr);
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .field-row-3 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(0, 0.9fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #111827;
+      color: #e5e7eb;
+    }
+    button.primary {
+      background: #22c55e;
+      color: #022c22;
+      box-shadow: 0 12px 30px rgba(34,197,94,0.3);
+    }
+    button.secondary {
+      background: #0f172a;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .pill code {
+      color: #e5e7eb;
+      font-size: 0.78rem;
+    }
+    pre {
+      margin: 6px 0 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.97);
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      border: 1px solid #111827;
+    }
+    code {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.8rem;
+    }
+    th, td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #1f2937;
+      text-align: left;
+    }
+    th {
+      color: #9ca3af;
+      font-weight: 500;
+    }
+    .status-line {
+      font-size: 0.8rem;
+      margin-top: 4px;
+      color: #9ca3af;
+    }
+    .status-line span {
+      font-weight: 500;
+    }
+    .status-ok {
+      color: #4ade80;
+    }
+    .status-error {
+      color: #f97373;
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+</head>
+<body>
+  <header>
+    <div class="logo">RE4CTOR API</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/#product">Product</a>
+      <a href="/api/">API</a>
+      <a href="https://github.com/pipavlo82/r4-monorepo" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="badge-row">
+      <div class="badge">FIPS-ready core</div>
+      <div class="badge badge-secondary">Dual-signed VRF (ECDSA + ML-DSA-65)</div>
+    </div>
+
+    <h1>Live API playground</h1>
+    <p class="muted">
+      Call the public gateway directly from your browser using the demo API key,
+      or point the playground at your own self-hosted instance.
+    </p>
+
+    <div class="grid">
+      <!-- LEFT: playground -->
+      <section>
+        <div class="card">
+          <h2>Play with the gateway</h2>
+          <p class="muted">
+            The demo key is rate-limited and intended for integration tests,
+            CI pipelines and evaluation.
+          </p>
+
+          <div class="field-row">
+            <div>
+              <label for="api-base-url">API base URL</label>
+              <input id="api-base-url" type="text"
+                     value="/api/"
+                     autocomplete="off">
+            </div>
+            <div>
+              <label>Header</label>
+              <div class="pill">X-API-Key: <code>demo</code></div>
+            </div>
+          </div>
+
+          <div class="field-row-3">
+            <div>
+              <label for="api-key">API key</label>
+              <input id="api-key" type="text" value="demo" autocomplete="off">
+            </div>
+            <div>
+              <label for="n-words">n (32-bit words)</label>
+              <input id="n-words" type="number" min="1" max="1024" value="4">
+            </div>
+            <div>
+              <label for="fmt">Format</label>
+              <select id="fmt">
+                <option value="hex">hex</option>
+                <option value="raw">raw</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button id="btn-random" class="primary">
+              Call /v1/random
+            </button>
+            <button id="btn-vrf" class="secondary">
+              Call /v1/vrf?sig=ecdsa
+            </button>
+          </div>
+
+          <div class="status-line" id="status-line">
+            Status: <span id="status-value">idle</span>
+          </div>
+          <pre id="response-box">{ }</pre>
+        </div>
+
+        <div class="card">
+          <h3>Quick curl snippets</h3>
+          <p class="muted">You can run these directly from your terminal.</p>
+          <pre><code># health
+curl -s "/api/v1/health"
+
+# random bytes (hex)
+curl -s -H "X-API-Key: demo" \
+  "/api/v1/random?n=16&amp;fmt=hex"
+
+# dual-signed VRF JSON
+curl -s -H "X-API-Key: demo" \
+  "/api/v1/vrf?sig=ecdsa" | jq .</code></pre>
+        </div>
+      </section>
+
+      <!-- RIGHT: snapshot / docs -->
+      <section>
+        <div class="card">
+          <h2>Runtime snapshot</h2>
+          <p class="muted">
+            Live view into your Re4ctoR SaaS gateway (demo tier).
+          </p>
+          <p class="muted"><strong>FIPS 204-ready</strong><br>
+            PQ combo: ECDSA + ML-DSA-65 (roadmap).</p>
+          <p class="muted"><strong>Latency (dev)</strong><br>
+            Core &lt; 1 ms → Gateway → Core single hop.</p>
+          <p class="muted"><strong>Randomness</strong><br>
+            NIST SP 800-22, Dieharder, PractRand and BigCrush test suites passed
+            on multi-GB samples.</p>
+        </div>
+
+        <div class="card">
+          <h2>Endpoints</h2>
+
+          <div class="endpoint">
+            <div>
+              <span class="pill">GET</span>
+              <span class="endpoint-path"><code>/v1/health</code></span>
+            </div>
+            <p class="muted">Lightweight health check of the gateway.</p>
+          </div>
+
+          <div class="endpoint">
+            <div>
+              <span class="pill">GET</span>
+              <span class="endpoint-path"><code>/v1/random</code></span>
+            </div>
+            <p class="muted">
+              High-entropy random bytes proxied from RE4CTOR Core RNG.
+            </p>
+            <table>
+              <tr><th>Query</th><th>Type</th><th>Description</th></tr>
+              <tr><td><code>n</code></td><td>int</td><td>Number of 32-bit words to return (e.g. 4, 8, 32).</td></tr>
+              <tr><td><code>fmt</code></td><td>string</td><td><code>hex</code> (default) or <code>raw</code>.</td></tr>
+            </table>
+          </div>
+
+          <div class="endpoint">
+            <div>
+              <span class="pill">GET</span>
+              <span class="endpoint-path"><code>/v1/vrf</code></span>
+            </div>
+            <p class="muted">
+              Dual-signed VRF-style randomness, proxied to the VRF node
+              (internally calling its <code>/random_dual</code>). Response is
+              JSON with ECDSA(secp256k1) + ML-DSA-65 signatures.
+            </p>
+            <table>
+              <tr><th>Query</th><th>Type</th><th>Description</th></tr>
+              <tr>
+                <td><code>sig</code></td>
+                <td>string</td>
+                <td>Signature scheme. For now: <code>ecdsa</code> (dual ECDSA + ML-DSA-65).</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="endpoint">
+            <div>
+              <span class="pill">POST</span>
+              <span class="endpoint-path"><code>/v1/verify</code></span>
+            </div>
+            <p class="muted">
+              Helper endpoint to verify an Ethereum-style ECDSA signature
+              produced by the VRF output (<code>msg_hash / v / r / s</code>).
+            </p>
+            <p class="muted">JSON body:</p>
+            <pre><code>{
+  "msg_hash": "0x...",
+  "r": "0x...",
+  "s": "0x...",
+  "v": 27,
+  "expected_signer": "0x1C901e3bd9..."
+}</code></pre>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section style="margin-top:32px;">
+      <p class="muted" style="font-size:0.8rem;">
+        Note: This playground uses the same-origin reverse proxy at <code>/api/</code>, so browser calls do not require cross-domain CORS. If you self-host on a different domain, enable CORS for <code>X-API-Key</code>.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const baseInput   = document.getElementById('api-base-url');
+      const apiKeyInput = document.getElementById('api-key');
+      const nInput      = document.getElementById('n-words');
+      const fmtSelect   = document.getElementById('fmt');
+      const btnRandom   = document.getElementById('btn-random');
+      const btnVrf      = document.getElementById('btn-vrf');
+      const statusLine  = document.getElementById('status-line');
+      const statusValue = document.getElementById('status-value');
+      const responseBox = document.getElementById('response-box');
+
+      function cleanBaseUrl() {
+        let url = baseInput.value.trim();
+        if (!url) {
+          url = '/api/';
+          baseInput.value = url;
+        }
+        return url.replace(/\/+$/, '');
+      }
+
+      function setStatus(text, ok) {
+        statusValue.textContent = text;
+        statusValue.classList.remove('status-ok', 'status-error');
+        statusValue.classList.add(ok ? 'status-ok' : 'status-error');
+      }
+
+      function setLoading(isLoading) {
+        btnRandom.disabled = isLoading;
+        btnVrf.disabled = isLoading;
+      }
+
+      async function callRandom() {
+        const base = cleanBaseUrl();
+        const apiKey = apiKeyInput.value.trim();
+        const n = parseInt(nInput.value, 10) || 4;
+        const fmt = fmtSelect.value || 'hex';
+
+        const url = `${base}/v1/random?n=${encodeURIComponent(n)}&fmt=${encodeURIComponent(fmt)}`;
+
+        setLoading(true);
+        setStatus('calling /v1/random…', true);
+        responseBox.textContent = '';
+
+        try {
+          const res = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+              'X-API-Key': apiKey || 'demo'
+            }
+          });
+
+          const text = await res.text();
+          let parsed;
+          try {
+            parsed = JSON.parse(text);
+          } catch {
+            parsed = text;
+          }
+
+          setStatus(`HTTP ${res.status}`, res.ok);
+          responseBox.textContent = typeof parsed === 'string'
+            ? parsed
+            : JSON.stringify(parsed, null, 2);
+        } catch (err) {
+          setStatus('TypeError: Failed to fetch', false);
+          responseBox.textContent = String(err);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      async function callVrf() {
+        const base = cleanBaseUrl();
+        const apiKey = apiKeyInput.value.trim();
+        const url = `${base}/v1/vrf?sig=ecdsa`;
+
+        setLoading(true);
+        setStatus('calling /v1/vrf…', true);
+        responseBox.textContent = '';
+
+        try {
+          const res = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+              'X-API-Key': apiKey || 'demo'
+            }
+          });
+
+          const text = await res.text();
+          let parsed;
+          try {
+            parsed = JSON.parse(text);
+          } catch {
+            parsed = text;
+          }
+
+          setStatus(`HTTP ${res.status}`, res.ok);
+          responseBox.textContent = typeof parsed === 'string'
+            ? parsed
+            : JSON.stringify(parsed, null, 2);
+        } catch (err) {
+          setStatus('TypeError: Failed to fetch', false);
+          responseBox.textContent = String(err);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      btnRandom.addEventListener('click', function (e) {
+        e.preventDefault();
+        callRandom();
+      });
+
+      btnVrf.addEventListener('click', function (e) {
+        e.preventDefault();
+        callVrf();
+      });
+    })();
+  </script>
+</body>
+</html>
