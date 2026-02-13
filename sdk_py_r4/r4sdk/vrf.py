@@ -4,6 +4,7 @@
 import json
 import base64
 import hashlib
+import functools
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, utils
 from cryptography.exceptions import InvalidSignature
@@ -14,6 +15,13 @@ def build_signed_message(random_int, timestamp):
     JSON compact, сортування ключів, без пробілів.
     """
     return json.dumps({"random": int(random_int), "timestamp": str(timestamp)}, separators=(",",":"), sort_keys=True).encode()
+
+@functools.lru_cache(maxsize=128)
+def _get_pubkey_from_pem(pem_bytes):
+    """
+    Parse and cache the public key from PEM bytes to avoid redundant parsing.
+    """
+    return serialization.load_pem_public_key(pem_bytes)
 
 def verify_ecdsa_from_response(resp):
     """
@@ -32,7 +40,7 @@ def verify_ecdsa_from_response(resp):
 
     sig = base64.b64decode(sig_b64)
     pem = base64.b64decode(pub_b64)
-    pubkey = serialization.load_pem_public_key(pem)
+    pubkey = _get_pubkey_from_pem(pem)
 
     msg = build_signed_message(resp["random"], resp.get("timestamp", ""))
 
