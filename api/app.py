@@ -22,3 +22,7 @@ app.include_router(dual_router)
 @app.get("/health")
 def health():
     return {"ok": True, "ts": int(time.time())}
+
+@app.get("/version")
+def version():
+    return {"name": "re4ctor-api", "version": "1.0.0", "status": "running"}

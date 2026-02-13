@@ -49,50 +49,38 @@ jobs:
           # give uvicorn a moment to boot
           sleep 1
 
-      # --- ключова правка: чекаємо будь-який HTTP-код, а не валимося на 404 ---
       - name: Wait until service is ready
         run: |
           set -euo pipefail
+          echo "Waiting for service (HTTP 200 on /version)..."
           for i in {1..45}; do
-            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8081/ || true)"
-            if [ "$code" != "000" ]; then
-              echo "service responded with HTTP $code"
+            code="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8081/version || true)"
+            if [ "$code" = "200" ]; then
+              echo "Service is ready (HTTP $code)"
               exit 0
             fi
             sleep 1
           done
-          echo "service did not become ready in time" >&2
+          echo "Service did not become ready (HTTP 200 on /version) in time" >&2
           exit 1
 
-      # --- спочатку пробуємо /version; якщо його нема — беремо /openapi.json ---
-      - name: Fetch /version or /openapi.json
+      - name: Fetch and verify /version
         run: |
           set -euo pipefail
-          code="$(curl -s -o /tmp/version.json -w '%{http_code}' http://127.0.0.1:8081/version || true)"
-          if [ "$code" = "200" ] && [ -s /tmp/version.json ]; then
-            echo "----- /version -----"
-            cat /tmp/version.json
-          else
-            echo "No /version (HTTP $code). Falling back to /openapi.json"
-            curl -sS http://127.0.0.1:8081/openapi.json -o /tmp/openapi.json
-            test -s /tmp/openapi.json
-            echo "----- /openapi.json (excerpt) -----"
-            head -c 400 /tmp/openapi.json; echo
-          fi
+          curl -sS http://127.0.0.1:8081/version -o /tmp/version.json
+          echo "::group::Service Version Info"
+          cat /tmp/version.json
+          echo "::endgroup::"
 
-      # --- м'який запит до /random_pq: не валить job, але покаже результат якщо є ---
-      - name: Hit /random_pq?sig=ecdsa (soft)
+      - name: Smoke test /random_pq?sig=ecdsa
         run: |
           set -euo pipefail
-          if curl -s "http://127.0.0.1:8081/random_pq?sig=ecdsa" -o /tmp/rand.json; then
-            if [ -s /tmp/rand.json ]; then
-              echo "----- /random_pq?sig=ecdsa -----"
-              cat /tmp/rand.json
-            else
-              echo "random_pq returned empty body"
-            fi
+          if curl -sSf "http://127.0.0.1:8081/random_pq?sig=ecdsa" -o /tmp/rand.json; then
+            echo "::group::Random PQ Response"
+            cat /tmp/rand.json
+            echo "::endgroup::"
           else
-            echo "random_pq endpoint not available (soft check)"
+            echo "::warning::/random_pq?sig=ecdsa endpoint failed or returned error"
           fi
 
       - name: Cleanup container
