@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RE4CTOR Docs — API</title>
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014" />
+</head>
+<body>
+  <main class="wrap" style="padding:32px 20px">
+    <a class="btn" href="/docs/">← Back to Docs</a>
+    <h1 style="margin-top:16px">API reference (human)</h1>
+    <p class="muted">Base URL: <code class="mono">https://api.re4ctor.com</code> · Demo key: <code class="mono">X-API-Key: demo</code></p>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-inner">
+        <h2>GET /v1/health</h2>
+        <pre class="out">curl -s https://api.re4ctor.com/v1/health</pre>
+
+        <h2 style="margin-top:14px">GET /v1/random</h2>
+        <pre class="out">curl -s -H "X-API-Key: demo" \
+"https://api.re4ctor.com/v1/random?n=16&amp;fmt=hex"</pre>
+
+        <h2 style="margin-top:14px">GET /v1/vrf</h2>
+        <pre class="out">curl -s -H "X-API-Key: demo" \
+"https://api.re4ctor.com/v1/vrf?sig=ecdsa" | jq .</pre>
+
+        <h2 style="margin-top:14px">OpenAPI</h2>
+        <p class="muted">Machine-readable schema:</p>
+        <pre class="out">https://api.re4ctor.com/openapi.json</pre>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

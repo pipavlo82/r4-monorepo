@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RE4CTOR — Success</title>
+  <style>
+    body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:#05060a;color:#e8eef6;margin:0}
+    .wrap{max-width:860px;margin:0 auto;padding:28px}
+    .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .btn{display:inline-block;background:#22d3ee;color:#001018;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:700}
+    .muted{opacity:.75}
+    .key{font-size:1.05rem;padding:10px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.10);overflow:auto}
+    code{background:rgba(0,0,0,.35);padding:2px 6px;border-radius:8px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    button.copy{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e8eef6;border-radius:12px;padding:8px 12px;cursor:pointer}
+    button.copy:hover{background:rgba(255,255,255,.12)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Payment successful ✅</h1>
+    <p class="muted">Your API access is ready. Copy the key below and use the quickstart.</p>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Your API key</h3>
+      <div class="row">
+        <div id="keyBox" class="key mono" style="flex:1">Loading…</div>
+        <button class="copy" id="btnCopy" type="button">Copy</button>
+      </div>
+      <p class="muted" style="margin:10px 0 0 0;">
+        Keep it private. If you think it leaked — rotate it.
+      </p>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Quickstart</h3>
+
+      <div class="mono">
+        <div class="muted">1) Health</div>
+        <div><code>curl -s https://re4ctor.com/api/v1/health</code></div>
+        <div style="height:10px"></div>
+
+        <div class="muted">2) Random bytes</div>
+        <div><code>curl -s -H "X-API-Key: YOUR_KEY" "https://re4ctor.com/api/v1/random?n=16&fmt=hex"</code></div>
+        <div style="height:10px"></div>
+
+        <div class="muted">3) VRF JSON</div>
+        <div><code>curl -s -H "X-API-Key: YOUR_KEY" "https://re4ctor.com/api/v1/vrf?sig=ecdsa" | jq .</code></div>
+      </div>
+
+      <div style="height:12px"></div>
+      <a class="btn" href="https://re4ctor.com/">Back to home</a>
+      <span class="muted" style="margin-left:10px;">Docs: <span class="mono">/api/openapi.json</span></span>
+    </div>
+
+    <p class="muted" style="margin-top:14px;">
+      Plan selector: <span class="mono">/success/?plan=9</span> or <span class="mono">?plan=19</span> or <span class="mono">?plan=49</span>
+    </p>
+  </div>
+
+<script>
+  const KEYS = {
+    "9":  "r4_9_23629cbf2918e4082db2f5bb28ae861d",
+    "19": "r4_19_72eeaf2956d4c41f198a75df36b3fe8a",
+    "49": "r4_49_92f11ec07863568cc63a3660601455cb"
+  };
+
+  const plan = new URLSearchParams(location.search).get("plan") || "";
+  const key = KEYS[plan];
+
+  const box = document.getElementById("keyBox");
+  const btn = document.getElementById("btnCopy");
+
+  function setBtn(text) { btn.textContent = text; setTimeout(()=>btn.textContent="Copy", 1200); }
+
+  if (!key) {
+    box.textContent = "Missing plan. Use /success/?plan=9 (or 19/49).";
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
+  } else {
+    box.textContent = key;
+  // buttons
+  const btns = document.createElement("div");
+  btns.style.marginTop = "12px";
+  btns.style.display = "flex";
+  btns.style.gap = "10px";
+  btns.style.flexWrap = "wrap";
+
+  const bCopy = document.createElement("button");
+  bCopy.textContent = "Copy API key";
+  bCopy.style.padding = "10px 14px";
+  bCopy.style.borderRadius = "10px";
+  bCopy.style.border = "1px solid rgba(255,255,255,.18)";
+  bCopy.style.background = "#111";
+  bCopy.style.color = "#fff";
+  bCopy.style.cursor = "pointer";
+
+  const bOpen = document.createElement("button");
+  bOpen.textContent = "Open Playground";
+  bOpen.style.padding = "10px 14px";
+  bOpen.style.borderRadius = "10px";
+  bOpen.style.border = "1px solid rgba(255,255,255,.18)";
+  bOpen.style.background = "#0ea5e9";
+  bOpen.style.color = "#001";
+  bOpen.style.cursor = "pointer";
+  bOpen.style.fontWeight = "700";
+
+  const msg = document.createElement("div");
+  msg.style.marginTop = "10px";
+  msg.style.opacity = ".85";
+  msg.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+
+  bCopy.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(key); msg.textContent = "Copied"; }
+    catch(e) { msg.textContent = "Copy failed"; }
+  });
+
+  bOpen.addEventListener("click", () => {
+    window.location.href = "/#playground";
+  });
+
+  btns.appendChild(bCopy);
+  btns.appendChild(bOpen);
+  box.parentNode.insertBefore(btns, box.nextSibling);
+  box.parentNode.insertBefore(msg, btns.nextSibling);
+
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(key);
+        setBtn("Copied");
+      } catch (_) {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = key;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        setBtn("Copied");
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

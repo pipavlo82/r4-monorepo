@@ -1,0 +1,61 @@
+services:
+  core:
+    image: pipavlo/r4-core:latest
+    pull_policy: if_not_present
+    container_name: r4-core
+    restart: unless-stopped
+    networks:
+      - r4net
+
+  vrf:
+    image: pipavlo/r4-local-test:latest
+    container_name: r4-vrf
+    restart: unless-stopped
+    networks:
+      - r4net
+
+  gateway:
+    image: pipavlo/r4-saas-api:v0.1.5
+    container_name: r4-gateway
+    restart: unless-stopped
+    volumes:
+      - ./gateway_override/main.py:/app/app/main.py:ro
+    environment:
+      CORE_URL: http://r4-core:8080        # ← ВАЖЛИВО: 8080
+      VRF_URL: http://r4-vrf:8081
+      PUBLIC_API_KEY: demo
+      INTERNAL_R4_API_KEY: demo
+      GATEWAY_VERSION: v0.1.5
+    ports:
+      - "8082:8082"                        # ← щоб з хоста ходити на gateway
+    networks:
+      - r4net
+    depends_on:
+      - core
+      - vrf
+
+  caddy:
+    image: caddy:alpine
+    container_name: r4-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      R4_DOMAIN: ${R4_DOMAIN:-api.re4ctor.net}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - r4net
+    depends_on:
+      - gateway
+
+networks:
+  r4net:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

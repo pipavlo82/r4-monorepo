@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>RE4CTOR — High-Assurance Cryptographic Randomness</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description"
+        content="RE4CTOR — sealed entropy appliance + PQ-ready VRF gateway. Dual-signed verifiable randomness (ECDSA + ML-DSA-65), engineered for protocol fairness and auditable security." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=IBM+Plex+Mono:wght@300;400;600&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet" />
+
+  <!-- External theme (keep once) -->
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014" />
+
+  <style>
+    :root{
+      --bg:#050816;
+      --bg2:#070b1c;
+      --panel:#0b1226;
+      --panel2:#0a1022;
+
+      --border:rgba(56,189,248,.20);
+      --border2:rgba(148,163,184,.18);
+      --grid:rgba(56,189,248,.085);
+
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+
+      --cyan:#22d3ee;
+      --green:#22c55e;
+      --orange:#f97316;
+      --yellow:#facc15;
+      --red:#fb7185;
+
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.45);
+
+      --r:14px;
+      --r2:18px;
+
+      --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --ui: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif;
+      --orb: "Orbitron", var(--ui);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:var(--ui);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 12% 0%, rgba(34,211,238,.14), transparent 55%),
+        radial-gradient(900px 600px at 85% 22%, rgba(249,115,22,.12), transparent 55%),
+        radial-gradient(900px 700px at 55% 85%, rgba(34,197,94,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg), #000);
+      overflow-x:hidden;
+      position:relative;
+    }
+
+    /* blueprint grid overlay */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity:.85;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    /* subtle noise */
+    body::after{
+      content:"";
+      position:fixed; inset:0;
+      background:url("data:image/svg+xml,%3Csvg width='180' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.75' numOctaves='2' stitchTiles='noStitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      mix-blend-mode:soft-light;
+      opacity:.75;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    a{color:inherit}
+    .wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 20px}
+    .mono{font-family:var(--mono)}
+    .muted{color:var(--muted)}
+
+    /* Header */
+    header{
+      position:sticky;top:0;z-index:50;
+      background:rgba(4,8,20,.78);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      padding:14px 0;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;text-decoration:none;
+    }
+    .mark{
+      width:36px;height:36px;border-radius:10px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(34,211,238,.9), transparent 55%),
+        radial-gradient(circle at 70% 70%, rgba(34,197,94,.8), transparent 55%),
+        linear-gradient(180deg, rgba(11,18,38,.9), rgba(5,8,22,.9));
+      border:1px solid rgba(34,211,238,.35);
+      box-shadow: 0 0 0 1px rgba(34,197,94,.10), 0 14px 34px rgba(0,0,0,.45);
+    }
+    .brand h1{
+      font-family:var(--orb);
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      font-size:1.05rem;
+      color:var(--cyan);
+      line-height:1;
+    }
+    .brand p{
+      font-family:var(--mono);
+      font-size:.72rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:rgba(250,204,21,.9);
+      margin-top:3px;
+    }
+
+    nav{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+    nav a{
+      text-decoration:none;
+      font-family:var(--mono);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(148,163,184,.95);
+      padding:6px 2px;
+      border-bottom:1px solid transparent;
+      transition: all .18s ease;
+    }
+    nav a:hover{
+      color:var(--text);
+      border-bottom-color:rgba(34,211,238,.6);
+    }
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 16px;border-radius:999px;
+      border:1px solid rgba(34,211,238,.45);
+      background:transparent;
+      text-decoration:none;
+      font-family:var(--mono);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      transition: all .18s ease;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn:hover{transform: translateY(-1px); box-shadow: var(--shadow2); border-color: rgba(34,211,238,.7);}
+    .btn.primary{
+      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(34,197,94,.92));
+      color:#021019;
+      border-color: transparent;
+      font-weight:700;
+    }
+    .btn.primary:hover{filter:saturate(1.05) brightness(1.03);}
+
+    @media (max-width: 980px){
+      .nav{flex-wrap:wrap}
+      nav{width:100%}
+    }
+
+    /* Layout blocks */
+    .panel{
+      background: linear-gradient(180deg, rgba(10,16,34,.86), rgba(6,10,26,.86));
+      border:1px solid var(--border);
+      border-radius: var(--r2);
+      box-shadow: var(--shadow);
+    }
+    .panel-inner{padding:18px 18px 16px}
+
+    /* Hero */
+    .hero{padding:34px 0 18px}
+    .hero-grid{
+      display:grid;
+      grid-template-columns: minmax(0,1.05fr) minmax(0,.95fr);
+      gap:18px;
+      align-items:stretch;
+      margin-top:22px;
+    }
+    @media (max-width: 980px){
+      .hero-grid{grid-template-columns:minmax(0,1fr)}
+    }
+
+    .kicker{
+      display:inline-flex;align-items:center;gap:10px;
+      font-family:var(--mono);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:rgba(249,115,22,.95);
+      margin-bottom:12px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:rgba(34,197,94,.95);
+      box-shadow: 0 0 18px rgba(34,197,94,.6);
+      animation:pulse 2s ease-in-out infinite;
+    }
+    .hero h2{
+      font-family:var(--orb);
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      font-size:2.55rem;
+      line-height:1.12;
+      margin-bottom:12px;
+    }
+    .hero h2 span{color:var(--cyan)}
+    .hero p{
+      color:rgba(148,163,184,.95);
+      font-size:.98rem;
+      line-height:1.72;
+      max-width: 58ch;
+    }
+    .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .note{
+      margin-top:12px;
+      font-family:var(--mono);
+      font-size:.78rem;
+      color:rgba(148,163,184,.92);
+      line-height:1.55;
+    }
+    .note code{
+      font-family:var(--mono);
+      background: rgba(2,6,23,.65);
+      border: 1px solid rgba(148,163,184,.16);
+      padding: 2px 6px;
+      border-radius: 8px;
+      color: rgba(226,232,240,.95);
+    }
+
+    /* Figure panels (graphs/diagrams) */
+    .figure-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:14px 16px 10px;
+      border-bottom:1px solid rgba(56,189,248,.18);
+    }
+    .figure-title{
+      font-family:var(--mono);
+      font-size:.72rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(34,211,238,.95);
+    }
+    .figure-meta{
+      font-family:var(--mono);
+      font-size:.72rem;
+      color: rgba(148,163,184,.92);
+      letter-spacing:.08em;
+      white-space:nowrap;
+    }
+    .figure-body{padding:14px 16px 16px}
+    .grid-2{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width: 980px){ .grid-2{grid-template-columns:minmax(0,1fr)} }
+
+    .mini{
+      border:1px solid rgba(148,163,184,.14);
+      background: rgba(2,6,23,.35);
+      border-radius: 14px;
+      padding:12px;
+    }
+    .mini .lbl{
+      font-family:var(--mono);
+      font-size:.72rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(148,163,184,.92);
+      margin-bottom:8px;
+    }
+    .mini .val{
+      font-family:var(--orb);
+      font-size:1.25rem;
+      letter-spacing:.06em;
+      color: rgba(226,232,240,.98);
+      margin-bottom:2px;
+    }
+    .mini .sub{
+      font-family:var(--mono);
+      font-size:.76rem;
+      color: rgba(34,197,94,.92);
+    }
+
+    /* Section headings */
+    .section{padding:34px 0 8px}
+    .section h3{
+      font-family:var(--orb);
+      font-size:1.45rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      margin-bottom:10px;
+      color: rgba(249,115,22,.95);
+    }
+    .section p.lead{
+      color: rgba(148,163,184,.95);
+      max-width: 92ch;
+      line-height:1.72;
+      margin-bottom:14px;
+    }
+
+    /* 3-up cards */
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:12px;
+      margin-top:10px;
+    }
+    @media (max-width: 980px){ .cards{grid-template-columns:minmax(0,1fr)} }
+
+    .card{
+      border-radius: var(--r2);
+      border:1px solid rgba(56,189,248,.18);
+      background: linear-gradient(180deg, rgba(7,11,26,.70), rgba(5,8,20,.72));
+      padding:16px 16px 14px;
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      position:relative;
+    }
+    .card .tag{
+      font-family:var(--mono);
+      font-size:.72rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(34,211,238,.95);
+      margin-bottom:8px;
+    }
+    .card .big{
+      font-family:var(--orb);
+      font-size:1.35rem;
+      color: rgba(226,232,240,.98);
+      margin-bottom:6px;
+      letter-spacing:.06em;
+    }
+    .card .desc{
+      color: rgba(148,163,184,.92);
+      line-height:1.6;
+      font-size:.92rem;
+    }
+    .card::after{
+      content:"";
+      position:absolute; inset:auto -40px -55px auto;
+      width:140px;height:140px;border-radius:50%;
+      background: radial-gradient(circle, rgba(34,211,238,.20), transparent 65%);
+      pointer-events:none;
+    }
+
+    /* Playground */
+    .pg-grid{
+      display:grid;
+      grid-template-columns: minmax(0,1.05fr) minmax(0,.95fr);
+      gap:12px;
+    }
+    @media (max-width: 980px){ .pg-grid{grid-template-columns:minmax(0,1fr)} }
+
+    .field-row{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 980px){ .field-row{grid-template-columns:minmax(0,1fr)} }
+
+    .label{
+      font-family:var(--mono);
+      font-size:.72rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(148,163,184,.92);
+      margin-bottom:6px;
+    }
+    .input{
+      width:100%;
+      border-radius: 12px;
+      border:1px solid rgba(148,163,184,.18);
+      background: rgba(2,6,23,.55);
+      color: rgba(226,232,240,.95);
+      padding:10px 10px;
+      font-family:var(--mono);
+      font-size:.86rem;
+      outline:none;
+    }
+    .input:focus{
+      border-color: rgba(34,211,238,.55);
+      box-shadow: 0 0 0 2px rgba(34,211,238,.12);
+    }
+    .pg-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .out{
+      border-radius: 14px;
+      border:1px solid rgba(148,163,184,.16);
+      background: rgba(2,6,23,.55);
+      padding:12px;
+      font-family:var(--mono);
+      font-size:.84rem;
+      line-height:1.5;
+      white-space:pre-wrap;
+      overflow:auto;
+      min-height: 148px;
+    }
+    .status{
+      margin-top:10px;
+      font-family:var(--mono);
+      font-size:.78rem;
+      color: rgba(148,163,184,.92);
+      display:flex;flex-wrap:wrap;gap:10px;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.16);
+      background: rgba(2,6,23,.35);
+      padding:6px 10px;
+    }
+    .pill b{color: rgba(226,232,240,.95); font-weight:700}
+    .pill.ok{border-color: rgba(34,197,94,.35)}
+    .pill.warn{border-color: rgba(250,204,21,.35)}
+    .pill.bad{border-color: rgba(251,113,133,.35)}
+    .pill .ok{color: rgba(34,197,94,.95)}
+    .pill .warn{color: rgba(250,204,21,.95)}
+    .pill .bad{color: rgba(251,113,133,.95)}
+
+    .toggles{
+      display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px;
+      font-family:var(--mono); font-size:.78rem; color:rgba(148,163,184,.92);
+    }
+    .toggle{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(148,163,184,.16);
+      background: rgba(2,6,23,.25);
+    }
+    .toggle input{accent-color: rgba(34,211,238,.9);}
+
+    /* Pricing */
+    .pricing{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width: 1100px){ .pricing{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media (max-width: 720px){ .pricing{grid-template-columns: minmax(0,1fr);} }
+
+    .price{
+      border-radius: var(--r2);
+      border:1px solid rgba(56,189,248,.18);
+      background: linear-gradient(180deg, rgba(7,11,26,.70), rgba(5,8,20,.72));
+      padding:16px 16px 14px;
+      box-shadow: var(--shadow2);
+    }
+    .price.highlight{
+      border-color: rgba(34,211,238,.55);
+      box-shadow: 0 0 0 1px rgba(34,211,238,.10), var(--shadow);
+    }
+    .price .name{
+      font-family:var(--orb);
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      font-size:1.02rem;
+      color: rgba(249,115,22,.95);
+      margin-bottom:8px;
+    }
+    .price .amount{
+      font-family:var(--orb);
+      font-size:2.0rem;
+      color: rgba(226,232,240,.98);
+      margin-bottom:4px;
+      letter-spacing:.04em;
+    }
+    .price .tagline{
+      font-family:var(--mono);
+      color: rgba(148,163,184,.92);
+      font-size:.82rem;
+      margin-bottom:10px;
+    }
+    .price ul{list-style:none;margin-top:10px}
+    .price li{
+      font-family:var(--mono);
+      color: rgba(148,163,184,.92);
+      font-size:.84rem;
+      padding-left:16px;
+      position:relative;
+      margin: 6px 0;
+    }
+    .price li::before{
+      content:"";
+      position:absolute;left:0;top:.55em;
+      width:6px;height:6px;border-radius:50%;
+      background: rgba(34,197,94,.9);
+      box-shadow: 0 0 12px rgba(34,197,94,.35);
+    }
+    .wide{width:100%; margin-top:12px}
+
+    /* Footer */
+    footer{
+      margin-top:34px;
+      border-top:1px solid rgba(56,189,248,.16);
+      background: rgba(2,6,23,.55);
+      padding:22px 0 28px;
+    }
+    .foot{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;
+      font-family:var(--mono);
+      color: rgba(148,163,184,.92);
+      font-size:.78rem;
+      line-height:1.6;
+    }
+    .foot a{color: rgba(34,211,238,.92); text-decoration:none}
+    .foot a:hover{text-decoration:underline}
+    .legal{
+      display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+      opacity:.95;
+    }
+
+    @keyframes pulse{
+      0%,100%{transform:scale(1);opacity:1}
+      50%{transform:scale(1.25);opacity:.55}
+    }
+
+    /* Scroll reveal */
+    .reveal{
+      opacity:0;
+      transform: translateY(18px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.on{
+      opacity:1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="/">
+        <div class="mark" aria-hidden="true"></div>
+        <div>
+          <h1>RE4CTOR</h1>
+          <p>Entropy appliance &amp; PQ-VRF</p>
+        </div>
+      </a>
+
+      <nav aria-label="Primary">
+        <a href="#benchmarks">Benchmarks</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#product">Product</a>
+        <a href="#security">Security</a>
+        <a href="#compliance">Compliance</a>
+        <a href="#pricing">Pricing</a>
+        <a href="/docs/">Docs</a>
+        <a href="/docs/quickstart/">Quickstart</a>
+      </nav>
+
+      <a class="btn primary" href="#pricing">Get Access</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="panel reveal">
+        <div class="panel-inner">
+          <div class="kicker"><span class="dot"></span> FIPS-aligned · PQ-ready · auditable</div>
+          <h2>High-Assurance <span>Cryptographic</span> Randomness</h2>
+          <p>
+            RE4CTOR is a <b>sealed entropy appliance</b> with an open, verifiable perimeter.
+            It delivers signed outputs (<b>ECDSA + ML-DSA-65</b>) and is engineered for
+            protocol fairness, measurable security, and audit-grade evidence.
+          </p>
+
+          <div class="cta-row">
+            <a class="btn primary" href="#benchmarks">Live Demo</a>
+            <a class="btn" href="https://re4ctor.com/api/" target="_blank" rel="noopener">Open API Gateway</a>
+            <a class="btn" href="/api/">API Docs</a>
+          </div>
+
+          <div class="note">
+            Gateway: <code>/api/</code><br/>
+            Demo header: <code>X-API-Key: demo</code> (rate-limited).
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Figure (Gas per secure bit) -->
+      <section class="panel reveal" aria-label="Figure: Gas per secure bit">
+        <div class="figure-head">
+          <div class="figure-title">Figure 1.0 · Gas per Secure Bit (EVM)</div>
+          <div class="figure-meta">dataset: gas-per-secure-bit</div>
+        </div>
+        <div class="figure-body">
+          <svg viewBox="0 0 560 210" width="100%" height="210" role="img" aria-label="Line chart">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="rgba(34,211,238,.25)"/>
+                <stop offset="1" stop-color="rgba(34,211,238,0)"/>
+              </linearGradient>
+              <linearGradient id="g2" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="rgba(34,197,94,.20)"/>
+                <stop offset="1" stop-color="rgba(34,197,94,0)"/>
+              </linearGradient>
+            </defs>
+
+            <!-- grid -->
+            <g opacity="0.55">
+              <path d="M20 20H540M20 60H540M20 100H540M20 140H540M20 180H540"
+                    stroke="rgba(56,189,248,.18)" stroke-width="1"/>
+              <path d="M20 20V180M120 20V180M220 20V180M320 20V180M420 20V180M540 20V180"
+                    stroke="rgba(56,189,248,.12)" stroke-width="1"/>
+            </g>
+
+            <!-- Series A (verify POC) -->
+            <path d="M20 165 L120 160 L220 155 L320 148 L420 146 L540 140"
+                  fill="none" stroke="rgba(249,115,22,.95)" stroke-width="2.5"/>
+            <!-- Series B (PreA path) -->
+            <path d="M20 72 L120 70 L220 67 L320 65 L420 64 L540 63"
+                  fill="none" stroke="rgba(34,197,94,.95)" stroke-width="2.5"/>
+
+            <!-- Fill under series -->
+            <path d="M20 72 L120 70 L220 67 L320 65 L420 64 L540 63 L540 180 L20 180 Z"
+                  fill="url(#g2)"/>
+            <path d="M20 165 L120 160 L220 155 L320 148 L420 146 L540 140 L540 180 L20 180 Z"
+                  fill="url(#g1)"/>
+
+            <text x="22" y="18" fill="rgba(148,163,184,.92)" font-size="11" font-family="IBM Plex Mono">
+              higher = worse
+            </text>
+            <text x="22" y="202" fill="rgba(148,163,184,.92)" font-size="11" font-family="IBM Plex Mono">
+              optimization phases
+            </text>
+
+            <circle cx="540" cy="63" r="3.5" fill="rgba(34,197,94,.95)"/>
+            <text x="410" y="54" fill="rgba(34,197,94,.95)" font-size="11" font-family="IBM Plex Mono">
+              PreA path (~1.5M)
+            </text>
+
+            <circle cx="540" cy="140" r="3.5" fill="rgba(249,115,22,.95)"/>
+            <text x="360" y="132" fill="rgba(249,115,22,.95)" font-size="11" font-family="IBM Plex Mono">
+              verify() POC (~68.9M)
+            </text>
+          </svg>
+
+          <div class="grid-2" style="margin-top:10px">
+            <div class="mini">
+              <div class="lbl">verify() POC snapshot</div>
+              <div class="val">≈ 68.9M gas</div>
+              <div class="sub">decode + checks + w = A·z − c·t1</div>
+            </div>
+            <div class="mini">
+              <div class="lbl">PreA compute_w microbench</div>
+              <div class="val">≈ 1.50M gas</div>
+              <div class="sub">packedA_ntt bound via CommitA</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- BENCHMARKS / PLAYGROUND -->
+  <section id="benchmarks" class="section">
+    <h3 class="reveal">Benchmarks & Live API</h3>
+    <p class="lead reveal">
+      Live gateway calls + a fast <b>frontend entropy diagnostic</b> (Shannon bits/byte + monobit ratio).
+      This is not a replacement for offline BigCrush/NIST reports, but it shows “non-degenerate output” in real time.
+      Background sampler pings <code class="mono">/v1/random</code> periodically (no <code class="mono">/health</code>).
+    </p>
+
+    <div class="panel reveal">
+      <div class="panel-inner">
+        <div class="pg-grid">
+          <div>
+            <div class="mono" style="letter-spacing:.14em;text-transform:uppercase;color:rgba(34,211,238,.95);font-size:.78rem;margin-bottom:6px;">
+              Live API Playground
+            </div>
+            <div class="muted" style="font-size:.92rem;line-height:1.65;">
+              Calls: <code class="mono">/v1/random</code> and <code class="mono">/v1/vrf</code>.
+              After <code class="mono">/v1/random</code>, the page computes a quick entropy estimate from returned bytes.
+            </div>
+
+            <div class="field-row">
+              <div>
+                <div class="label">API Base URL</div>
+                <input id="pg-base-url" class="input" value="/api/" />
+              </div>
+              <div>
+                <div class="label">API Key (X-API-Key)</div>
+                <input id="pg-api-key" class="input" value="demo" />
+              </div>
+              <div>
+                <div class="label">n (32-bit words)</div>
+                <input id="pg-n" class="input" value="4" />
+              </div>
+            </div>
+
+            <div class="pg-actions">
+              <button class="btn primary" id="btn-call-random" type="button">Call /v1/random</button>
+              <button class="btn" id="btn-call-vrf" type="button">Call /v1/vrf?sig=ecdsa</button>
+              <a class="btn" href="https://re4ctor.com/api/" target="_blank" rel="noopener">Open https://re4ctor.com/api</a>
+            </div>
+
+            <div class="toggles">
+              <label class="toggle">
+                <input id="bg-enabled" type="checkbox" checked />
+                background sampler (30s)
+              </label>
+              <span class="muted">Auto-pauses when tab is hidden.</span>
+            </div>
+
+            <div class="status" id="pg-status">
+              <span class="pill" id="pill-http"><span class="mono">HTTP</span> <b class="mono">—</b></span>
+              <span class="pill" id="pill-entropy"><span class="mono">entropy</span> <b class="mono">—</b></span>
+              <span class="pill" id="pill-monobit"><span class="mono">monobit</span> <b class="mono">—</b></span>
+              <span class="pill" id="pill-ts"><span class="mono">timestamp</span> <b class="mono">—</b></span>
+            </div>
+          </div>
+
+          <div>
+            <div class="label">Response</div>
+            <div id="pg-output" class="out">
+{ "hint": "Click a button to call the RE4CTOR gateway with X-API-Key: demo." }
+            </div>
+            <div class="muted mono" style="margin-top:10px;font-size:.78rem;line-height:1.5;">
+              Browser note: CORS must allow your origin (your prod Caddy already supports preflight for <code class="mono">X-API-Key</code>).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Extra chart row to match the “adult / dashboard” vibe -->
+    <div class="panel reveal" style="margin-top:12px;">
+      <div class="figure-head">
+        <div class="figure-title">Figure 1.1 · Latency distribution (gateway → VRF node)</div>
+        <div class="figure-meta">prod VPS (representative)</div>
+      </div>
+      <div class="figure-body">
+        <svg viewBox="0 0 900 210" width="100%" height="210" role="img" aria-label="Latency chart">
+          <g opacity="0.55">
+            <path d="M20 20H880M20 60H880M20 100H880M20 140H880M20 180H880" stroke="rgba(56,189,248,.18)" stroke-width="1"/>
+            <path d="M20 20V180M180 20V180M340 20V180M500 20V180M660 20V180M820 20V180" stroke="rgba(56,189,248,.12)" stroke-width="1"/>
+          </g>
+
+          <!-- Simple polyline -->
+          <path d="M20 150 L180 142 L340 132 L500 120 L660 126 L820 118 L880 122"
+                fill="none" stroke="rgba(34,211,238,.95)" stroke-width="2.5"/>
+
+          <!-- p50/p95/p99 guides -->
+          <path d="M20 120H880" stroke="rgba(34,197,94,.35)" stroke-width="1.5" stroke-dasharray="6 6"/>
+          <text x="26" y="114" fill="rgba(34,197,94,.9)" font-family="IBM Plex Mono" font-size="12">p50 ~ 14ms</text>
+
+          <path d="M20 92H880" stroke="rgba(250,204,21,.35)" stroke-width="1.5" stroke-dasharray="6 6"/>
+          <text x="26" y="86" fill="rgba(250,204,21,.9)" font-family="IBM Plex Mono" font-size="12">p95 ~ 23ms</text>
+
+          <path d="M20 70H880" stroke="rgba(249,115,22,.35)" stroke-width="1.5" stroke-dasharray="6 6"/>
+          <text x="26" y="64" fill="rgba(249,115,22,.9)" font-family="IBM Plex Mono" font-size="12">p99 &lt; 30ms</text>
+
+          <text x="22" y="202" fill="rgba(148,163,184,.92)" font-size="11" font-family="IBM Plex Mono">
+            sequential requests (illustrative)
+          </text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture" class="section">
+    <h3 class="reveal">Architecture</h3>
+    <p class="lead reveal">
+      RE4CTOR treats randomness as an engineered system: sealed entropy core, auditable gateway,
+      and verifiable protocol surfaces. This replaces “hand-wavy randomness” with measurable, testable, deployable infrastructure.
+    </p>
+
+    <div class="cards">
+      <div class="card reveal">
+        <div class="tag">Sealed core</div>
+        <div class="big">Fail-closed entropy</div>
+        <div class="desc">
+          If health tests fail, output stops instead of silently degrading. This is the operational property most RNG stacks omit.
+        </div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">Verifiable perimeter</div>
+        <div class="big">Signed outputs</div>
+        <div class="desc">
+          Signing (ECDSA + ML-DSA-65) supports today’s chains and an explicit PQ migration track.
+        </div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">Protocol envelope</div>
+        <div class="big">Measured surfaces</div>
+        <div class="desc">
+          Benchmarks include protocol surfaces (not only “verify gas”) so the weakest-link can be reasoned about quantitatively.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:12px;">
+      <div class="figure-head">
+        <div class="figure-title">Figure 2.0 · Protocol Envelope Dominance</div>
+        <div class="figure-meta">model: weakest-link / surfaces</div>
+      </div>
+      <div class="figure-body">
+        <svg viewBox="0 0 900 220" width="100%" height="220" role="img" aria-label="Architecture flow diagram">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(34,211,238,.9)"/>
+            </marker>
+          </defs>
+
+          <g font-family="IBM Plex Mono" font-size="12" fill="rgba(226,232,240,.92)">
+            <rect x="20" y="60" width="190" height="90" rx="12" fill="rgba(2,6,23,.45)" stroke="rgba(56,189,248,.24)"/>
+            <text x="36" y="92">Entropy Core</text>
+            <text x="36" y="112" fill="rgba(148,163,184,.92)">health tests · fail-closed</text>
+
+            <rect x="260" y="60" width="190" height="90" rx="12" fill="rgba(2,6,23,.45)" stroke="rgba(56,189,248,.24)"/>
+            <text x="276" y="92">Gateway (API)</text>
+            <text x="276" y="112" fill="rgba(148,163,184,.92)">CORS · auth · rate limits</text>
+
+            <rect x="500" y="30" width="190" height="90" rx="12" fill="rgba(2,6,23,.45)" stroke="rgba(34,197,94,.35)"/>
+            <text x="516" y="62">VRF Node</text>
+            <text x="516" y="82" fill="rgba(148,163,184,.92)">ECDSA + ML-DSA-65</text>
+
+            <rect x="500" y="130" width="190" height="90" rx="12" fill="rgba(2,6,23,.45)" stroke="rgba(249,115,22,.35)"/>
+            <text x="516" y="162">Protocol Surfaces</text>
+            <text x="516" y="182" fill="rgba(148,163,184,.92)">RANDAO · attestations · AA</text>
+
+            <rect x="740" y="60" width="140" height="90" rx="12" fill="rgba(2,6,23,.45)" stroke="rgba(56,189,248,.24)"/>
+            <text x="756" y="92">On-chain</text>
+            <text x="756" y="112" fill="rgba(148,163,184,.92)">verify · auditability</text>
+
+            <line x1="210" y1="105" x2="260" y2="105" stroke="rgba(34,211,238,.9)" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="450" y1="105" x2="500" y2="75" stroke="rgba(34,211,238,.9)" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="450" y1="105" x2="500" y2="175" stroke="rgba(34,211,238,.9)" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="690" y1="75" x2="740" y2="105" stroke="rgba(34,211,238,.9)" stroke-width="2" marker-end="url(#arrow)"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPLIANCE -->
+  <section id="compliance" class="section">
+    <h3 class="reveal">Compliance & Validation</h3>
+    <p class="lead reveal">
+      Public pages keep claims conservative. Detailed artifacts live in your audit bundle (reports, SBOM, integrity manifests).
+      This section is intentionally minimal and “adult”: only what you can stand behind.
+    </p>
+
+    <div class="cards">
+      <div class="card reveal">
+        <div class="tag">TestU01 BigCrush</div>
+        <div class="big">160 / 160</div>
+        <div class="desc">Offline validation on large samples; reports shipped per release.</div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">NIST SP 800-22</div>
+        <div class="big">STS suite</div>
+        <div class="desc">Release-gated QA plus continuous health tests (RCT/APT).</div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">VRF latency</div>
+        <div class="big">p99 &lt; 30 ms</div>
+        <div class="desc">Gateway → node → signing → JSON response (prod VPS).</div>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:12px;">
+      <div class="panel-inner">
+        <div class="mono" style="letter-spacing:.14em;text-transform:uppercase;color:rgba(34,211,238,.95);font-size:.78rem;margin-bottom:8px;">
+          Selected benchmark surfaces
+        </div>
+
+        <div style="overflow:auto;border-radius:14px;border:1px solid rgba(148,163,184,.14);">
+          <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.86rem;background:rgba(2,6,23,.35)">
+            <thead>
+              <tr style="text-transform:uppercase;letter-spacing:.12em;color:rgba(34,211,238,.95);">
+                <th style="text-align:left;padding:12px;border-bottom:1px solid rgba(56,189,248,.18);">Surface</th>
+                <th style="text-align:left;padding:12px;border-bottom:1px solid rgba(56,189,248,.18);">Metric</th>
+                <th style="text-align:left;padding:12px;border-bottom:1px solid rgba(56,189,248,.18);">Value</th>
+                <th style="text-align:left;padding:12px;border-bottom:1px solid rgba(56,189,248,.18);">Status</th>
+              </tr>
+            </thead>
+            <tbody style="color:rgba(226,232,240,.92)">
+              <tr>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);">verify() POC (ML-DSA-65)</td>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);">gas</td>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);">≈ 68,901,612</td>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);"><span style="color:rgba(250,204,21,.95)">baseline</span></td>
+              </tr>
+              <tr>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);"><b>PreA compute_w (packedA_ntt)</b></td>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);">gas</td>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);"><b>≈ 1,499,354</b></td>
+                <td style="padding:12px;border-bottom:1px solid rgba(148,163,184,.12);"><span style="color:rgba(34,197,94,.95)">optimized</span></td>
+              </tr>
+              <tr>
+                <td style="padding:12px;">gateway VRF (prod VPS)</td>
+                <td style="padding:12px;">latency</td>
+                <td style="padding:12px;">p50 ≈ 14 ms · p99 &lt; 30 ms</td>
+                <td style="padding:12px;"><span style="color:rgba(34,211,238,.95)">measured</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="muted mono" style="margin-top:10px;font-size:.78rem;line-height:1.5;">
+          Public page avoids over-claiming. Full reproducible detail lives in the benchmark lab and audit artifacts.
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <!-- PRODUCT -->
+  <section id="product" class="section">
+    <h3 class="reveal">Product surfaces</h3>
+    <p class="lead reveal">
+      Everything you consume is an explicit surface: <b>entropy bytes</b>, <b>dual-signed VRF</b>, and <b>verification helpers</b>.
+      The site keeps wording conservative; the artifacts live in <a href="/docs/test-reports/">Test Reports</a> and <a href="/docs/sbom/">SBOM</a>.
+    </p>
+
+    <div class="cards">
+      <div class="card reveal">
+        <div class="tag">RNG surface</div>
+        <div class="big"><span class="mono">GET /v1/random</span></div>
+        <div class="desc">
+          Raw high-entropy bytes via the gateway. Designed for fairness-sensitive protocols, gaming, L2 sequencing, and AA.
+        </div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">VRF surface</div>
+        <div class="big"><span class="mono">GET /v1/vrf</span></div>
+        <div class="desc">
+          Dual-signed output (<b>ECDSA + ML-DSA-65</b> roadmap lane). JSON response suitable for audit trails.
+        </div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">Verification</div>
+        <div class="big"><span class="mono">POST /v1/verify</span></div>
+        <div class="desc">
+          Helper endpoint for integrators to validate an ECDSA signature from VRF output (useful during integration and CI).
+        </div>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:12px;">
+      <div class="panel-inner">
+        <div class="mono" style="letter-spacing:.14em;text-transform:uppercase;color:rgba(34,211,238,.95);font-size:.78rem;margin-bottom:8px;">
+          Quickstart (copy/paste)
+        </div>
+
+        <div class="grid-2">
+          <div class="mini">
+            <div class="lbl">1) Check gateway</div>
+            <div class="sub mono">curl -s https://api.re4ctor.com/v1/health</div>
+          </div>
+          <div class="mini">
+            <div class="lbl">2) Random bytes (hex)</div>
+            <div class="sub mono">curl -s -H "X-API-Key: demo" "https://api.re4ctor.com/v1/random?n=16&amp;fmt=hex"</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:10px;">
+          <div class="mini">
+            <div class="lbl">3) Dual-signed VRF JSON</div>
+            <div class="sub mono">curl -s -H "X-API-Key: demo" "https://api.re4ctor.com/v1/vrf?sig=ecdsa" | jq .</div>
+          </div>
+          <div class="mini">
+            <div class="lbl">Docs &amp; artifacts</div>
+            <div class="sub">
+              <a class="mono" href="/docs/quickstart/">/docs/quickstart/</a> ·
+              <a class="mono" href="/docs/test-reports/">/docs/test-reports/</a> ·
+              <a class="mono" href="/docs/sbom/">/docs/sbom/</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="muted mono" style="margin-top:10px;font-size:.78rem;line-height:1.5;">
+          Tip: the website playground uses <code class="mono">/api/</code> (same-origin reverse proxy). For direct calls, use <code class="mono">https://api.re4ctor.com</code>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY -->
+  <section id="security" class="section">
+    <h3 class="reveal">Security posture</h3>
+    <p class="lead reveal">
+      RE4CTOR is built around an operational invariant: <b>fail-closed entropy</b>. If health/quality degrades, output stops.
+      The perimeter stays auditable via signed responses and reproducible artifacts.
+    </p>
+
+    <div class="cards">
+      <div class="card reveal">
+        <div class="tag">Fail-closed</div>
+        <div class="big">Stop &amp; alert</div>
+        <div class="desc">No silent degradation: health tests gate output instead of letting &ldquo;maybe-random&rdquo; leak into production.</div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">Audit bundle</div>
+        <div class="big">Reports + SBOM</div>
+        <div class="desc">Artifacts are versioned and shippable: <a href="/docs/test-reports/">test reports</a>, <a href="/docs/sbom/">SBOM</a>, and integrity notes.</div>
+      </div>
+      <div class="card reveal">
+        <div class="tag">PQ track</div>
+        <div class="big">Explicit migration</div>
+        <div class="desc">Dual-signing supports today (ECDSA) and an explicit PQ lane (ML-DSA-65) with measured surfaces and benchmarks.</div>
+      </div>
+    </div>
+  </section>
+
+<!-- PRICING -->
+  <section id="pricing" class="section">
+    <h3 class="reveal">Pricing</h3>
+    <p class="lead reveal">Choose a plan and get redirected to Stripe Checkout.</p>
+
+    <div class="pricing">
+      <div class="price reveal">
+        <div class="name">R4 SaaS API</div>
+        <div class="amount">$9.99</div>
+        <div class="tagline">Solo devs and small apps.</div>
+        <ul>
+          <li>10k requests / month</li>
+          <li>VRF + RNG</li>
+          <li>Email support</li>
+        </ul>
+        <button class="btn primary wide" type="button" onclick="buyPlan('price_1SZ21JGGBPotZrQPmNR2pIhU')">Subscribe</button>
+      </div>
+
+      <div class="price highlight reveal">
+        <div class="name">R4 Dev Plan</div>
+        <div class="amount">$19.99</div>
+        <div class="tagline">Growing apps & early-stage protocols.</div>
+        <ul>
+          <li>50k requests / month</li>
+          <li>Priority gateway</li>
+          <li>Email + Telegram support</li>
+        </ul>
+        <button class="btn primary wide" type="button" onclick="buyPlan('price_1SZ23jGGBPotZrQPoEed0eAb')">Subscribe</button>
+      </div>
+
+      <div class="price reveal">
+        <div class="name">R4 Pro Plan</div>
+        <div class="amount">$49.99</div>
+        <div class="tagline">Production-grade workloads.</div>
+        <ul>
+          <li>250k requests / month</li>
+          <li>Multi-region routing</li>
+          <li>Slack support</li>
+        </ul>
+        <button class="btn primary wide" type="button" onclick="buyPlan('price_1SZ24MGGBPotZrQP6YMckcyi')">Subscribe</button>
+      </div>
+
+      <div class="price reveal">
+        <div class="name">Enterprise</div>
+        <div class="amount">Custom</div>
+        <div class="tagline">Banks, L2 sequencers, regulated infra.</div>
+        <ul>
+          <li>On-prem or dedicated VPC</li>
+          <li>Audit + compliance bundle</li>
+          <li>PQ signature stack</li>
+          <li>Dedicated support</li>
+        </ul>
+        <a class="btn wide" href="mailto:shtomko@gmail.com?subject=Re4ctor%20Enterprise">Contact Sales</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <div style="font-family:var(--orb);letter-spacing:.16em;text-transform:uppercase;color:rgba(250,204,21,.92);margin-bottom:8px;">
+          RE4CTOR
+        </div>
+        <div>© 2025 RE4CTOR · BUILD: 20260130-203944 — sealed entropy appliance &amp; PQ-VRF gateway.</div>
+        <div class="muted">FastAPI · Docker · Dual-Sig (ECDSA + ML-DSA-65)</div>
+      </div>
+
+      <div class="legal">
+        <a href="https://re4ctor.com/api/" target="_blank" rel="noopener">API Gateway</a>
+        <a href="/api/" target="_blank" rel="noopener">API Docs</a>
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/security.html">Security</a>
+        <a href="mailto:shtomko@gmail.com">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // -------------------------------
+  // Fast helpers: hex + entropy + monobit
+  // -------------------------------
+  function hexToBytes(hex) {
+    if (!hex) return new Uint8Array();
+    hex = String(hex).trim();
+    if (hex.startsWith("0x")) hex = hex.slice(2);
+    hex = hex.replace(/[^0-9a-fA-F]/g, "");
+    if (hex.length % 2 === 1) hex = "0" + hex;
+    const out = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return out;
+  }
+
+  function shannonEntropyBitsPerByte(bytes) {
+    if (!bytes || bytes.length === 0) return NaN;
+    const freq = new Uint32Array(256);
+    for (let i = 0; i < bytes.length; i++) freq[bytes[i]]++;
+    const n = bytes.length;
+    let H = 0;
+    for (let i = 0; i < 256; i++) {
+      const c = freq[i];
+      if (!c) continue;
+      const p = c / n;
+      H -= p * Math.log2(p);
+    }
+    return H; // bits per byte (max 8)
+  }
+
+  // Precompute popcount for 0..255
+  const POPCNT8 = (() => {
+    const t = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) {
+      let x = i, c = 0;
+      while (x) { x &= (x - 1); c++; }
+      t[i] = c;
+    }
+    return t;
+  })();
+
+  function monobitPOnes(bytes) {
+    if (!bytes || bytes.length === 0) return NaN;
+    let ones = 0;
+    for (let i = 0; i < bytes.length; i++) ones += POPCNT8[bytes[i]];
+    const total = bytes.length * 8;
+    return ones / total; // ideally ~0.5
+  }
+
+  function pickHexFromParsed(parsed, rawText) {
+    const candidates = [];
+    if (parsed && typeof parsed === "object") {
+      if (typeof parsed.hex === "string") candidates.push(parsed.hex);
+      if (typeof parsed.data_hex === "string") candidates.push(parsed.data_hex);
+      if (typeof parsed.random_hex === "string") candidates.push(parsed.random_hex);
+      if (typeof parsed.data === "string") candidates.push(parsed.data);
+
+      if (parsed.data && typeof parsed.data === "object") {
+        if (typeof parsed.data.hex === "string") candidates.push(parsed.data.hex);
+        if (typeof parsed.data.random_hex === "string") candidates.push(parsed.data.random_hex);
+      }
+    }
+    for (const c of candidates) {
+      if (c && /[0-9a-fA-F]{16,}/.test(c)) return c;
+    }
+    if (typeof rawText === "string") {
+      const m = rawText.match(/0x[0-9a-fA-F]{32,}/);
+      if (m) return m[0];
+    }
+    return null;
+  }
+
+  // -------------------------------
+  // UI status
+  // -------------------------------
+  function setPillText(pillId, text) {
+    const pill = document.getElementById(pillId);
+    if (!pill) return;
+    const b = pill.querySelector("b");
+    if (b) b.textContent = text ?? "—";
+  }
+
+  function setPillClass(pillId, cls) {
+    const pill = document.getElementById(pillId);
+    if (!pill) return;
+    pill.classList.remove("ok","warn","bad");
+    if (cls) pill.classList.add(cls);
+  }
+
+  function updateEntropyPills(entropyBits, pOnes) {
+    setPillText("pill-entropy", Number.isFinite(entropyBits) ? entropyBits.toFixed(3) + " b/B" : "—");
+    setPillText("pill-monobit", Number.isFinite(pOnes) ? ("p(1)=" + pOnes.toFixed(4)) : "—");
+
+    const entOk = Number.isFinite(entropyBits) && entropyBits > 7.90;
+    const monoOk = Number.isFinite(pOnes) && Math.abs(pOnes - 0.5) < 0.02;
+
+    setPillClass("pill-entropy", entOk ? "ok" : "warn");
+    setPillClass("pill-monobit", monoOk ? "ok" : "warn");
+  }
+
+  function updateTimestampPill() {
+    setPillText("pill-ts", new Date().toISOString());
+  }
+
+  // -------------------------------
+  // API Playground calls
+  // -------------------------------
+  function getInputs() {
+    const baseInput = document.getElementById("pg-base-url");
+    const apiKeyInput = document.getElementById("pg-api-key");
+    const nInput = document.getElementById("pg-n");
+
+    const base = (baseInput.value || "/api/").replace(/\/+$/, "");
+    const apiKey = apiKeyInput.value || "demo";
+
+    // UI uses 32-bit words; API expects bytes.
+    const BYTES_PER_WORD = 4;
+    const words = Math.max(1, parseInt(nInput.value || "4", 10) || 4);
+    const nBytes = words * BYTES_PER_WORD;
+
+    return { base, apiKey, words, nBytes };
+  }
+
+  async function callRandom(silent=false) {
+    const { base, apiKey, nBytes } = getInputs();
+    const out = document.getElementById("pg-output");
+    const url = base + "/v1/random?n=" + encodeURIComponent(String(nBytes)) + "&fmt=hex";
+
+    if (!silent) out.textContent = "Requesting " + url + " ...";
+    updateTimestampPill();
+
+    try {
+      const res = await fetch(url, { method: "GET", headers: { "X-API-Key": apiKey }});
+      setPillText("pill-http", "HTTP " + res.status);
+      setPillClass("pill-http", res.ok ? "ok" : "warn");
+
+      const text = await res.text();
+      let parsed = text;
+      try { parsed = JSON.parse(text); } catch (_) {}
+
+      if (!silent) {
+        out.textContent = (typeof parsed === "string") ? parsed : JSON.stringify(parsed, null, 2);
+      }
+
+      const hex = pickHexFromParsed(parsed, text);
+      const bytes = hexToBytes(hex);
+      const H = shannonEntropyBitsPerByte(bytes);
+      const p1 = monobitPOnes(bytes);
+      updateEntropyPills(H, p1);
+
+      updateTimestampPill();
+      return { ok: res.ok, H, p1 };
+    } catch (err) {
+      if (!silent) out.textContent = "Random request failed: " + String(err);
+      setPillText("pill-http", "ERR");
+      setPillClass("pill-http", "bad");
+      updateEntropyPills(NaN, NaN);
+      updateTimestampPill();
+      return { ok: false, H: NaN, p1: NaN };
+    }
+  }
+
+  async function callVrf(silent=false) {
+    const { base, apiKey } = getInputs();
+    const out = document.getElementById("pg-output");
+    const url = base + "/v1/vrf?sig=ecdsa";
+    if (!silent) out.textContent = "Requesting " + url + " ...";
+    updateTimestampPill();
+    try {
+      const res = await fetch(url, { method:"GET", headers: { "X-API-Key": apiKey }});
+      setPillText("pill-http", "HTTP " + res.status);
+      setPillClass("pill-http", res.ok ? "ok" : "warn");
+      const text = await res.text();
+      let parsed = text;
+      try { parsed = JSON.parse(text); } catch (_) {}
+      if (!silent) out.textContent = (typeof parsed === "string") ? parsed : JSON.stringify(parsed, null, 2);
+      updateTimestampPill();
+      return res.ok;
+    } catch (err) {
+      if (!silent) out.textContent = "VRF request failed: " + String(err);
+      setPillText("pill-http", "ERR");
+      setPillClass("pill-http", "bad");
+      updateTimestampPill();
+      return false;
+    }
+  }
+
+  document.getElementById("btn-call-random")
+    .addEventListener("click", () => callRandom(false));
+  document.getElementById("btn-call-vrf")
+    .addEventListener("click", () => callVrf(false));
+
+  // -------------------------------
+  // Stripe checkout (Payment Links)
+  // -------------------------------
+  async function buyPlan(priceId) {
+    const LINKS = {
+      "price_1SZ21JGGBPotZrQPmNR2pIhU": "https://buy.stripe.com/8x228rbmI4wE2vW5Eu6kg00", // .99
+      "price_1SZ23jGGBPotZrQPoEed0eAb": "https://buy.stripe.com/7sY14n62oe7edaAc2S6kg01", // .99
+      "price_1SZ24MGGBPotZrQP6YMckcyi": "https://buy.stripe.com/6oU7sL76sgfm0nO6Iy6kg02"  // .99
+    };
+
+    const id = String(priceId || "").trim();
+    const url = LINKS[id];
+    if (!url) {
+      alert("Stripe link not configured for: " + id);
+      return;
+    }
+    window.location.href = url;
+  }
+
+  // -------------------------------
+  // Background sampler (entropy only)
+  // -------------------------------
+  let bgTimer = null;
+
+  function bgStop() {
+    if (bgTimer) clearInterval(bgTimer);
+    bgTimer = null;
+  }
+
+  async function bgTick() {
+    if (document.hidden) return;
+    const enabled = document.getElementById("bg-enabled");
+    if (!enabled || !enabled.checked) return;
+    await callRandom(true);
+  }
+
+  function bgStart() {
+    bgStop();
+    bgTick(); // immediate
+    bgTimer = setInterval(bgTick, 30000);
+  }
+
+  document.getElementById("bg-enabled").addEventListener("change", (e) => {
+    if (e.target.checked) bgStart();
+    else bgStop();
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) bgTick();
+  });
+
+  bgStart();
+
+  // -------------------------------
+  // Scroll reveal
+  // -------------------------------
+  const revealEls = Array.from(document.querySelectorAll(".reveal"));
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) e.target.classList.add("on");
+    }
+  }, { threshold: 0.12, rootMargin: "0px 0px -80px 0px" });
+
+  revealEls.forEach(el => io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Logs / temp
+nohup.out
+*.log
+/tmp/
+*.tmp
+*.swp
+*.swo
+
+# Backups / editor artifacts
+*.bak
+*.bak.*
+*.orig
+*.rej
+*.broken.*
+*.good.*
+
+# Node / Hardhat
+node_modules/
+artifacts/
+cache/
+coverage/
+coverage.json
+typechain/
+typechain-types/
+*.tsbuildinfo
+
+# OS
+.DS_Store
+
+# Local attic (not for publish)
+attic/
+reports/
+*.pyc
+deploy/**/*.bak*

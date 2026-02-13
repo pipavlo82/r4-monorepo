@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Re4ctoR — Architecture & Trust Model</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    nav a {
+      color: #9ca3af;
+      text-decoration: none;
+      margin-left: 14px;
+      font-size: 0.9rem;
+    }
+    nav a:hover {
+      color: #e5e7eb;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 16px 64px;
+    }
+    h1 {
+      font-size: 2.1rem;
+      margin-bottom: 0.25rem;
+    }
+    h2 {
+      font-size: 1.4rem;
+      margin-top: 2.2rem;
+      margin-bottom: 0.35rem;
+      border-left: 3px solid #22c55e;
+      padding-left: 10px;
+    }
+    h3 {
+      font-size: 1.1rem;
+      margin-top: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+    p {
+      margin: 0.35rem 0;
+      color: #cbd5f5;
+    }
+    ul {
+      margin: 0.25rem 0 0.9rem 1.1rem;
+      padding: 0;
+    }
+    li {
+      margin: 0.15rem 0;
+      color: #cbd5f5;
+    }
+    code {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.9rem;
+      background: #020617;
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 1px solid #1f2937;
+    }
+    .pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid #22c55e55;
+      font-size: 0.75rem;
+      color: #bbf7d0;
+      background: #022c22;
+      margin-right: 6px;
+      margin-bottom: 4px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 24px;
+      margin-top: 1.5rem;
+    }
+    .card {
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 16px 14px;
+    }
+    .muted {
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 800px) {
+      .grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+</head>
+<body>
+  <header>
+    <div class="logo">RE4CTOR</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/product">Product</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/docs">Docs</a>
+      <a href="/about">About</a>
+      <a href="/api">API</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <h1>Product Overview & Architecture</h1>
+    <p class="muted">
+      Re4ctoR is an entropy appliance and verifiable randomness layer designed for blockchain consensus,
+      finance and critical infrastructure that cannot tolerate weak RNG.
+    </p>
+
+    <div class="grid-2">
+      <section>
+        <h2>Core Guarantees</h2>
+        <p>
+          Re4ctoR is built around three guarantees:
+        </p>
+        <ul>
+          <li><strong>High-Assurance Entropy</strong> — statistically verified with industry-standard batteries (BigCrush, Dieharder, PractRand).</li>
+          <li><strong>Cryptographic Soundness</strong> — multiple mixing layers and signed outputs (ECDSA, optional Dilithium-3).</li>
+          <li><strong>Auditability & Compliance</strong> — FIPS-aligned design, SBOM, health tests and reproducible binaries.</li>
+        </ul>
+
+        <h2>High-Level Architecture</h2>
+        <p>The system is composed of four logical layers:</p>
+        <ol>
+          <li><strong>Entropy Core</strong> — sealed binary <code>re4_dump</code> producing high-quality random bits.</li>
+          <li><strong>Cryptographic Mixer</strong> — whitening via ChaCha20 / Xoshiro / Keccak and internal self-tests.</li>
+          <li><strong>VRF & Signing Layer</strong> — ECDSA(secp256k1) and optional Dilithium-3 signatures for every output.</li>
+          <li><strong>API Gateway</strong> — FastAPI-based HTTP service with API keys, rate limiting and logging.</li>
+        </ol>
+      </section>
+
+      <aside class="card">
+        <h3>Positioning</h3>
+        <p>
+          Re4ctoR sits between your application and the raw randomness sources and behaves like an
+          <em>HSM-style RNG front-end</em>.
+        </p>
+        <p>
+          You integrate via HTTPS and signed JSON, without exposing your stack to low-level RNG details.
+        </p>
+        <p class="muted">
+          Think of it as a “nuclear-grade randomness appliance” with clear crypto boundaries and audit trails.
+        </p>
+      </aside>
+    </div>
+
+    <h2>Entropy & Mixing</h2>
+    <p>
+      The entropy core generates raw bits which are then passed through several layers of cryptographic mixing.
+      The goal is to ensure that even if one layer is degraded, the overall output remains uniform and
+      unpredictable.
+    </p>
+    <ul>
+      <li><strong>Multi-source entropy</strong> (depending on build) combined and normalized.</li>
+      <li><strong>ChaCha20 / Keccak-based whitening</strong> to remove bias and short-range correlations.</li>
+      <li><strong>Continuous health tests</strong> (monobit, runs, block frequency, etc.) to spot anomalies.</li>
+      <li><strong>Fail-closed behaviour</strong> — in case of test failure, outputs are refused instead of degraded.</li>
+    </ul>
+
+    <h2>VRF-style Outputs</h2>
+    <p>
+      While Re4ctoR is not limited to VRF usage, its API is designed to act as a verifiable randomness function:
+    </p>
+    <ul>
+      <li>Every random value is tied to a <strong>signature</strong> and <strong>timestamp</strong>.</li>
+      <li>Signatures can be verified on-chain (Solidity) or off-chain (any ECDSA/PQ-capable stack).</li>
+      <li>For long-term security, <strong>Dilithium-3</strong> signatures can be enabled in enterprise builds.</li>
+    </ul>
+
+    <h2>Trust & Compliance</h2>
+    <p>
+      Re4ctoR is <em>designed</em> to be aligned with FIPS 140-3 entropy requirements and provides a clear
+      roadmap towards FIPS 204 (post-quantum signatures):
+    </p>
+    <ul>
+      <li>Deterministic builds and signed binary releases.</li>
+      <li>Software Bill of Materials (SBOM) and dependency transparency.</li>
+      <li>Entropy source validation reports (ESV) and health-test documentation.</li>
+      <li>Separation of concerns: closed entropy core vs. open verification and API layer.</li>
+    </ul>
+
+    <h2>Typical Deployment Models</h2>
+    <p>Re4ctoR can be deployed in several ways:</p>
+    <ul>
+      <li><span class="pill">SaaS</span> Hosted by us, multi-tenant, with API keys and rate limits.</li>
+      <li><span class="pill">Dedicated Node</span> Single-tenant instance per customer, isolated network, custom SLAs.</li>
+      <li><span class="pill">On-Prem</span> Deployed in your datacenter / air-gapped environment, for defense or regulated sectors.</li>
+    </ul>
+
+    <p class="muted">
+      For integration examples and test vectors, see the <a href="/docs" style="color:#93c5fd;">Docs</a> page
+      and the public GitHub repository.
+    </p>
+  </main>
+</body>
+</html>

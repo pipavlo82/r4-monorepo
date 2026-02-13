@@ -1,0 +1,1 @@
+fix(gateway): stabilize override middleware logic and keep stack boot-safe

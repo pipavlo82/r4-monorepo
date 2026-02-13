@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Re4ctoR — Pricing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      background: #020617;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    nav a {
+      color: #9ca3af;
+      text-decoration: none;
+      margin-left: 14px;
+      font-size: 0.9rem;
+    }
+    nav a:hover {
+      color: #e5e7eb;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+    h1 {
+      font-size: 2.1rem;
+      margin-bottom: 0.4rem;
+    }
+    p.lead {
+      color: #cbd5f5;
+      max-width: 640px;
+    }
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-top: 2rem;
+    }
+    .plan {
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 20px 18px;
+    }
+    .plan.highlight {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.4);
+    }
+    .plan h2 {
+      font-size: 1.3rem;
+      margin: 0 0 0.1rem;
+    }
+    .price {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #22c55e;
+      margin: 0.35rem 0 0.8rem;
+    }
+    ul {
+      margin: 0.25rem 0 1.2rem 1.1rem;
+      padding: 0;
+    }
+    li {
+      margin: 0.15rem 0;
+      color: #cbd5f5;
+      font-size: 0.95rem;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #22c55e;
+      color: #bbf7d0;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .btn.primary {
+      background: #22c55e;
+      color: #022c22;
+      font-weight: 600;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .note {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+  <link rel="stylesheet" href="/assets/theme.css?v=20260202_194014">
+</head>
+<body>
+  <header>
+    <div class="logo">RE4CTOR</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/product">Product</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/docs">Docs</a>
+      <a href="/about">About</a>
+      <a href="/api">API</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <h1>Pricing</h1>
+    <p class="lead">
+      Start with a free tier, scale to high-throughput workloads, and go all the way to dedicated
+      deployments with compliance support when needed.
+    </p>
+
+    <section class="plans">
+      <article class="plan">
+        <h2>Free Tier</h2>
+        <p class="price">$0 / month</p>
+        <ul>
+          <li>Up to <strong>1,000 requests per day</strong></li>
+          <li>Access to <code>/v1/random</code> and <code>/v1/random32</code></li>
+          <li>ECDSA-signed responses (secp256k1)</li>
+          <li>Shared SaaS infrastructure</li>
+          <li>Best for testing, prototyping and POCs</li>
+        </ul>
+        <a href="/api" class="btn primary">Get Free API Key</a>
+      </article>
+
+      <article class="plan highlight">
+        <h2>Pro</h2>
+        <p class="price">Usage-based</p>
+        <ul>
+          <li>Higher rate limits and throughput</li>
+          <li>Priority access to new endpoints</li>
+          <li>Integration support (email / Slack)</li>
+          <li>Ideal for Web3 apps, games, raffles, NFT drops</li>
+          <li>SLA-backed uptime and latency targets</li>
+        </ul>
+        <a href="/about" class="btn">Contact for Quote</a>
+      </article>
+
+      <article class="plan">
+        <h2>Enterprise</h2>
+        <p class="price">Custom</p>
+        <ul>
+          <li>Dedicated or on-prem Re4ctoR nodes</li>
+          <li>Post-quantum signatures (Dilithium-3) options</li>
+          <li>FIPS-aligned documentation &amp; ESV reports</li>
+          <li>Custom attestation / signing policies</li>
+          <li>Support for defense, finance, and regulated sectors</li>
+        </ul>
+        <a href="/about" class="btn">Talk to Sales</a>
+      </article>
+    </section>
+
+    <p class="note">
+      Detailed pricing for each tier (per-request and volume discounts) can be provided based on your
+      expected workload and compliance requirements.
+    </p>
+  </main>
+</body>
+</html>
